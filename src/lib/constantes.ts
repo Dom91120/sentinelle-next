@@ -391,10 +391,11 @@ export function statusRank(status: string | null | undefined): number {
 }
 
 /** Types de tests récurrents (app/tests.py). */
-export const TEST_TYPES: Record<string, string> = {
-  restore: "Test de restauration",
-  pca: "Test PCA / PRA",
-  security: "Test de sécurité",
-  failover: "Test de bascule",
-  other: "Autre",
-};
+export const TEST_TYPES: [string, string][] = [
+  ["restoration", "Test de restauration"],
+  ["sensitive_backup", "Sauvegarde données sensibles sur clé"],
+  ["disaster_recovery", "Test PCA/PRA"],
+  ["integrity_check", "Vérification d'intégrité"],
+  ["other", "Autre"],
+];
+export const TEST_TYPE_LABELS: Record<string, string> = Object.fromEntries(TEST_TYPES);

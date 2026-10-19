@@ -1,5 +1,5 @@
 /**
- * Les gestionnaires de formulaires (route.ts sous src/app/__post) : jeton CSRF,
+ * Les gestionnaires de formulaires (route.ts sous src/app/envoi) : jeton CSRF,
  * lecture du formulaire, redirection « à la Flask » (303 vers la page suivante,
  * message flash dans le cookie).
  */

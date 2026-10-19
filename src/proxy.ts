@@ -12,7 +12,7 @@ import { buildCsp, generateNonce } from "@/lib/csp";
  * 2. Formulaires POST « à la Flask » : l'application est multi-pages. Un
  *    formulaire envoie son POST à l'adresse de la page (« /accounts/create »), que
  *    Next.js ne peut pas servir à la fois en page et en route. La requête est donc
- *    RÉÉCRITE vers `/__post<chemin>`, où vivent les gestionnaires (route.ts), sans
+ *    RÉÉCRITE vers `/envoi<chemin>`, où vivent les gestionnaires (route.ts), sans
  *    que l'adresse change pour le navigateur. Les Server Actions (en-tête
  *    `next-action`) et l'API (`/api/*`) ne sont pas touchées.
  *
@@ -55,13 +55,13 @@ export default function proxy(request: NextRequest) {
   const estFormulaire =
     request.method === "POST" &&
     !pathname.startsWith("/api/") &&
-    !pathname.startsWith("/__post/") &&
+    !pathname.startsWith("/envoi/") &&
     !request.headers.has("next-action");
 
   let response: NextResponse;
   if (estFormulaire) {
     const url = request.nextUrl.clone();
-    url.pathname = `/__post${pathname === "/" ? "" : pathname}`;
+    url.pathname = `/envoi${pathname === "/" ? "" : pathname}`;
     response = NextResponse.rewrite(url, { request: { headers } });
   } else {
     response = NextResponse.next({ request: { headers } });
@@ -80,5 +80,5 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon\.ico|.*\.[^/]+$).*)", "/api/auth/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|.*\\.[^/]+$).*)", "/api/auth/:path*"],
 };
