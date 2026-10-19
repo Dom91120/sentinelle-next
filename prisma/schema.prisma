@@ -115,6 +115,9 @@ model TwoFactor {
   backupCodes String @map("backup_codes")
   userId      String @map("user_id")
   user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean   @default(true)
+  failedVerificationCount Int       @default(0) @map("failed_verification_count")
+  lockedUntil             DateTime? @map("locked_until") @db.Timestamptz
 
   @@index([userId])
   @@map("two_factor")
@@ -124,8 +127,8 @@ model TwoFactor {
 model RateLimit {
   id          String @id @default(cuid())
   key         String @unique
-  count       Int
-  lastRequest BigInt @map("last_request")
+  count       Int    @default(0)
+  lastRequest BigInt @default(0) @map("last_request")
 
   @@map("rate_limits")
 }
