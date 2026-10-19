@@ -1,0 +1,126 @@
+name: CI
+
+# CI Linux : reproduit la validation faite en local.
+#  - checks : lint (Biome) + typecheck (TS) + tests (Vitest) après génération du client Prisma 7
+#  - audit  : vulnérabilités connues des dépendances (constat D5, audit 2026-07-29)
+#  - docker : build de l'image (output standalone) + test `migrate deploy` sur un Postgres
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Lint + Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Client Prisma 7 généré dans src/generated (gitignoré) → requis par le typecheck.
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Lint (Biome)
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # La suite existait mais n'était pas exécutée en CI : une régression sur les
+      # règles métier (jauges, récurrences, politique de session, chiffrement des
+      # sauvegardes) pouvait passer inaperçue jusqu'en production.
+      - name: Tests (Vitest)
+        run: pnpm test
+
+  audit:
+    name: Audit des dépendances
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # `pnpm audit` n'a besoin QUE du lockfile : cette installation est en trop,
+      # et pourtant nécessaire. `actions/setup-node` met en cache le magasin pnpm
+      # de lui-même — retirer `cache: pnpm` n'y change rien —, et son étape de
+      # post-traitement échoue si le magasin n'existe pas, faisant tomber le job
+      # alors que l'audit est passé. Un contrôle qui vire au rouge pour une raison
+      # étrangère à la sécurité est un contrôle qu'on apprend à ignorer : mieux
+      # vaut trente secondes d'installation qu'un signal auquel on ne croit plus.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # Bloquant sur « high » et « critical » UNIQUEMENT. Un contrôle qui échoue en
+      # permanence — sur des avis transitifs sans correctif — finit ignoré, et c'est
+      # pire que pas de contrôle du tout. Les avis « moderate » restent visibles dans
+      # la sortie sans faire échouer la CI.
+      #
+      # Base de référence au 2026-07-29, après remédiation : 0 critical, 0 high,
+      # 3 moderate. Toute nouvelle vulnérabilité grave fera donc échouer le job.
+      #
+      # `--ignore-registry-errors` : une indisponibilité du registre npm ne doit pas
+      # être confondue avec une vulnérabilité. Sinon la CI devient rouge pour une
+      # raison sans rapport, et l'on prend l'habitude de passer outre.
+      #
+      # Pour accepter sciemment un avis sans correctif : l'ajouter à
+      # `auditConfig.ignoreGhsas` dans pnpm-workspace.yaml (pnpm 11 : `pnpm audit --ignore
+      # GHSA-xxxx-xxxx-xxxx` l'y inscrit), en y documentant la raison et la date de réexamen.
+      #
+      # Avis acceptés à ce jour : AUCUN (2026-10-18 — deepmerge-ts, seul avis accepté,
+      # corrigé par Prisma 7.10.1). Source unique si besoin : `auditConfig.ignoreGhsas`.
+      - name: pnpm audit
+        run: pnpm audit --audit-level high --ignore-registry-errors
+
+  docker:
+    name: Build image + migrate deploy
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # Build de l'image de production (valide l'étape `output: standalone` + prisma generate
+      # v7 en Alpine — l'étape qui échoue sous Windows à cause des symlinks).
+      - name: Build Docker image
+        run: docker build -t culturesa-next:ci .
+
+      # Lance l'entrypoint de l'image : `prisma migrate deploy` applique les migrations sur
+      # la base de service, puis l'app démarrerait. `--network host` pour joindre Postgres
+      # (exposé sur localhost:5432 du runner).
+      - name: Run migrate deploy (image entrypoint)
+        run: |
+          docker run --rm --network host \
+            -e DATABASE_URL="postgresql://app:app@localhost:5432/app?schema=public" \
+            culturesa-next:ci echo "CI: entrypoint OK, app would start"

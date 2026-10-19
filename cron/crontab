@@ -1,0 +1,15 @@
+# Tâches planifiées Sentinelle.
+# $CRON_SECRET est injecté via l'environnement du conteneur (docker-compose).
+# busybox crond exécute chaque ligne via /bin/sh, qui développe la variable.
+#
+# Toutes les tâches sont APPELÉES toutes les 5 minutes : chaque route applique la
+# planification héritée de l'application Flask (app/scheduler.py) et ne s'exécute
+# que si son échéance est atteinte ; sinon l'appel répond `skipped` sans rien faire.
+# Horaires (Europe/Paris) : scan_backup_inbox toutes les 30 min, backup_database 01:00,
+# sync_ad_passwords 06:00, check_ct_logs 06:30, refresh_eol_cache 06:50,
+# refresh_certificates_tls 07:00, refresh_domains_rdap 07:10, send_daily_digest 07:30,
+# send_scheduled_report 07:40, check_passwords 08:00, check_certificates 08:15,
+# check_domains 08:20, check_backups 08:30, check_contracts 08:40, check_tests 08:45,
+# check_reviews 08:50, check_updates 08:55, check_inventory 08:58, check_software 09:00 (lundi).
+
+*/5 * * * * curl -fsS -H "x-cron-secret: $CRON_SECRET" http://app:3000/api/cron/tous >/dev/null 2>&1

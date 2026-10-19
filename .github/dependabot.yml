@@ -1,0 +1,96 @@
+# Mises à jour automatiques des dépendances (constat D5, audit 2026-07-29).
+#
+# Complément indispensable de `pnpm audit` en CI : l'audit signale une
+# vulnérabilité une fois qu'elle existe, Dependabot fait remonter les correctifs
+# et ouvre la demande de fusion. Sans lui, l'audit se contente de rendre la CI
+# rouge sans rien proposer.
+#
+# Dependabot ouvre aussi des demandes de SÉCURITÉ hors calendrier, dès qu'un avis
+# concerne une dépendance du projet. C'est le mécanisme qui a le plus de valeur
+# ici : le projet embarque puppeteer, nodemailer, better-auth et next, tous à
+# surface d'attaque élevée.
+version: 2
+
+updates:
+  # ── Dépendances npm ──
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+    # Regroupé pour limiter le bruit : une demande de fusion par lot plutôt qu'une
+    # par paquet. Les montées MAJEURES restent séparées — elles demandent une
+    # relecture, pas une fusion de routine.
+    groups:
+      production-mineur-et-correctif:
+        dependency-type: production
+        update-types: [minor, patch]
+      developpement-mineur-et-correctif:
+        dependency-type: development
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+
+  # ── Actions GitHub ──
+  # Une action compromise s'exécute avec le jeton du dépôt : elles se maintiennent
+  # comme du code, pas comme de l'outillage accessoire.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(ci)"
+
+  # ── Images de base Docker ──
+  # `node:22-alpine` et l'image du conteneur cron : c'est par là qu'arrivent les
+  # correctifs des paquets système (OpenSSL, Chromium, client PostgreSQL), que
+  # `pnpm audit` ne voit pas — il n'examine que l'arbre npm.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
+    # Dependabot compare des NUMÉROS, pas des cycles de vie : il a proposé
+    # `node:26-alpine` alors que la 26 est une branche *Current*, non LTS
+    # (`process.release.lts` vide). Un service en production ne tourne pas sur
+    # Current — la 26 ne deviendra LTS qu'en octobre 2026.
+    #
+    # On ignore donc les montées MAJEURES de Node. Les correctifs de la branche
+    # en cours continuent d'arriver : le tag `22-alpine` est flottant, chaque
+    # reconstruction de l'image récupère les derniers correctifs système.
+    #
+    # Changer de majeure reste une décision délibérée, à traiter comme une
+    # migration (répétition, vérification de Prisma / Puppeteer / Chromium).
+    # Prochaine étape pertinente : 22 → 24, l'actuelle LTS active, à planifier
+    # avant la fin du support de la 22 (printemps 2027) — et non 26.
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
+    commit-message:
+      prefix: "chore(docker)"
+
+  - package-ecosystem: docker
+    directory: /cron
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(docker)"
+
+  # ── Images référencées par docker-compose.yml (constat D4) ──
+  # `postgres` y est désormais ÉPINGLÉ à une version précise, pour que deux
+  # constructions à quinze jours d'écart donnent la même base. Épingler sans
+  # surveiller échangerait un défaut de reproductibilité contre un défaut de
+  # sécurité : une version figée cesse de recevoir les correctifs, et personne ne
+  # s'en aperçoit. C'est cette entrée qui referme le marché.
+  #
+  # Les entrées `docker` ci-dessus ne couvrent QUE les Dockerfile ; les images
+  # citées dans un fichier compose relèvent d'un écosystème distinct.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(docker)"

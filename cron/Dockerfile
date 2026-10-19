@@ -1,0 +1,20 @@
+# Conteneur cron : busybox crond + curl — appelle les routes /api/cron/* de l'app
+# toutes les 5 minutes (la planification réelle est configurée dans l'admin, onglet
+# Tâches planifiées › CRON). L'export planifié de la base est réalisé PAR L'APP
+# (route /api/cron/backup → pg_dump embarqué dans l'image de l'app).
+#
+# L'image embarque aussi backup.sh (export MANUEL en ligne de commande, hors crontab) :
+#   docker compose exec --user 10001:10001 cron backup.sh
+# → dump direct depuis Postgres, utilisable même si le conteneur app est HS.
+# postgresql18-client : la version du client doit couvrir celle du serveur (postgres:18),
+# d'où alpine >= 3.23 (3.22 s'arrête à postgresql17).
+# openssl : chiffrement du dump manuel de backup.sh (constat D1) — la libcrypto
+# est déjà là via curl, mais pas le binaire.
+FROM alpine:3.24
+RUN apk add --no-cache curl tzdata postgresql18-client openssl
+ENV TZ=Europe/Paris
+COPY crontab /etc/crontabs/root
+COPY backup.sh /usr/local/bin/backup.sh
+RUN chmod +x /usr/local/bin/backup.sh
+# -f : foreground (pour Docker) ; -l 2 : niveau de log
+CMD ["crond", "-f", "-l", "2"]

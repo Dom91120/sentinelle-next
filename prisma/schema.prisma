@@ -1,0 +1,1080 @@
+// ============================================================
+//  Sentinelle — Schéma Prisma (PostgreSQL)
+//  Porté depuis app/models.py (SQLAlchemy / SQLite) de l'application Flask.
+//  Chaque table et chaque colonne garde son nom d'origine (@@map / @map) :
+//  la reprise des données (scripts/reprise-sqlite.ts) copie table pour table.
+// ============================================================
+
+generator client {
+  // Prisma 7 : client Rust-free (généré dans le projet, importé via @/generated/prisma).
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+//  Authentification — Better Auth (user / session / account / verification /
+//  two_factor). La table `user` porte AUSSI les champs métier de Sentinelle
+//  (rôle, origine du compte, préférences d'affichage, jeton ICS). Les comptes
+//  à mot de passe SUIVIS par l'application (module « Comptes ») sont la table
+//  `account`, inchangée : la table d'identifiants de Better Auth s'appelle donc
+//  `auth_account`.
+// ============================================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique @db.VarChar(120)
+  emailVerified Boolean  @default(true) @map("email_verified")
+  name          String   @default("")
+  image         String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Plugin username : l'identifiant de connexion de Sentinelle.
+  username        String  @unique @db.VarChar(64)
+  displayUsername String? @map("display_username")
+
+  // ── Champs Sentinelle ──
+  role       String @default("viewer") @db.VarChar(20)
+  // Origine du compte : 'local' (géré dans l'app) ou 'ldap' (provisionné via AD).
+  authSource String @default("local") @map("auth_source") @db.VarChar(10)
+  // Second facteur : piloté par le plugin twoFactor de Better Auth.
+  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
+  // Essais de code 2FA, comptés EN BASE (un compteur en cookie se remettait à zéro).
+  totpFailedCount Int       @default(0) @map("totp_failed_count")
+  totpLockedUntil DateTime? @map("totp_locked_until") @db.Timestamptz
+  // Jeton d'abonnement au calendrier ICS (null = pas de lien actif).
+  icsToken String? @unique @map("ics_token") @db.VarChar(64)
+  // Personnalisation du tableau de bord (JSON {"order", "hidden", "spans", "cards", "hidden_cards"}).
+  dashboardPrefs String? @map("dashboard_prefs")
+  // Taille de page retenue, liste par liste (JSON {"<endpoint>": 25 | "all"}).
+  listPrefs String? @map("list_prefs")
+
+  sessions  Session[]
+  accounts  AuthAccount[]
+  twofactor TwoFactor[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model AuthAccount {
+  id                    String    @id @default(cuid())
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at") @db.Timestamptz
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at") @db.Timestamptz
+  scope                 String?
+  // Hachage du mot de passe : scrypt de Better Auth, ou `pbkdf2:sha256:…` /
+  // `scrypt:…` de Werkzeug pour les comptes repris de Sentinelle (cf. server/password.ts).
+  password  String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([userId])
+  @@map("auth_account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id          String @id @default(cuid())
+  secret      String
+  backupCodes String @map("backup_codes")
+  userId      String @map("user_id")
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("two_factor")
+}
+
+// Quota par IP de Better Auth (`rateLimit.storage: "database"`).
+model RateLimit {
+  id          String @id @default(cuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt @map("last_request")
+
+  @@map("rate_limits")
+}
+
+// ============================================================
+//  Réglages
+// ============================================================
+
+/// Réglages applicatifs simples (clé/valeur texte) : catégories de la conformité globale.
+model Setting {
+  key   String  @id @db.VarChar(64)
+  value String?
+
+  @@map("setting")
+}
+
+/// Cache local des données End-of-Life (endoflife.date), un enregistrement par produit.
+model EolCache {
+  product   String    @id @db.VarChar(64)
+  payload   String?
+  fetchedAt DateTime? @default(now()) @map("fetched_at") @db.Timestamptz
+
+  @@map("eol_cache")
+}
+
+/// Configuration applicative persistée en base (messagerie, LDAP, seuils, webhooks…).
+/// Les valeurs sensibles sont chiffrées (cf. server/config-store.ts).
+model AppConfig {
+  key      String  @id @db.VarChar(64)
+  value    String?
+  isSecret Boolean @default(false) @map("is_secret")
+
+  @@map("app_config")
+}
+
+/// Webhook de notification rattaché à une catégorie de gestion (ou 'all').
+model Webhook {
+  id        Int      @id @default(autoincrement())
+  category  String   @default("all") @db.VarChar(32)
+  channel   String   @db.VarChar(16)
+  url       String   @db.VarChar(512)
+  label     String?  @db.VarChar(128)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("webhook")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(40)
+  description String? @db.VarChar(200)
+  isAdmin     Boolean @default(false) @map("is_admin")
+  /// {catégorie: niveau 0-3}
+  permissions Json?
+
+  @@map("role")
+}
+
+// ============================================================
+//  Comptes à mot de passe
+// ============================================================
+
+model Account {
+  id                 Int       @id @default(autoincrement())
+  serviceName        String    @map("service_name") @db.VarChar(128)
+  username           String    @db.VarChar(128)
+  url                String?   @db.VarChar(256)
+  softwareId         Int?      @map("software_id")
+  software           Software? @relation(fields: [softwareId], references: [id])
+  equipmentId        Int?      @map("equipment_id")
+  equipment          Equipment? @relation(fields: [equipmentId], references: [id])
+  supplierId         Int?      @map("supplier_id")
+  supplier           Supplier? @relation(fields: [supplierId], references: [id])
+  description        String?
+  lastPasswordChange DateTime? @map("last_password_change") @db.Date
+  nextPasswordChange DateTime? @map("next_password_change") @db.Date
+  rotationDays       Int?      @default(90) @map("rotation_days")
+  priority           String?   @default("medium") @db.VarChar(20)
+  isActive           Boolean   @default(true) @map("is_active")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  histories          AccountHistory[]
+
+  @@index([softwareId])
+  @@index([equipmentId])
+  @@index([supplierId])
+  @@map("account")
+}
+
+model AccountHistory {
+  id          Int      @id @default(autoincrement())
+  accountId   Int      @map("account_id")
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  action      String   @db.VarChar(64)
+  comment     String?
+  performedBy String?  @map("performed_by") @db.VarChar(64)
+  performedAt DateTime @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([accountId])
+  @@map("account_history")
+}
+
+// ============================================================
+//  Certificats (TLS et électroniques)
+// ============================================================
+
+model Certificate {
+  id               Int       @id @default(autoincrement())
+  kind             String    @default("tls") @db.VarChar(16)
+  serviceName      String    @map("service_name") @db.VarChar(128)
+  domain           String?   @db.VarChar(256)
+  domainId         Int?      @map("domain_id")
+  registeredDomain Domain?   @relation(fields: [domainId], references: [id])
+  issuer           String?   @db.VarChar(128)
+  equipmentId      Int?      @map("equipment_id")
+  equipment        Equipment? @relation(fields: [equipmentId], references: [id])
+  issuedAt         DateTime? @map("issued_at") @db.Date
+  expiryDate       DateTime? @map("expiry_date") @db.Date
+  autoRenew        Boolean   @default(false) @map("auto_renew")
+  description      String?
+  priority         String?   @default("medium") @db.VarChar(20)
+  isActive         Boolean   @default(true) @map("is_active")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  histories        CertificateHistory[]
+
+  // ── Certificat électronique nominatif (kind='signature') ──
+  supplierId    Int?         @map("supplier_id")
+  supplier      Supplier?    @relation(fields: [supplierId], references: [id])
+  serviceId     Int?         @map("service_id")
+  service       UserService? @relation(fields: [serviceId], references: [id])
+  civility      String?      @db.VarChar(8)
+  holder        String?      @db.VarChar(128)
+  firstName     String?      @map("first_name") @db.VarChar(128)
+  holderRole    String?      @map("holder_role") @db.VarChar(128)
+  holderEmail   String?      @map("holder_email") @db.VarChar(120)
+  // Anciennes colonnes de l'usage et du support (clés de CERT_USAGE_LABELS / CERT_SUPPORT_LABELS).
+  certUsageCode String?      @map("cert_usage") @db.VarChar(24)
+  supportCode   String?      @map("support") @db.VarChar(16)
+  usageId       Int?         @map("usage_id")
+  certUsage     Referential? @relation("CertificateUsage", fields: [usageId], references: [id])
+  supportId     Int?         @map("support_id")
+  support       Referential? @relation("CertificateSupport", fields: [supportId], references: [id])
+  level          String?   @db.VarChar(64)
+  serialNumber   String?   @map("serial_number") @db.VarChar(128)
+  durationYears  Int?      @map("duration_years")
+  amountTtc      Float?    @map("amount_ttc")
+  budgetCode     String?   @map("budget_code") @db.VarChar(32)
+  orderSignedOn  DateTime? @map("order_signed_on") @db.Date
+  revocationCode String?   @map("revocation_code") @db.VarChar(64)
+  validity       String?   @default("valide") @db.VarChar(16)
+  documents      Document[]
+
+  @@index([domainId])
+  @@index([equipmentId])
+  @@index([supplierId])
+  @@index([serviceId])
+  @@index([usageId])
+  @@index([supportId])
+  @@map("certificate")
+}
+
+model CertificateHistory {
+  id            Int         @id @default(autoincrement())
+  certificateId Int         @map("certificate_id")
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  action        String      @db.VarChar(64)
+  comment       String?
+  performedBy   String?     @map("performed_by") @db.VarChar(64)
+  performedAt   DateTime    @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([certificateId])
+  @@map("certificate_history")
+}
+
+// ============================================================
+//  Sauvegardes
+// ============================================================
+
+model Backup {
+  id           Int        @id @default(autoincrement())
+  serviceName  String     @map("service_name") @db.VarChar(128)
+  backupType   String?    @map("backup_type") @db.VarChar(64)
+  location     String?    @db.VarChar(256)
+  equipmentId  Int?       @map("equipment_id")
+  equipment    Equipment? @relation(fields: [equipmentId], references: [id])
+  frequency    String?    @db.VarChar(64)
+  expectedTime String?    @map("expected_time") @db.VarChar(5)
+  description  String?
+  priority     String?    @default("medium") @db.VarChar(20)
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  checks       BackupCheck[]
+  histories    BackupHistory[]
+
+  @@index([equipmentId])
+  @@map("backup")
+}
+
+model BackupCheck {
+  id          Int      @id @default(autoincrement())
+  backupId    Int      @map("backup_id")
+  backup      Backup   @relation(fields: [backupId], references: [id], onDelete: Cascade)
+  checkDate   DateTime @map("check_date") @db.Date
+  status      String   @default("ok") @db.VarChar(20)
+  /// Premier état constaté ce jour-là (figé) : sert aux stats.
+  firstStatus String?  @map("first_status") @db.VarChar(20)
+  comment     String?
+  checkedBy   String?  @map("checked_by") @db.VarChar(64)
+  checkedAt   DateTime @default(now()) @map("checked_at") @db.Timestamptz
+
+  @@unique([backupId, checkDate], map: "uq_backup_check_date")
+  @@index([backupId])
+  @@index([checkDate])
+  @@map("backup_check")
+}
+
+model BackupHistory {
+  id          Int      @id @default(autoincrement())
+  backupId    Int      @map("backup_id")
+  backup      Backup   @relation(fields: [backupId], references: [id], onDelete: Cascade)
+  action      String   @db.VarChar(64)
+  status      String?  @db.VarChar(20)
+  comment     String?
+  performedBy String?  @map("performed_by") @db.VarChar(64)
+  performedAt DateTime @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([backupId])
+  @@map("backup_history")
+}
+
+// ============================================================
+//  Tests récurrents
+// ============================================================
+
+model TestTask {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(128)
+  testType      String    @map("test_type") @db.VarChar(64)
+  softwareId    Int?      @map("software_id")
+  software      Software? @relation(fields: [softwareId], references: [id])
+  description   String?
+  lastPerformed DateTime? @map("last_performed") @db.Date
+  nextDue       DateTime? @map("next_due") @db.Date
+  frequencyDays Int?      @default(90) @map("frequency_days")
+  status        String?   @default("pending") @db.VarChar(20)
+  result        String?
+  priority      String?   @default("medium") @db.VarChar(20)
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  histories     TestHistory[]
+
+  @@index([softwareId])
+  @@map("test_task")
+}
+
+model TestHistory {
+  id          Int      @id @default(autoincrement())
+  testId      Int      @map("test_id")
+  testTask    TestTask @relation(fields: [testId], references: [id], onDelete: Cascade)
+  action      String   @db.VarChar(64)
+  result      String?
+  comment     String?
+  performedBy String?  @map("performed_by") @db.VarChar(64)
+  performedAt DateTime @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([testId])
+  @@map("test_history")
+}
+
+// ============================================================
+//  Domaines
+// ============================================================
+
+model Domain {
+  id                Int       @id @default(autoincrement())
+  name              String    @db.VarChar(256)
+  registrar         String?   @db.VarChar(128)
+  registrarId       Int?      @map("registrar_id")
+  registrarSupplier Supplier? @relation(fields: [registrarId], references: [id])
+  expiryDate        DateTime? @map("expiry_date") @db.Date
+  renewedOn         DateTime? @map("renewed_on") @db.Date
+  autoRenew         Boolean   @default(false) @map("auto_renew")
+  description       String?
+  priority          String?   @default("medium") @db.VarChar(20)
+  isActive          Boolean   @default(true) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  ctEnabled         Boolean   @default(true) @map("ct_enabled")
+  ctLastId          BigInt?   @map("ct_last_id")
+  histories         DomainHistory[]
+  ctEntries         CtLogEntry[]
+  certificates      Certificate[]
+
+  @@index([registrarId])
+  @@map("domain")
+}
+
+model DomainHistory {
+  id          Int      @id @default(autoincrement())
+  domainId    Int      @map("domain_id")
+  domain      Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  action      String   @db.VarChar(64)
+  comment     String?
+  performedBy String?  @map("performed_by") @db.VarChar(64)
+  performedAt DateTime @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([domainId])
+  @@map("domain_history")
+}
+
+/// Certificat observé dans les journaux de Certificate Transparency (crt.sh).
+model CtLogEntry {
+  id             Int       @id @default(autoincrement())
+  domainId       Int       @map("domain_id")
+  domain         Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  crtshId        BigInt?   @map("crtsh_id")
+  serialNumber   String?   @map("serial_number") @db.VarChar(128)
+  commonName     String?   @map("common_name") @db.VarChar(256)
+  nameValue      String?   @map("name_value")
+  issuerName     String?   @map("issuer_name") @db.VarChar(256)
+  notBefore      DateTime? @map("not_before") @db.Date
+  notAfter       DateTime? @map("not_after") @db.Date
+  entryTimestamp DateTime? @map("entry_timestamp") @db.Timestamptz
+  firstSeen      DateTime  @default(now()) @map("first_seen") @db.Timestamptz
+  status         String?   @default("new") @db.VarChar(16)
+  acknowledgedBy String?   @map("acknowledged_by") @db.VarChar(64)
+  acknowledgedAt DateTime? @map("acknowledged_at") @db.Timestamptz
+
+  @@unique([domainId, crtshId], map: "uq_ctlog_domain_crtsh")
+  @@index([domainId])
+  @@index([crtshId])
+  @@map("ct_log_entry")
+}
+
+// ============================================================
+//  Revues de droits
+// ============================================================
+
+model AccessReview {
+  id               Int       @id @default(autoincrement())
+  application      String    @db.VarChar(128)
+  softwareId       Int?      @map("software_id")
+  software         Software? @relation(fields: [softwareId], references: [id])
+  responsible      String?   @db.VarChar(128)
+  responsibleEmail String?   @map("responsible_email") @db.VarChar(120)
+  scope            String?
+  frequencyDays    Int?      @default(365) @map("frequency_days")
+  lastReview       DateTime? @map("last_review") @db.Date
+  nextReview       DateTime? @map("next_review") @db.Date
+  status           String?   @default("pending") @db.VarChar(20)
+  priority         String?   @default("medium") @db.VarChar(20)
+  isActive         Boolean   @default(true) @map("is_active")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  histories        ReviewHistory[]
+
+  @@index([softwareId])
+  @@map("access_review")
+}
+
+model ReviewHistory {
+  id          Int          @id @default(autoincrement())
+  reviewId    Int          @map("review_id")
+  review      AccessReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  action      String       @db.VarChar(64)
+  comment     String?
+  performedBy String?      @map("performed_by") @db.VarChar(64)
+  performedAt DateTime     @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([reviewId])
+  @@map("review_history")
+}
+
+// ============================================================
+//  Mises à jour
+// ============================================================
+
+model SystemUpdate {
+  id             Int        @id @default(autoincrement())
+  name           String     @db.VarChar(128)
+  systemType     String?    @default("application") @map("system_type") @db.VarChar(32)
+  currentVersion String?    @map("current_version") @db.VarChar(64)
+  latestVersion  String?    @map("latest_version") @db.VarChar(64)
+  status         String?    @default("up_to_date") @db.VarChar(20)
+  equipmentId    Int?       @map("equipment_id")
+  equipment      Equipment? @relation(fields: [equipmentId], references: [id])
+  softwareId     Int?       @map("software_id")
+  software       Software?  @relation(fields: [softwareId], references: [id])
+  lastUpdate     DateTime?  @map("last_update") @db.Date
+  updaterType    String?    @default("interne") @map("updater_type") @db.VarChar(20)
+  updatedBy      String?    @map("updated_by") @db.VarChar(128)
+  description    String?
+  priority       String?    @default("medium") @db.VarChar(20)
+  isActive       Boolean    @default(true) @map("is_active")
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  histories      UpdateHistory[]
+
+  @@index([equipmentId])
+  @@index([softwareId])
+  @@map("system_update")
+}
+
+model UpdateHistory {
+  id           Int          @id @default(autoincrement())
+  updateId     Int          @map("update_id")
+  systemUpdate SystemUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
+  action       String       @db.VarChar(64)
+  comment      String?
+  performedBy  String?      @map("performed_by") @db.VarChar(64)
+  performedAt  DateTime     @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([updateId])
+  @@map("update_history")
+}
+
+// ============================================================
+//  Inventaire matériel
+// ============================================================
+
+model Equipment {
+  id          Int       @id @default(autoincrement())
+  kind        String    @default("vm") @db.VarChar(16)
+  name        String    @db.VarChar(128)
+  environment String?   @db.VarChar(16)
+  criticality Int?
+
+  // Système
+  os           String?   @db.VarChar(128)
+  osVersion    String?   @map("os_version") @db.VarChar(64)
+  osLastUpdate DateTime? @map("os_last_update") @db.Date
+  supervision  String?   @db.VarChar(128)
+  supervised   Boolean   @default(false)
+  cyberwatch   Boolean   @default(false)
+  ninjaOne     Boolean   @default(false) @map("ninja_one")
+
+  // Réseau
+  ipAddress String? @map("ip_address") @db.VarChar(64)
+  netmask   String? @db.VarChar(64)
+  vlan      String? @db.VarChar(32)
+
+  // Hôte (VM)
+  hostServer String? @map("host_server") @db.VarChar(128)
+  hypervisor String? @db.VarChar(64)
+
+  // Ressources (VM)
+  vcpu   Int?
+  ramGo  Float? @map("ram_go")
+  hdd1Go Float? @map("hdd1_go")
+  hdd2Go Float? @map("hdd2_go")
+  hdd3Go Float? @map("hdd3_go")
+
+  // Matériel & garantie
+  manufacturerModel   String?   @map("manufacturer_model") @db.VarChar(128)
+  serialNumber        String?   @map("serial_number") @db.VarChar(128)
+  serviceTag          String?   @map("service_tag") @db.VarChar(64)
+  purchaseDate        DateTime? @map("purchase_date") @db.Date
+  warrantyEnd         DateTime? @map("warranty_end") @db.Date
+  maintenanceContract String?   @map("maintenance_contract") @db.VarChar(128)
+  supplierId          Int?      @map("supplier_id")
+  supplier            Supplier? @relation(fields: [supplierId], references: [id])
+
+  // Stockage, emplacement, administration
+  location      String? @db.VarChar(128)
+  managementUrl String? @map("management_url") @db.VarChar(256)
+  ports         Int?
+  protocols     String? @db.VarChar(128)
+  access        String?
+  capacityTo    Float?  @map("capacity_to")
+  usedTo        Float?  @map("used_to")
+  raid          String? @db.VarChar(64)
+
+  // Rôle & logiciels
+  rolePrincipal    String? @map("role_principal") @db.VarChar(128)
+  businessSoftware String? @map("business_software")
+  userServices     String? @map("user_services")
+  usage            String?
+
+  // Continuité & sécurité
+  praPca       String? @map("pra_pca") @db.VarChar(128)
+  backup1      String? @db.VarChar(128)
+  backup1Freq  String? @map("backup1_freq") @db.VarChar(64)
+  backup2      String? @db.VarChar(128)
+  backup2Freq  String? @map("backup2_freq") @db.VarChar(64)
+  observations String?
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  accounts      Account[]
+  certificates  Certificate[]
+  backups       Backup[]
+  systemUpdates SystemUpdate[]
+  contracts     ContractEquipment[]
+  softwareList  SoftwareEquipment[]
+  documents     Document[]
+
+  @@index([supplierId])
+  @@map("equipment")
+}
+
+// ============================================================
+//  Fournisseurs
+// ============================================================
+
+model Supplier {
+  id           Int     @id @default(autoincrement())
+  name         String  @db.VarChar(128)
+  kind         String? @default("provider") @db.VarChar(32)
+  contactName  String? @map("contact_name") @db.VarChar(128)
+  phone        String? @db.VarChar(64)
+  supportPhone String? @map("support_phone") @db.VarChar(64)
+  email        String? @db.VarChar(128)
+  supportUrl   String? @map("support_url") @db.VarChar(256)
+  supportEmail String? @map("support_email") @db.VarChar(128)
+  customerRef  String? @map("customer_ref") @db.VarChar(128)
+  hours        String? @db.VarChar(128)
+  hours2       String? @db.VarChar(128)
+  address      String? @db.VarChar(256)
+  postalCode   String? @map("postal_code") @db.VarChar(16)
+  city         String? @db.VarChar(128)
+  website      String? @db.VarChar(256)
+  // ── Contacts hors incident ──
+  commercialContact  String? @map("commercial_contact") @db.VarChar(128)
+  commercialPhone    String? @map("commercial_phone") @db.VarChar(64)
+  commercialEmail    String? @map("commercial_email") @db.VarChar(128)
+  commercialContact2 String? @map("commercial_contact2") @db.VarChar(128)
+  commercialPhone2   String? @map("commercial_phone2") @db.VarChar(64)
+  commercialEmail2   String? @map("commercial_email2") @db.VarChar(128)
+  adminContact       String? @map("admin_contact") @db.VarChar(128)
+  adminPhone         String? @map("admin_phone") @db.VarChar(64)
+  adminEmail         String? @map("admin_email") @db.VarChar(128)
+  dpoContact         String? @map("dpo_contact") @db.VarChar(128)
+  dpoPhone           String? @map("dpo_phone") @db.VarChar(64)
+  dpoEmail           String? @map("dpo_email") @db.VarChar(128)
+  notes              String?
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  accounts     Account[]
+  certificates Certificate[]
+  domains      Domain[]
+  equipments   Equipment[]
+  contracts    Contract[]
+  quotes       Quote[]
+  software     Software[]
+  documents    Document[]
+
+  @@map("supplier")
+}
+
+// ============================================================
+//  Contrats, consultations, devis
+// ============================================================
+
+/// Équipements couverts par un contrat (N:N).
+model ContractEquipment {
+  contractId  Int       @map("contract_id")
+  equipmentId Int       @map("equipment_id")
+  contract    Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@id([contractId, equipmentId])
+  @@map("contract_equipment")
+}
+
+/// Logiciels couverts par un marché (N:N).
+model ContractSoftware {
+  contractId Int      @map("contract_id")
+  softwareId Int      @map("software_id")
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  software   Software @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+
+  @@id([contractId, softwareId])
+  @@map("contract_software")
+}
+
+model Contract {
+  id                Int          @id @default(autoincrement())
+  name              String       @db.VarChar(128)
+  /// Ancienne colonne du type (clé de CONTRACT_KIND_LABELS), versée dans kind_id.
+  kind              String?      @db.VarChar(32)
+  kindId            Int?         @map("kind_id")
+  kindRef           Referential? @relation("ContractKind", fields: [kindId], references: [id])
+  supplierId        Int?         @map("supplier_id")
+  supplier          Supplier?    @relation(fields: [supplierId], references: [id])
+  nature            String?      @db.VarChar(16)
+  reference         String?      @db.VarChar(128)
+  supplierReference String?      @map("supplier_reference") @db.VarChar(128)
+  costYearly        Float?       @map("cost_yearly")
+  costMaxYearly     Float?       @map("cost_max_yearly")
+  costTotal         Float?       @map("cost_total")
+  startDate         DateTime?    @map("start_date") @db.Date
+  endDate           DateTime?    @map("end_date") @db.Date
+  firmYears         Int?         @map("firm_years")
+  renewals          Int?
+  renewalYears      Int?         @map("renewal_years")
+  noticeDays        Int?         @default(0) @map("notice_days")
+  autoRenew         Boolean      @default(false) @map("auto_renew")
+  budgetCode        String?      @map("budget_code") @db.VarChar(32)
+  orderSignedOn     DateTime?    @map("order_signed_on") @db.Date
+  description       String?
+  isActive          Boolean      @default(true) @map("is_active")
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  histories         ContractHistory[]
+  equipments        ContractEquipment[]
+  software          ContractSoftware[]
+  documents         Document[]
+
+  @@index([kindId])
+  @@index([supplierId])
+  @@map("contract")
+}
+
+model ContractHistory {
+  id          Int      @id @default(autoincrement())
+  contractId  Int      @map("contract_id")
+  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  action      String   @db.VarChar(64)
+  comment     String?
+  performedBy String?  @map("performed_by") @db.VarChar(64)
+  performedAt DateTime @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([contractId])
+  @@map("contract_history")
+}
+
+/// Une mise en concurrence sur un logiciel : l'objet consulté et les devis reçus.
+model Consultation {
+  id         Int       @id @default(autoincrement())
+  softwareId Int       @map("software_id")
+  software   Software  @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+  subject    String    @db.VarChar(256)
+  date       DateTime? @db.Date
+  notes      String?
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  quotes     Quote[]
+
+  @@index([softwareId])
+  @@map("consultation")
+}
+
+/// Devis reçu dans le cadre d'une consultation.
+model Quote {
+  id             Int          @id @default(autoincrement())
+  consultationId Int          @map("consultation_id")
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  supplierId     Int?         @map("supplier_id")
+  supplier       Supplier?    @relation(fields: [supplierId], references: [id])
+  supplierName   String?      @map("supplier_name") @db.VarChar(128)
+  amount         Float?
+  date           DateTime?    @db.Date
+  selected       Boolean      @default(false)
+  notes          String?
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  documents      Document[]
+
+  @@index([consultationId])
+  @@index([supplierId])
+  @@map("quote")
+}
+
+// ============================================================
+//  Référentiels et services utilisateurs
+// ============================================================
+
+/// Liste de valeurs administrable (technologies, catégories de pièces, types de tâches…).
+model Referential {
+  id       Int     @id @default(autoincrement())
+  kind     String  @db.VarChar(32)
+  label    String  @db.VarChar(64)
+  position Int?    @default(0)
+  isActive Boolean @default(true) @map("is_active")
+  scope    String? @db.VarChar(16)
+
+  certificateUsages   Certificate[] @relation("CertificateUsage")
+  certificateSupports Certificate[] @relation("CertificateSupport")
+  contractKinds       Contract[]    @relation("ContractKind")
+  softwareTechnology  Software[]    @relation("SoftwareTechnology")
+  documentCategory    Document[]    @relation("DocumentCategory")
+
+  @@unique([kind, label], map: "uq_referential_kind_label")
+  @@index([kind])
+  @@map("referential")
+}
+
+/// Service utilisateur : la direction qui se sert d'un logiciel, avec son référent.
+model UserService {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique @db.VarChar(128)
+  contactName  String?  @map("contact_name") @db.VarChar(128)
+  contactEmail String?  @map("contact_email") @db.VarChar(120)
+  contactPhone String?  @map("contact_phone") @db.VarChar(64)
+  position     Int?     @default(0)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  software     SoftwareService[]
+  certificates Certificate[]
+
+  @@map("user_service")
+}
+
+/// Services utilisateurs d'un logiciel (N:N).
+model SoftwareService {
+  softwareId    Int         @map("software_id")
+  userServiceId Int         @map("user_service_id")
+  software      Software    @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+  userService   UserService @relation(fields: [userServiceId], references: [id], onDelete: Cascade)
+
+  @@id([softwareId, userServiceId])
+  @@map("software_service")
+}
+
+/// Serveur(s) sur lesquels un logiciel est installé (N:N).
+model SoftwareEquipment {
+  softwareId  Int       @map("software_id")
+  equipmentId Int       @map("equipment_id")
+  software    Software  @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@id([softwareId, equipmentId])
+  @@map("software_equipment")
+}
+
+/// Flux ORIENTÉ entre deux logiciels.
+model SoftwareLink {
+  id            Int      @id @default(autoincrement())
+  sourceId      Int      @map("source_id")
+  targetId      Int      @map("target_id")
+  source        Software @relation("LinksOut", fields: [sourceId], references: [id], onDelete: Cascade)
+  target        Software @relation("LinksIn", fields: [targetId], references: [id], onDelete: Cascade)
+  description   String?  @db.VarChar(256)
+  bidirectional Boolean? @default(false)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([sourceId, targetId], map: "uq_link_source_target")
+  @@index([sourceId])
+  @@index([targetId])
+  @@map("software_link")
+}
+
+/// Un dossier du partage réseau rattaché à un logiciel.
+model SoftwareShare {
+  id         Int      @id @default(autoincrement())
+  softwareId Int      @map("software_id")
+  software   Software @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+  label      String?  @db.VarChar(128)
+  path       String   @db.VarChar(512)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([softwareId, path], map: "uq_share_software_path")
+  @@index([softwareId])
+  @@map("software_share")
+}
+
+// ============================================================
+//  Logiciels
+// ============================================================
+
+model Software {
+  id                   Int          @id @default(autoincrement())
+  name                 String       @db.VarChar(128)
+  supplierId           Int?         @map("supplier_id")
+  supplier             Supplier?    @relation(fields: [supplierId], references: [id])
+  version              String?      @db.VarChar(64)
+  hosting              String       @default("on_premise") @db.VarChar(16)
+  isDocker             Boolean      @default(false) @map("is_docker")
+  internalDev          Boolean      @default(false) @map("internal_dev")
+  noServer             Boolean      @default(false) @map("no_server")
+  lifecycle            String       @default("production") @db.VarChar(16)
+  sourceType           String?      @default("proprietaire") @map("source_type") @db.VarChar(16)
+  technologyId         Int?         @map("technology_id")
+  technology           Referential? @relation("SoftwareTechnology", fields: [technologyId], references: [id])
+  authMode             String?      @map("auth_mode") @db.VarChar(16)
+  authStrong           Boolean      @default(false) @map("auth_strong")
+  usersCount           Int?         @map("users_count")
+  usersMax             Int?         @map("users_max")
+  serviceDate          DateTime?    @map("service_date") @db.Date
+  techResponsible      String?      @map("tech_responsible") @db.VarChar(128)
+  techResponsibleEmail String?      @map("tech_responsible_email") @db.VarChar(120)
+  noContractNote       String?      @map("no_contract_note") @db.VarChar(256)
+  // ── Volet RGPD ──
+  gdprPersonalData Boolean @default(false) @map("gdpr_personal_data")
+  gdprCategories   String? @map("gdpr_categories") @db.VarChar(256)
+  gdprRegistryRef  String? @map("gdpr_registry_ref") @db.VarChar(64)
+  gdprLocation     String? @default("inconnue") @map("gdpr_location") @db.VarChar(16)
+  url              String? @db.VarChar(256)
+  criticality      Int?
+  responsible      String? @db.VarChar(128)
+  responsibleEmail String? @map("responsible_email") @db.VarChar(120)
+  description      String?
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  userServices  SoftwareService[]
+  equipments    SoftwareEquipment[]
+  contracts     ContractSoftware[]
+  systemUpdates SystemUpdate[]
+  accounts      Account[]
+  tasks         TestTask[]
+  accessReviews AccessReview[]
+  consultations Consultation[]
+  linksOut      SoftwareLink[] @relation("LinksOut")
+  linksIn       SoftwareLink[] @relation("LinksIn")
+  shares        SoftwareShare[]
+  documents     Document[]
+
+  @@index([supplierId])
+  @@index([technologyId])
+  @@map("software")
+}
+
+// ============================================================
+//  Pièces jointes
+// ============================================================
+
+/// Pièce jointe : un fichier accroché à une fiche. Les octets vivent à part (DocumentContent).
+model Document {
+  id            Int          @id @default(autoincrement())
+  softwareId    Int?         @map("software_id")
+  software      Software?    @relation(fields: [softwareId], references: [id])
+  supplierId    Int?         @map("supplier_id")
+  supplier      Supplier?    @relation(fields: [supplierId], references: [id])
+  contractId    Int?         @map("contract_id")
+  contract      Contract?    @relation(fields: [contractId], references: [id])
+  quoteId       Int?         @map("quote_id")
+  quote         Quote?       @relation(fields: [quoteId], references: [id])
+  certificateId Int?         @map("certificate_id")
+  certificate   Certificate? @relation(fields: [certificateId], references: [id])
+  equipmentId   Int?         @map("equipment_id")
+  equipment     Equipment?   @relation(fields: [equipmentId], references: [id])
+  categoryId    Int?         @map("category_id")
+  category      Referential? @relation("DocumentCategory", fields: [categoryId], references: [id])
+  filename      String       @db.VarChar(256)
+  mime          String?      @db.VarChar(128)
+  /// NULL = pas de fichier (encore) : une pièce reprise sans son acte.
+  size          Int?
+  docDate       DateTime?    @map("doc_date") @db.Date
+  uploadedBy    String?      @map("uploaded_by") @db.VarChar(64)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  content       DocumentContent?
+
+  @@index([softwareId])
+  @@index([supplierId])
+  @@index([contractId])
+  @@index([quoteId])
+  @@index([certificateId])
+  @@index([equipmentId])
+  @@index([categoryId])
+  @@index([docDate])
+  @@map("document")
+}
+
+/// Les octets d'une pièce jointe, dans une table À PART.
+model DocumentContent {
+  documentId Int      @id @map("document_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  data       Bytes
+
+  @@map("document_content")
+}
+
+// ============================================================
+//  Exploitation : tâches planifiées, journaux, alertes
+// ============================================================
+
+/// Trace d'exécution d'un job planifié (diagnostic des alertes).
+model SchedulerRun {
+  id      Int      @id @default(autoincrement())
+  jobId   String?  @map("job_id") @db.VarChar(64)
+  status  String?  @db.VarChar(20)
+  message String?
+  runAt   DateTime @default(now()) @map("run_at") @db.Timestamptz
+
+  @@map("scheduler_run")
+}
+
+/// Correspondance entre l'identifiant d'un objet dans l'outil d'ORIGINE et la fiche créée ici.
+model ImportMap {
+  kind     String @db.VarChar(32)
+  remoteId Int    @map("remote_id")
+  localId  Int    @map("local_id")
+
+  @@id([kind, remoteId])
+  @@map("import_map")
+}
+
+/// Journal d'actions central et persistant : qui a fait quoi, et quand.
+model ActionLog {
+  id          Int      @id @default(autoincrement())
+  username    String?  @db.VarChar(64)
+  action      String   @db.VarChar(64)
+  category    String?  @db.VarChar(64)
+  detail      String?
+  performedAt DateTime @default(now()) @map("performed_at") @db.Timestamptz
+
+  @@index([performedAt])
+  @@map("action_log")
+}
+
+/// Suivi des échecs de connexion par couple (identifiant, IP source).
+model LoginThrottle {
+  id          Int       @id @default(autoincrement())
+  username    String    @db.VarChar(64)
+  ip          String    @default("") @db.VarChar(64)
+  failedCount Int?      @default(0) @map("failed_count")
+  lockedUntil DateTime? @map("locked_until") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([username, ip], map: "uq_throttle_user_ip")
+  @@index([username])
+  @@index([ip])
+  @@map("login_throttle")
+}
+
+model AlertLog {
+  id         Int      @id @default(autoincrement())
+  alertType  String   @map("alert_type") @db.VarChar(64)
+  entityType String?  @map("entity_type") @db.VarChar(64)
+  entityId   Int?     @map("entity_id")
+  entityName String?  @map("entity_name") @db.VarChar(128)
+  message    String?
+  recipients String?  @db.VarChar(512)
+  sentAt     DateTime @default(now()) @map("sent_at") @db.Timestamptz
+  status     String?  @default("sent") @db.VarChar(20)
+
+  @@index([sentAt])
+  @@index([entityType, entityId, sentAt], map: "ix_alert_log_entity_sent")
+  @@map("alert_log")
+}
+
+/// Report d'alerte : suspend les notifications d'un élément jusqu'à une date.
+model AlertSnooze {
+  id           Int      @id @default(autoincrement())
+  entityType   String   @map("entity_type") @db.VarChar(64)
+  entityId     Int      @map("entity_id")
+  snoozedUntil DateTime @map("snoozed_until") @db.Date
+  reason       String?
+  createdBy    String?  @map("created_by") @db.VarChar(64)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([entityType, entityId], map: "uq_snooze_entity")
+  @@map("alert_snooze")
+}

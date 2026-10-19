@@ -1,0 +1,141 @@
+# Stack de production auto-hébergée :
+#   - app    : Next.js (standalone) + Prisma
+#   - db     : PostgreSQL 18
+#   - cron   : déclencheur des tâches planifiées (/api/cron/*)
+# (Pas de reverse proxy dans la stack : l'app est publiée en HTTP sur :3000 —
+#  à placer derrière un proxy TLS externe si exposée à Internet.)
+#
+# Démarrage :  docker compose up -d --build
+# Logs      :  docker compose logs -f app
+# Migrations: appliquées automatiquement au démarrage (docker-entrypoint.sh)
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    # Chromium (génération des PDF) tourne sans bac à sable : le conteneur n'a
+    # besoin d'aucune capacité (port 3000, compte non root).
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 512
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TZ: Europe/Paris
+      DATABASE_URL: postgresql://${APP_DB_USER:-${POSTGRES_USER}}:${APP_DB_PASSWORD:-${POSTGRES_PASSWORD}}@db:5432/${POSTGRES_DB}?schema=public
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${APP_URL}
+      NEXT_PUBLIC_APP_URL: ${APP_URL}
+      APP_BASE_URL: ${APP_URL}
+      CRON_SECRET: ${CRON_SECRET}
+      # Sauvegardes de la base (pg_dump) et boîte de dépôt des mails de sauvegarde
+      BACKUP_DB_DIR: /backups
+      BACKUP_INBOX_DIR: ${BACKUP_INBOX_DIR:-}
+      # Reprise des secrets Fernet de l'ancienne base SQLite (scripts/reprise-sqlite.ts)
+      SENTINELLE_SECRET_KEY: ${SENTINELLE_SECRET_KEY:-}
+      NODE_ENV: production
+    ports: !override
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./backups:/backups
+      - ./inbox:/inbox
+    networks:
+      - web
+
+  db:
+    image: postgres:18.6-alpine
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run/postgresql
+      - /var/run/postgresql
+    pids_limit: 256
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      # Image Postgres 18 : le volume se monte sur le PARENT du dossier de données.
+      - pgdata18:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - web
+
+  # Déclencheur : appelle /api/cron/tous toutes les 5 minutes ; l'app applique
+  # elle-même les horaires hérités de l'application Flask (app/scheduler.py).
+  cron:
+    build:
+      context: ./cron
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    pids_limit: 64
+    depends_on:
+      - app
+    environment:
+      CRON_SECRET: ${CRON_SECRET}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./backups:/backups
+    networks:
+      - web
+
+  # Initialisation one-shot d'une base VIERGE : rôles, référentiels et compte
+  # administrateur (mot de passe aléatoire affiché en console, ou ADMIN_INITIAL_PASSWORD).
+  #   docker compose run --rm init
+  init:
+    profiles: ["init"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${APP_URL}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      NODE_ENV: production
+    command: ["pnpm", "db:init"]
+    networks:
+      - web
+
+volumes:
+  pgdata18:
+
+networks:
+  web:
+    driver: bridge
