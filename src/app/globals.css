@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+/* Le socle charge Tailwind v4 ; la feuille de Sentinelle (sentinelle.css, copie de
+   static/css/style.css) et Bootstrap portent tout le style. Le « preflight » de
+   Tailwind est neutralisé par Bootstrap, chargé avant dans le <head>. */
