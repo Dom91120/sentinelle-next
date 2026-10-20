@@ -3,11 +3,12 @@
  * voisins, menu ⋯, bandeau d'échéance, fenêtre d'action, cartes du rail,
  * historique, activité.
  */
-import type { Supplier } from "@/generated/prisma/client";
+
 import { Icone, Lucide } from "@/components/icones";
 import { DelaiBadge, StatusBadge } from "@/components/macros";
-import { couleurIcone } from "@/lib/navigation";
+import type { Supplier } from "@/generated/prisma/client";
 import { dateCourte, dateHeure, jours } from "@/lib/libelles";
+import { couleurIcone } from "@/lib/navigation";
 import type { Voisins } from "@/server/voisins";
 
 /** Chevrons précédent / suivant. `base` : le chemin de la liste (« /accounts »). */
@@ -17,7 +18,12 @@ export function FicheVoisins({ voisins, base }: { voisins?: Voisins | null; base
   return (
     <div className="btn-group fiche-voisins" role="group" aria-label="Feuilleter les fiches">
       {prec ? (
-        <a href={`${base}/${prec.id}`} className="btn btn-outline-secondary btn-icon" title={`Précédente : ${prec.nom}`} aria-label={`Fiche précédente : ${prec.nom}`}>
+        <a
+          href={`${base}/${prec.id}`}
+          className="btn btn-outline-secondary btn-icon"
+          title={`Précédente : ${prec.nom}`}
+          aria-label={`Fiche précédente : ${prec.nom}`}
+        >
           <Icone bi="bi-chevron-left" taille="1em" />
         </a>
       ) : (
@@ -26,7 +32,12 @@ export function FicheVoisins({ voisins, base }: { voisins?: Voisins | null; base
         </span>
       )}
       {suiv ? (
-        <a href={`${base}/${suiv.id}`} className="btn btn-outline-secondary btn-icon" title={`Suivante : ${suiv.nom}`} aria-label={`Fiche suivante : ${suiv.nom}`}>
+        <a
+          href={`${base}/${suiv.id}`}
+          className="btn btn-outline-secondary btn-icon"
+          title={`Suivante : ${suiv.nom}`}
+          aria-label={`Fiche suivante : ${suiv.nom}`}
+        >
           <Icone bi="bi-chevron-right" taille="1em" />
         </a>
       ) : (
@@ -52,11 +63,25 @@ export type EnteteProps = {
 };
 
 function estSeparateur(n: React.ReactNode): boolean {
-  return Boolean(n && typeof n === "object" && "type" in n && (n as React.ReactElement).type === MenuSep);
+  return Boolean(
+    n && typeof n === "object" && "type" in n && (n as React.ReactElement).type === MenuSep,
+  );
 }
 
-export function Entete({ titre, sousTitre, statut, primaire, menu = [], badges, voisins, base = "", bandeau }: EnteteProps) {
-  const entrees = menu.filter((m) => m !== null && m !== undefined && m !== false && !estSeparateur(m)).length;
+export function Entete({
+  titre,
+  sousTitre,
+  statut,
+  primaire,
+  menu = [],
+  badges,
+  voisins,
+  base = "",
+  bandeau,
+}: EnteteProps) {
+  const entrees = menu.filter(
+    (m) => m !== null && m !== undefined && m !== false && !estSeparateur(m),
+  ).length;
   return (
     <div className="page-header fiche-entete">
       <div className="fiche-entete-titre">
@@ -82,7 +107,14 @@ export function Entete({ titre, sousTitre, statut, primaire, menu = [], badges, 
               <ul className="menu-seul">{menu}</ul>
             ) : entrees > 1 ? (
               <div className="dropdown">
-                <button className="btn btn-outline-secondary btn-icon" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Autres actions" aria-label="Autres actions">
+                <button
+                  className="btn btn-outline-secondary btn-icon"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  title="Autres actions"
+                  aria-label="Autres actions"
+                >
                   <Icone bi="bi-three-dots" taille="1em" />
                 </button>
                 <ul className="dropdown-menu dropdown-menu-end">{menu}</ul>
@@ -95,10 +127,26 @@ export function Entete({ titre, sousTitre, statut, primaire, menu = [], badges, 
   );
 }
 
-export function MenuLien({ url, libelle, icone, cible }: { url: string; libelle: string; icone: string; cible?: string }) {
+export function MenuLien({
+  url,
+  libelle,
+  icone,
+  cible,
+}: {
+  url: string;
+  libelle: string;
+  icone: string;
+  cible?: string;
+}) {
   return (
     <li>
-      <a className="dropdown-item" href={url} title={libelle} target={cible} rel={cible ? "noopener" : undefined}>
+      <a
+        className="dropdown-item"
+        href={url}
+        title={libelle}
+        target={cible}
+        rel={cible ? "noopener" : undefined}
+      >
         <Icone bi={icone} taille="1em" classes="me-2" />
         <span className="menu-libelle">{libelle}</span>
       </a>
@@ -106,13 +154,38 @@ export function MenuLien({ url, libelle, icone, cible }: { url: string; libelle:
   );
 }
 
-export function MenuPost({ url, libelle, icone, csrf, confirm, danger = false, champs }: { url: string; libelle: string; icone: string; csrf: string; confirm?: string; danger?: boolean; champs?: Record<string, string> }) {
+export function MenuPost({
+  url,
+  libelle,
+  icone,
+  csrf,
+  confirm,
+  danger = false,
+  champs,
+}: {
+  url: string;
+  libelle: string;
+  icone: string;
+  csrf: string;
+  confirm?: string;
+  danger?: boolean;
+  champs?: Record<string, string>;
+}) {
   return (
     <li>
       <form method="POST" action={url}>
         <input type="hidden" name="csrf_token" value={csrf} />
-        {champs ? Object.entries(champs).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />) : null}
-        <button type="submit" className={`dropdown-item${danger ? " text-danger" : ""}`} title={libelle} data-confirm={confirm}>
+        {champs
+          ? Object.entries(champs).map(([k, v]) => (
+              <input key={k} type="hidden" name={k} value={v} />
+            ))
+          : null}
+        <button
+          type="submit"
+          className={`dropdown-item${danger ? " text-danger" : ""}`}
+          title={libelle}
+          data-confirm={confirm}
+        >
           <Icone bi={icone} taille="1em" classes="me-2" />
           <span className="menu-libelle">{libelle}</span>
         </button>
@@ -130,26 +203,77 @@ export function MenuSep() {
 }
 
 /** Le bouton principal, qui ouvre la fenêtre d'action. */
-export function BoutonModal({ id, libelle, icone = "bi-check-lg", classe = "btn-primary" }: { id: string; libelle: string; icone?: string; classe?: string }) {
+export function BoutonModal({
+  id,
+  libelle,
+  icone = "bi-check-lg",
+  classe = "btn-primary",
+}: {
+  id: string;
+  libelle: string;
+  icone?: string;
+  classe?: string;
+}) {
   return (
-    <button type="button" className={`btn ${classe}`} data-bs-toggle="modal" data-bs-target={`#${id}`}>
+    <button
+      type="button"
+      className={`btn ${classe}`}
+      data-bs-toggle="modal"
+      data-bs-target={`#${id}`}
+    >
       <Icone bi={icone} taille="1em" classes="me-1" /> {libelle}
     </button>
   );
 }
 
 /** La fenêtre d'action : un formulaire POST, ses champs en children. */
-export function ModalAction({ id, titre, action, csrf, bouton = "Enregistrer", aide, icone = "bi-check-lg", children, multipart }: { id: string; titre: string; action: string; csrf: string; bouton?: string; aide?: string; icone?: string; children: React.ReactNode; multipart?: boolean }) {
+export function ModalAction({
+  id,
+  titre,
+  action,
+  csrf,
+  bouton = "Enregistrer",
+  aide,
+  icone = "bi-check-lg",
+  children,
+  multipart,
+}: {
+  id: string;
+  titre: string;
+  action: string;
+  csrf: string;
+  bouton?: string;
+  aide?: string;
+  icone?: string;
+  children: React.ReactNode;
+  multipart?: boolean;
+}) {
   return (
-    <div className="modal fade" id={id} tabIndex={-1} aria-labelledby={`${id}-titre`} aria-hidden="true">
+    <div
+      className="modal fade"
+      id={id}
+      tabIndex={-1}
+      aria-labelledby={`${id}-titre`}
+      aria-hidden="true"
+    >
       <div className="modal-dialog">
-        <form method="POST" action={action} className="modal-content" encType={multipart ? "multipart/form-data" : undefined}>
+        <form
+          method="POST"
+          action={action}
+          className="modal-content"
+          encType={multipart ? "multipart/form-data" : undefined}
+        >
           <input type="hidden" name="csrf_token" value={csrf} />
           <div className="modal-header">
             <h5 className="modal-title" id={`${id}-titre`}>
               {titre}
             </h5>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Fermer" />
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            />
           </div>
           <div className="modal-body">
             {aide ? <p className="text-muted small mb-3">{aide}</p> : null}
@@ -170,13 +294,32 @@ export function ModalAction({ id, titre, action, csrf, bouton = "Enregistrer", a
 }
 
 /** Le bandeau d'échéance : LA date, son délai, une frise du début à l'échéance. */
-export function BandeauEcheance({ libelle, date, statut, passe = "retard", debut, complement, sansDate = "à renseigner", seuilLibelle }: { libelle: string; date: Date | null | undefined; statut: string | null | undefined; passe?: string; debut?: Date | null; complement?: React.ReactNode; sansDate?: string; seuilLibelle?: string }) {
+export function BandeauEcheance({
+  libelle,
+  date,
+  statut,
+  passe = "retard",
+  debut,
+  complement,
+  sansDate = "à renseigner",
+  seuilLibelle,
+}: {
+  libelle: string;
+  date: Date | null | undefined;
+  statut: string | null | undefined;
+  passe?: string;
+  debut?: Date | null;
+  complement?: React.ReactNode;
+  sansDate?: string;
+  seuilLibelle?: string;
+}) {
   let frise: React.ReactNode = null;
   if (date && debut && debut < date) {
     const restant = jours(date) ?? 0;
     const total = Math.round((date.getTime() - debut.getTime()) / 86_400_000);
     const ecoule = total - restant;
-    const pct = Math.round((ecoule >= total ? 100 : ecoule <= 0 ? 0 : (ecoule * 100) / total) * 10) / 10;
+    const pct =
+      Math.round((ecoule >= total ? 100 : ecoule <= 0 ? 0 : (ecoule * 100) / total) * 10) / 10;
     frise = (
       <>
         <div className="fiche-frise" role="img" aria-label={`${pct} % de la période écoulée`}>
@@ -225,10 +368,28 @@ export function Lie({ titre = "Lié à", children }: { titre?: string; children?
   );
 }
 
-export function Lien({ url, icone, nom, sous, cible, teinte }: { url: string; icone: string; nom: React.ReactNode; sous?: React.ReactNode; cible?: string; teinte?: string }) {
+export function Lien({
+  url,
+  icone,
+  nom,
+  sous,
+  cible,
+  teinte,
+}: {
+  url: string;
+  icone: string;
+  nom: React.ReactNode;
+  sous?: React.ReactNode;
+  cible?: string;
+  teinte?: string;
+}) {
   return (
     <a href={url} className="fiche-lie" target={cible} rel={cible ? "noopener" : undefined}>
-      {icone.startsWith("bi-") ? <Icone bi={icone} taille="1em" /> : <Lucide nom={icone} taille={16} classes={teinte ? `kind-icon--${teinte}` : ""} />}
+      {icone.startsWith("bi-") ? (
+        <Icone bi={icone} taille="1em" />
+      ) : (
+        <Lucide nom={icone} taille={16} classes={teinte ? `kind-icon--${teinte}` : ""} />
+      )}
       <span className="cell2">
         <strong>{nom}</strong>
         {sous ? <small>{sous}</small> : null}
@@ -238,7 +399,13 @@ export function Lien({ url, icone, nom, sous, cible, teinte }: { url: string; ic
 }
 
 /** Un fournisseur dans le rail : nom, hotline, n° client, portail. */
-export function CarteFournisseur({ sup, titre = "Fournisseur" }: { sup: Supplier | null | undefined; titre?: string }) {
+export function CarteFournisseur({
+  sup,
+  titre = "Fournisseur",
+}: {
+  sup: Supplier | null | undefined;
+  titre?: string;
+}) {
   if (!sup) return null;
   const tel = sup.supportPhone || sup.phone;
   const mail = sup.supportEmail || sup.email;
@@ -288,7 +455,13 @@ export function CarteFournisseur({ sup, titre = "Fournisseur" }: { sup: Supplier
 }
 
 /** La carte d'un éditeur ou d'un fournisseur, dans le rail. */
-export function CarteEditeur({ sup, role = "Fournisseur" }: { sup: Supplier | null | undefined; role?: string }) {
+export function CarteEditeur({
+  sup,
+  role = "Fournisseur",
+}: {
+  sup: Supplier | null | undefined;
+  role?: string;
+}) {
   if (!sup) return null;
   const tel = sup.supportPhone || sup.phone;
   const mail = sup.supportEmail || sup.email;
@@ -296,8 +469,16 @@ export function CarteEditeur({ sup, role = "Fournisseur" }: { sup: Supplier | nu
     <div className="data-card mb-3">
       <div className="card-header-custom">
         <h6 className="fw-bold mb-0 d-flex align-items-center min-w-0 editeur-titre">
-          <Icone bi="bi-building" taille="1em" classes={`me-2 flex-shrink-0 ico-carte ico-${couleurIcone("bi-building")}`} />
-          <a href={`/suppliers/${sup.id}`} className="text-truncate" title={`${role} : ${sup.name}`}>
+          <Icone
+            bi="bi-building"
+            taille="1em"
+            classes={`me-2 flex-shrink-0 ico-carte ico-${couleurIcone("bi-building")}`}
+          />
+          <a
+            href={`/suppliers/${sup.id}`}
+            className="text-truncate"
+            title={`${role} : ${sup.name}`}
+          >
             {sup.name}
           </a>
         </h6>
@@ -305,7 +486,8 @@ export function CarteEditeur({ sup, role = "Fournisseur" }: { sup: Supplier | nu
       <div className="p-3">
         {sup.customerRef ? (
           <div className="small mb-1">
-            <span className="text-muted">N° client</span> <span className="fw-medium">{sup.customerRef}</span>
+            <span className="text-muted">N° client</span>{" "}
+            <span className="fw-medium">{sup.customerRef}</span>
           </div>
         ) : null}
         <ul className="list-unstyled small mb-0 editeur-coordonnees">
@@ -330,7 +512,10 @@ export function CarteEditeur({ sup, role = "Fournisseur" }: { sup: Supplier | nu
             </li>
           ) : null}
           {sup.dpoEmail ? (
-            <li className="text-truncate" title={`DPO${sup.dpoContact ? ` — ${sup.dpoContact}` : ""}`}>
+            <li
+              className="text-truncate"
+              title={`DPO${sup.dpoContact ? ` — ${sup.dpoContact}` : ""}`}
+            >
               <Icone bi="bi-envelope" taille="1em" classes="me-1" />
               <a href={`mailto:${sup.dpoEmail}`}>{sup.dpoEmail}</a>
             </li>
@@ -357,10 +542,23 @@ export function CarteEditeur({ sup, role = "Fournisseur" }: { sup: Supplier | nu
   );
 }
 
-export type Histo = { id: number; performedAt: Date | null; action: string; comment: string | null; performedBy: string | null; result?: string | null };
+export type Histo = {
+  id: number;
+  performedAt: Date | null;
+  action: string;
+  comment: string | null;
+  performedBy: string | null;
+  result?: string | null;
+};
 
 /** L'historique, en volet. */
-export function Historique({ histories, titre = "Historique" }: { histories: Histo[]; titre?: string }) {
+export function Historique({
+  histories,
+  titre = "Historique",
+}: {
+  histories: Histo[];
+  titre?: string;
+}) {
   return (
     <div className="data-card">
       <div className="card-header-custom">
@@ -412,7 +610,13 @@ export function Historique({ histories, titre = "Historique" }: { histories: His
 }
 
 /** Les trois dernières lignes d'activité, dans le rail. */
-export function Activite({ histories, cible = "historique" }: { histories: Histo[]; cible?: string }) {
+export function Activite({
+  histories,
+  cible = "historique",
+}: {
+  histories: Histo[];
+  cible?: string;
+}) {
   if (!histories.length) return null;
   return (
     <div className="data-card mb-3">
@@ -445,7 +649,17 @@ export function Activite({ histories, cible = "historique" }: { histories: Histo
 
 // ── _fiche_section.html ──
 
-export function TitreSection({ titre, icone, couleur = "indigo", classes = "mb-2 mt-3" }: { titre: string; icone: string; couleur?: string; classes?: string }) {
+export function TitreSection({
+  titre,
+  icone,
+  couleur = "indigo",
+  classes = "mb-2 mt-3",
+}: {
+  titre: string;
+  icone: string;
+  couleur?: string;
+  classes?: string;
+}) {
   return (
     <h6 className={`fw-bold fiche-titre fiche-titre--${couleur} ${classes}`}>
       <Icone bi={icone} taille={14} classes={`ico ico-${couleurIcone(icone)}`} />
@@ -454,7 +668,15 @@ export function TitreSection({ titre, icone, couleur = "indigo", classes = "mb-2
   );
 }
 
-export function Champ({ label, value, large = false }: { label: string; value: React.ReactNode; large?: boolean }) {
+export function Champ({
+  label,
+  value,
+  large = false,
+}: {
+  label: string;
+  value: React.ReactNode;
+  large?: boolean;
+}) {
   if (value === null || value === undefined || value === "" || value === false) return null;
   return (
     <div className={`fiche-champ${large ? " fiche-champ--large" : ""}`}>
@@ -475,7 +697,9 @@ export function Fait({ label, value }: { label: string; value: React.ReactNode }
   return (
     <div className="fiche-fait">
       <span className="fiche-fait-k">{label}</span>
-      <div className="fiche-fait-v">{value === null || value === undefined || value === "" ? "-" : value}</div>
+      <div className="fiche-fait-v">
+        {value === null || value === undefined || value === "" ? "-" : value}
+      </div>
     </div>
   );
 }

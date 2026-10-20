@@ -5,7 +5,11 @@ import { contexteAnonyme } from "@/server/page";
 
 export const metadata = { title: "Connexion - Sentinelle" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   // Déjà connecté : la page de login n'a pas de sens.
   if (await getCurrentUser()) redirect("/");
   const { nonce, csrf, flashes } = await contexteAnonyme();
@@ -25,25 +29,45 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <div className="login-card">
             <h1>Connexion</h1>
             {flashes.map(([category, message], i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: liste figée au rendu
-              <div key={i} className={`alert alert-${["success", "danger", "warning", "info"].includes(category) ? category : "info"}`}>
+              <div
+                key={i}
+                className={`alert alert-${["success", "danger", "warning", "info"].includes(category) ? category : "info"}`}
+              >
                 {message}
               </div>
             ))}
             {flashes.length ? <script src="/js/flash-clear.js" nonce={nonce} /> : null}
-            <form method="POST" action={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}>
+            <form
+              method="POST"
+              action={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+            >
               <input type="hidden" name="csrf_token" value={csrf} />
               <div className="mb-3">
                 <label className="form-label" htmlFor="login-username">
                   Nom d'utilisateur
                 </label>
-                <input type="text" id="login-username" name="username" className="form-control" required autoFocus autoComplete="username" />
+                <input
+                  type="text"
+                  id="login-username"
+                  name="username"
+                  className="form-control"
+                  required
+                  autoFocus
+                  autoComplete="username"
+                />
               </div>
               <div className="mb-4">
                 <label className="form-label" htmlFor="login-password">
                   Mot de passe
                 </label>
-                <input type="password" id="login-password" name="password" className="form-control" required autoComplete="current-password" />
+                <input
+                  type="password"
+                  id="login-password"
+                  name="password"
+                  className="form-control"
+                  required
+                  autoComplete="current-password"
+                />
               </div>
               <button type="submit" className="btn btn-primary w-100">
                 Se connecter

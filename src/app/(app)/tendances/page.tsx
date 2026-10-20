@@ -18,12 +18,18 @@ export default async function Tendances() {
   const today = aujourdhui();
   const days: Date[] = [];
   for (let i = 29; i >= 0; i--) days.push(new Date(today.getTime() - i * 86_400_000));
-  const labels = days.map((d) => `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`);
+  const labels = days.map(
+    (d) =>
+      `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`,
+  );
 
   const backups = { ok: [] as number[], warning: [] as number[], failed: [] as number[] };
   const showBackups = user.canView("backups");
   if (showBackups) {
-    const rows = await prisma.backupCheck.findMany({ where: { checkDate: { gte: days[0] } }, select: { checkDate: true, status: true, firstStatus: true } });
+    const rows = await prisma.backupCheck.findMany({
+      where: { checkDate: { gte: days[0] } },
+      select: { checkDate: true, status: true, firstStatus: true },
+    });
     const perDay = new Map<string, Record<string, number>>();
     for (const r of rows) {
       const k = iso(r.checkDate);
@@ -43,7 +49,10 @@ export default async function Tendances() {
   let alerts: number[] = [];
   const showAlerts = user.canView("alerts");
   if (showAlerts) {
-    const rows = await prisma.alertLog.findMany({ where: { status: "sent", sentAt: { gte: days[0] } }, select: { sentAt: true } });
+    const rows = await prisma.alertLog.findMany({
+      where: { status: "sent", sentAt: { gte: days[0] } },
+      select: { sentAt: true },
+    });
     const perDay = new Map<string, number>();
     for (const r of rows) {
       const k = iso(r.sentAt);
@@ -213,7 +222,8 @@ new MutationObserver(buildCharts).observe(document.documentElement, { attributes
         <div>
           <h1 className="page-title">Tendances</h1>
           <p className="page-subtitle">
-            Évolution sur les 30 derniers jours · <Icone bi="bi-hand-index" taille="1em" /> cliquez sur un graphique pour ouvrir la liste correspondante
+            Évolution sur les 30 derniers jours · <Icone bi="bi-hand-index" taille="1em" /> cliquez
+            sur un graphique pour ouvrir la liste correspondante
           </p>
         </div>
         <a href="/" className="btn btn-sm btn-outline-secondary">

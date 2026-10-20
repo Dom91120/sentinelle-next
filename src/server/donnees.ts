@@ -40,7 +40,7 @@ import {
 } from "@/lib/statuts";
 import { type AppSettings, getSettings, seuilsDe } from "@/server/config-store";
 import { prisma } from "@/server/db";
-import { chargerCycles, type CyclesParProduit, type EolInfo, lookupDans } from "@/server/eol";
+import { type CyclesParProduit, chargerCycles, type EolInfo, lookupDans } from "@/server/eol";
 import { categoryEnabledIn } from "@/server/features";
 
 export type AvecStatut<T> = T & { status: Statut };
@@ -51,7 +51,10 @@ export type CertificatComplet = Certificate & {
   supplier: Supplier | null;
 };
 export type BackupComplet = Backup & { checks: BackupCheck[] };
-export type SoftwareComplet = Software & { systemUpdates: SystemUpdate[]; supplier: Supplier | null };
+export type SoftwareComplet = Software & {
+  systemUpdates: SystemUpdate[];
+  supplier: Supplier | null;
+};
 export type ContratComplet = Contract & { kindRef: Referential | null; supplier: Supplier | null };
 export type EquipementComplet = Equipment & {
   eol: EolInfo | null;
@@ -60,18 +63,28 @@ export type EquipementComplet = Equipment & {
   supplier: Supplier | null;
 };
 
-export async function contexteStatuts(): Promise<{ settings: AppSettings; seuils: Seuils; today: Date }> {
+export async function contexteStatuts(): Promise<{
+  settings: AppSettings;
+  seuils: Seuils;
+  today: Date;
+}> {
   const settings = await getSettings();
   return { settings, seuils: seuilsDe(settings), today: aujourdhui() };
 }
 
 export async function chargerComptes(seuils?: Seuils): Promise<AvecStatut<Account>[]> {
   const s = seuils ?? (await contexteStatuts()).seuils;
-  const rows = await prisma.account.findMany({ where: { isActive: true }, orderBy: { nextPasswordChange: "asc" } });
+  const rows = await prisma.account.findMany({
+    where: { isActive: true },
+    orderBy: { nextPasswordChange: "asc" },
+  });
   return rows.map((a) => ({ ...a, status: accountStatus(a, s) }));
 }
 
-export async function chargerCertificats(seuils?: Seuils, settings?: AppSettings): Promise<AvecStatut<CertificatComplet>[]> {
+export async function chargerCertificats(
+  seuils?: Seuils,
+  settings?: AppSettings,
+): Promise<AvecStatut<CertificatComplet>[]> {
   const ctx = seuils && settings ? { seuils, settings } : await contexteStatuts();
   if (!categoryEnabledIn(ctx.settings, "certificates")) return [];
   const rows = await prisma.certificate.findMany({
@@ -87,7 +100,9 @@ export function surveilles<T extends CertificatComplet>(certs: T[]): T[] {
   return certs.filter((c) => certificateMonitored(c));
 }
 
-export async function chargerDomaines(seuils?: Seuils): Promise<AvecStatut<Domain & { registrarSupplier: Supplier | null }>[]> {
+export async function chargerDomaines(
+  seuils?: Seuils,
+): Promise<AvecStatut<Domain & { registrarSupplier: Supplier | null }>[]> {
   const s = seuils ?? (await contexteStatuts()).seuils;
   const rows = await prisma.domain.findMany({
     where: { isActive: true },
@@ -106,25 +121,41 @@ export async function chargerSauvegardes(): Promise<AvecStatut<BackupComplet>[]>
   return rows.map((b) => ({ ...b, status: backupComputedStatus(b, b.checks) }));
 }
 
-export async function chargerTests(seuils?: Seuils): Promise<AvecStatut<TestTask & { software: Software | null }>[]> {
+export async function chargerTests(
+  seuils?: Seuils,
+): Promise<AvecStatut<TestTask & { software: Software | null; brut: string | null }>[]> {
   const s = seuils ?? (await contexteStatuts()).seuils;
-  const rows = await prisma.testTask.findMany({ where: { isActive: true }, orderBy: { nextDue: "asc" }, include: { software: true } });
-  return rows.map((t) => ({ ...t, status: testComputedStatus(t, s) }));
+  const rows = await prisma.testTask.findMany({
+    where: { isActive: true },
+    orderBy: { nextDue: "asc" },
+    include: { software: true },
+  });
+  return rows.map((t) => ({ ...t, brut: t.status, status: testComputedStatus(t, s) }));
 }
 
-export async function chargerRevues(seuils?: Seuils): Promise<AvecStatut<AccessReview & { software: Software | null }>[]> {
+export async function chargerRevues(
+  seuils?: Seuils,
+): Promise<AvecStatut<AccessReview & { software: Software | null; brut: string | null }>[]> {
   const s = seuils ?? (await contexteStatuts()).seuils;
-  const rows = await prisma.accessReview.findMany({ where: { isActive: true }, orderBy: { nextReview: "asc" }, include: { software: true } });
-  return rows.map((r) => ({ ...r, status: reviewComputedStatus(r, s) }));
+  const rows = await prisma.accessReview.findMany({
+    where: { isActive: true },
+    orderBy: { nextReview: "asc" },
+    include: { software: true },
+  });
+  return rows.map((r) => ({ ...r, brut: r.status, status: reviewComputedStatus(r, s) }));
 }
 
-export async function chargerMisesAJour(): Promise<AvecStatut<SystemUpdate & { equipment: Equipment | null; software: Software | null }>[]> {
+export async function chargerMisesAJour(): Promise<
+  AvecStatut<
+    SystemUpdate & { equipment: Equipment | null; software: Software | null; brut: string | null }
+  >[]
+> {
   const rows = await prisma.systemUpdate.findMany({
     where: { isActive: true },
     orderBy: { name: "asc" },
     include: { equipment: true, software: true },
   });
-  return rows.map((u) => ({ ...u, status: updateStatusColor(u) }));
+  return rows.map((u) => ({ ...u, brut: u.status, status: updateStatusColor(u) }));
 }
 
 export async function chargerEquipements(
@@ -134,8 +165,15 @@ export async function chargerEquipements(
 ): Promise<AvecStatut<EquipementComplet>[]> {
   const ctx = seuils && settings ? { seuils, settings } : await contexteStatuts();
   const [rows, backups, cyc] = await Promise.all([
-    prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, include: { supplier: true } }),
-    prisma.backup.findMany({ where: { isActive: true, equipmentId: { not: null } }, select: { equipmentId: true } }),
+    prisma.equipment.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      include: { supplier: true },
+    }),
+    prisma.backup.findMany({
+      where: { isActive: true, equipmentId: { not: null } },
+      select: { equipmentId: true },
+    }),
     cycles ? Promise.resolve(cycles) : chargerCycles(),
   ]);
   const avecBackup = new Set(backups.map((b) => b.equipmentId));
@@ -176,20 +214,42 @@ export async function chargerContrats(seuils?: Seuils): Promise<AvecStatut<Contr
 export async function chargerTout() {
   const ctx = await contexteStatuts();
   const cycles = await chargerCycles();
-  const [accounts, certificates, domains, backups, tests, reviews, updates, equipments, software, contracts] =
-    await Promise.all([
-      chargerComptes(ctx.seuils),
-      chargerCertificats(ctx.seuils, ctx.settings),
-      chargerDomaines(ctx.seuils),
-      chargerSauvegardes(),
-      chargerTests(ctx.seuils),
-      chargerRevues(ctx.seuils),
-      chargerMisesAJour(),
-      chargerEquipements(ctx.seuils, ctx.settings, cycles),
-      chargerLogiciels(),
-      chargerContrats(ctx.seuils),
-    ]);
-  return { ...ctx, accounts, certificates, domains, backups, tests, reviews, updates, equipments, software, contracts };
+  const [
+    accounts,
+    certificates,
+    domains,
+    backups,
+    tests,
+    reviews,
+    updates,
+    equipments,
+    software,
+    contracts,
+  ] = await Promise.all([
+    chargerComptes(ctx.seuils),
+    chargerCertificats(ctx.seuils, ctx.settings),
+    chargerDomaines(ctx.seuils),
+    chargerSauvegardes(),
+    chargerTests(ctx.seuils),
+    chargerRevues(ctx.seuils),
+    chargerMisesAJour(),
+    chargerEquipements(ctx.seuils, ctx.settings, cycles),
+    chargerLogiciels(),
+    chargerContrats(ctx.seuils),
+  ]);
+  return {
+    ...ctx,
+    accounts,
+    certificates,
+    domains,
+    backups,
+    tests,
+    reviews,
+    updates,
+    equipments,
+    software,
+    contracts,
+  };
 }
 
 export type Tout = Awaited<ReturnType<typeof chargerTout>>;

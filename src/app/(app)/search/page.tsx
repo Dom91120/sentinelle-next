@@ -1,6 +1,6 @@
 import { Icone } from "@/components/icones";
-import { rechercher } from "@/server/recherche";
 import { contextePage } from "@/server/page";
+import { rechercher } from "@/server/recherche";
 
 export const metadata = { title: "Recherche - Sentinelle" };
 
@@ -15,7 +15,14 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
         <h1 className="page-title mb-3">Recherche globale</h1>
         <form method="GET" action="/search">
           <div className="input-group" style={{ maxWidth: 600 }}>
-            <input type="text" name="q" className="form-control form-control-lg" defaultValue={q} placeholder="Rechercher un service, compte, domaine, logiciel, pièce jointe..." autoFocus />
+            <input
+              type="text"
+              name="q"
+              className="form-control form-control-lg"
+              defaultValue={q}
+              placeholder="Rechercher un service, compte, domaine, logiciel, pièce jointe..."
+              autoFocus
+            />
             <button type="submit" className="btn btn-primary">
               <Icone bi="bi-search" taille="1em" classes="me-1" /> Rechercher
             </button>

@@ -12,7 +12,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const update = await prisma.systemUpdate.findUnique({ where: { id } });
     if (!update) return pasTrouve();
     await prisma.systemUpdate.update({ where: { id }, data: { isActive: false } });
-    await prisma.updateHistory.create({ data: { updateId: id, action: "deleted", comment: `Mise a jour desactivee : ${update.name}`, performedBy: user.username } });
+    await prisma.updateHistory.create({
+      data: {
+        updateId: id,
+        action: "deleted",
+        comment: `Mise a jour desactivee : ${update.name}`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage("/updates", "Entree supprimee", "success");
   });

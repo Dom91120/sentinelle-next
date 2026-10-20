@@ -16,7 +16,10 @@ export type FormContext = Awaited<ReturnType<typeof formContext>>;
 /** La fiche logiciel que désigne ce nom (casse ignorée ; deux homonymes actifs : aucune). */
 export async function logicielParNom(nom: string): Promise<{ id: number; name: string } | null> {
   if (!nom) return null;
-  const candidats = await prisma.software.findMany({ where: { isActive: true, name: { equals: nom, mode: "insensitive" } }, select: { id: true, name: true } });
+  const candidats = await prisma.software.findMany({
+    where: { isActive: true, name: { equals: nom, mode: "insensitive" } },
+    select: { id: true, name: true },
+  });
   return candidats.length === 1 ? candidats[0] : null;
 }
 

@@ -3,7 +3,16 @@ import type { Prisma } from "@/generated/prisma/client";
 import { SUPPLIER_KIND_LABELS } from "@/lib/constantes";
 import { champ, champOuNull } from "@/lib/forms-util";
 
-export const SEARCH_FIELDS = ["name", "contactName", "email", "customerRef", "city", "commercialContact", "adminContact", "notes"];
+export const SEARCH_FIELDS = [
+  "name",
+  "contactName",
+  "email",
+  "customerRef",
+  "city",
+  "commercialContact",
+  "adminContact",
+  "notes",
+];
 
 /** Champs texte simples du formulaire, versés tels quels : nom de champ → colonne. */
 const TEXT_FIELDS: [string, keyof Prisma.SupplierUncheckedUpdateInput][] = [
@@ -47,10 +56,37 @@ export function depuisFormulaire(f: FormData): Prisma.SupplierUncheckedUpdateInp
     kind: typeof kind === "string" && kind ? kind : "provider",
     notes: typeof f.get("notes") === "string" && f.get("notes") ? (f.get("notes") as string) : null,
   };
-  for (const [nom, col] of TEXT_FIELDS) (data as Record<string, unknown>)[col] = champOuNull(f, nom);
+  for (const [nom, col] of TEXT_FIELDS)
+    (data as Record<string, unknown>)[col] = champOuNull(f, nom);
   return data;
 }
 
-export function hasContacts(s: { commercialContact: string | null; commercialPhone: string | null; commercialEmail: string | null; commercialContact2: string | null; commercialPhone2: string | null; commercialEmail2: string | null; adminContact: string | null; adminPhone: string | null; adminEmail: string | null; dpoContact: string | null; dpoPhone: string | null; dpoEmail: string | null }): boolean {
-  return [s.commercialContact, s.commercialPhone, s.commercialEmail, s.commercialContact2, s.commercialPhone2, s.commercialEmail2, s.adminContact, s.adminPhone, s.adminEmail, s.dpoContact, s.dpoPhone, s.dpoEmail].some(Boolean);
+export function hasContacts(s: {
+  commercialContact: string | null;
+  commercialPhone: string | null;
+  commercialEmail: string | null;
+  commercialContact2: string | null;
+  commercialPhone2: string | null;
+  commercialEmail2: string | null;
+  adminContact: string | null;
+  adminPhone: string | null;
+  adminEmail: string | null;
+  dpoContact: string | null;
+  dpoPhone: string | null;
+  dpoEmail: string | null;
+}): boolean {
+  return [
+    s.commercialContact,
+    s.commercialPhone,
+    s.commercialEmail,
+    s.commercialContact2,
+    s.commercialPhone2,
+    s.commercialEmail2,
+    s.adminContact,
+    s.adminPhone,
+    s.adminEmail,
+    s.dpoContact,
+    s.dpoPhone,
+    s.dpoEmail,
+  ].some(Boolean);
 }

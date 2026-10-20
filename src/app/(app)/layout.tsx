@@ -22,7 +22,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     }
   }
   return (
-    <Shell user={user} counts={page.counts} pathname={page.pathname} flashes={page.flashes} csrf={page.csrf} nonce={page.nonce}>
+    <Shell
+      user={user}
+      counts={page.counts}
+      pathname={page.pathname}
+      flashes={page.flashes}
+      csrf={page.csrf}
+      nonce={page.nonce}
+    >
       {children}
     </Shell>
   );

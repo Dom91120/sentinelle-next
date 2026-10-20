@@ -18,7 +18,10 @@ function normaliser(cat: string): FlashCategory {
 }
 
 /** Ajoute un message à afficher sur la prochaine page. À appeler dans une Server Action ou une route. */
-export async function flash(message: string, category: FlashCategory | string = "info"): Promise<void> {
+export async function flash(
+  message: string,
+  category: FlashCategory | string = "info",
+): Promise<void> {
   const jar = await cookies();
   let current: Flash[] = [];
   try {

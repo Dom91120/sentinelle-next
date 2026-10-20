@@ -1,6 +1,11 @@
 /** Inventaire matériel (port de app/inventory.py et app/inventory_import.py). */
 import type { Prisma } from "@/generated/prisma/client";
-import { CRITICALITY_LABELS, EQUIPMENT_FAMILIES, EQUIPMENT_KIND_LABELS, equipmentFamily } from "@/lib/constantes";
+import {
+  CRITICALITY_LABELS,
+  EQUIPMENT_FAMILIES,
+  EQUIPMENT_KIND_LABELS,
+  equipmentFamily,
+} from "@/lib/constantes";
 import { parseDate, parseFloat_, parseInt_ } from "@/lib/forms-util";
 import { prisma } from "@/server/db";
 
@@ -12,7 +17,22 @@ export const ENV_CHOICES: [string, string][] = [
   ["dev", "Développement"],
   ["decommissioned", "Décommissionné"],
 ];
-export const SEARCH_FIELDS = ["name", "os", "osVersion", "ipAddress", "hostServer", "hypervisor", "rolePrincipal", "serialNumber", "serviceTag", "location", "managementUrl", "manufacturerModel", "usage", "observations"];
+export const SEARCH_FIELDS = [
+  "name",
+  "os",
+  "osVersion",
+  "ipAddress",
+  "hostServer",
+  "hypervisor",
+  "rolePrincipal",
+  "serialNumber",
+  "serviceTag",
+  "location",
+  "managementUrl",
+  "manufacturerModel",
+  "usage",
+  "observations",
+];
 
 /** Équipements actifs, pour les selects « équipement lié » des autres modules. */
 export async function activeEquipments() {
@@ -25,7 +45,10 @@ function txt(f: FormData, key: string): string | null {
 }
 
 /** La famille à laquelle la fiche appartient : celle de l'équipement, ou celle d'où l'on vient. */
-export function familleDemandee(item: { kind: string | null } | null, demandee?: string | null): string {
+export function familleDemandee(
+  item: { kind: string | null } | null,
+  demandee?: string | null,
+): string {
   if (item) return equipmentFamily(item.kind || "vm");
   const d = (demandee ?? "").trim();
   return d in EQUIPMENT_FAMILIES ? d : "serveurs";
@@ -36,7 +59,8 @@ export function depuisFormulaire(f: FormData): Prisma.EquipmentUncheckedCreateIn
   const kindDemande = f.get("kind");
   const env = f.get("environment");
   return {
-    kind: typeof kindDemande === "string" && kindDemande in EQUIPMENT_KIND_LABELS ? kindDemande : "vm",
+    kind:
+      typeof kindDemande === "string" && kindDemande in EQUIPMENT_KIND_LABELS ? kindDemande : "vm",
     name: typeof f.get("name") === "string" ? (f.get("name") as string).trim() : "",
     environment: typeof env === "string" && env ? env : null,
     criticality: parseInt_(f.get("criticality"), null),
@@ -84,8 +108,14 @@ export function depuisFormulaire(f: FormData): Prisma.EquipmentUncheckedCreateIn
   };
 }
 
-export async function formContext(item: { kind: string | null } | null, familleUrl?: string | null) {
-  const suppliers = await prisma.supplier.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+export async function formContext(
+  item: { kind: string | null } | null,
+  familleUrl?: string | null,
+) {
+  const suppliers = await prisma.supplier.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+  });
   return { famille: familleDemandee(item, familleUrl), suppliers, critLabels: CRITICALITY_LABELS };
 }
 
@@ -174,8 +204,20 @@ function matchField(h: string): [Champ, Typ] | null {
 /** La nature, devinée du titre de l'onglet (les formes les plus précises d'abord). */
 export function detectKind(title: string): string | null {
   const t = norm(title);
-  if (t.includes("baie") || t.includes("san") || (t.includes("stockage") && !t.includes("nas"))) return "storage";
-  for (const mot of ["switch", "firewall", "pare-feu", "pare feu", "routeur", "router", "reseau", "wifi", "borne"]) if (t.includes(mot)) return "network";
+  if (t.includes("baie") || t.includes("san") || (t.includes("stockage") && !t.includes("nas")))
+    return "storage";
+  for (const mot of [
+    "switch",
+    "firewall",
+    "pare-feu",
+    "pare feu",
+    "routeur",
+    "router",
+    "reseau",
+    "wifi",
+    "borne",
+  ])
+    if (t.includes(mot)) return "network";
   if (t.includes("nas")) return "nas";
   if (t.includes("vm")) return "vm";
   if (t.includes("phys")) return "physical";
@@ -196,7 +238,10 @@ function findHeaderRow(rows: unknown[][]): number | null {
 }
 
 function toDate(v: unknown): Date | null {
-  if (v instanceof Date) return Number.isNaN(v.getTime()) ? null : new Date(Date.UTC(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate()));
+  if (v instanceof Date)
+    return Number.isNaN(v.getTime())
+      ? null
+      : new Date(Date.UTC(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate()));
   if (!v) return null;
   const s = String(v).trim();
   let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
@@ -242,7 +287,13 @@ function toEnv(v: unknown): string | null {
   return null;
 }
 
-function assign(eq: Record<string, unknown>, value: unknown, field: Champ, typ: Typ, kind: string): void {
+function assign(
+  eq: Record<string, unknown>,
+  value: unknown,
+  field: Champ,
+  typ: Typ,
+  kind: string,
+): void {
   const vide = value === null || value === undefined || value === "";
   if (typ === "text") {
     const v = vide ? null : String(value).trim();
@@ -280,7 +331,8 @@ function cellValue(v: unknown): unknown {
   if (typeof v === "object") {
     const o = v as Record<string, unknown>;
     if ("result" in o) return cellValue(o.result);
-    if (Array.isArray(o.richText)) return (o.richText as { text: string }[]).map((r) => r.text).join("");
+    if (Array.isArray(o.richText))
+      return (o.richText as { text: string }[]).map((r) => r.text).join("");
     if ("text" in o) return o.text;
     if ("error" in o) return null;
   }
@@ -319,13 +371,18 @@ export async function importWorkbook(buffer: Buffer): Promise<[number, string]> 
     for (const r of rows.slice(hidx + 1)) {
       if (!r.some((c) => c !== null && c !== undefined && c !== "")) continue;
       const eq: Record<string, unknown> = { kind };
-      for (const [idx, [field, typ]] of colmap) if (idx < r.length) assign(eq, r[idx], field, typ, kind);
+      for (const [idx, [field, typ]] of colmap)
+        if (idx < r.length) assign(eq, r[idx], field, typ, kind);
       if (!(typeof eq.name === "string" && eq.name.trim())) {
-        const repli = String(eq.serialNumber || eq.ipAddress || eq.hostServer || eq.manufacturerModel || "").trim();
+        const repli = String(
+          eq.serialNumber || eq.ipAddress || eq.hostServer || eq.manufacturerModel || "",
+        ).trim();
         eq.name = repli || null;
       }
       if (!eq.name) continue;
-      await prisma.equipment.create({ data: eq as unknown as Prisma.EquipmentUncheckedCreateInput });
+      await prisma.equipment.create({
+        data: eq as unknown as Prisma.EquipmentUncheckedCreateInput,
+      });
       created += 1;
       n += 1;
     }

@@ -20,7 +20,14 @@ export default async function UpdateEdit({ params }: { params: Promise<{ id: str
   return (
     <>
       <EnteteForm titre="Modifier — Mises à jour" retour={retour} />
-      <FormCorps update={update} {...ctx} user={page.user} csrf={page.csrf} nonce={page.nonce} retour={retour} />
+      <FormCorps
+        update={update}
+        {...ctx}
+        user={page.user}
+        csrf={page.csrf}
+        nonce={page.nonce}
+        retour={retour}
+      />
     </>
   );
 }

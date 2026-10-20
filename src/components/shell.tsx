@@ -25,14 +25,18 @@ export function FlashMessages({ flashes, nonce }: { flashes: Flash[]; nonce?: st
         const cat = category in FLASH_ICONS ? category : "info";
         return (
           <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: liste figée au rendu
             key={i}
             className={`alert alert-${cat} alert-dismissible fade show d-flex align-items-center gap-2 js-autodismiss`}
             role="alert"
           >
             <Icone bi={`bi-${FLASH_ICONS[cat]}`} taille="1em" />
             <div className="flex-grow-1">{message}</div>
-            <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Fermer" />
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Fermer"
+            />
           </div>
         );
       })}
@@ -53,7 +57,16 @@ export type ShellProps = {
   extraJs?: React.ReactNode;
 };
 
-export function Shell({ user, counts, pathname, flashes, csrf, nonce, children, extraJs }: ShellProps) {
+export function Shell({
+  user,
+  counts,
+  pathname,
+  flashes,
+  csrf,
+  nonce,
+  children,
+  extraJs,
+}: ShellProps) {
   const [domActif, entreeActif] = entreeActive(pathname);
   const fil = filAriane(pathname);
   const adminVisible = user.isAdmin || user.canView("alerts");
@@ -65,11 +78,23 @@ export function Shell({ user, counts, pathname, flashes, csrf, nonce, children, 
       </a>
 
       <div className="app-topbar">
-        <button className="topbar-toggle" type="button" data-action="toggleSidebar" aria-label="Ouvrir le menu">
+        <button
+          className="topbar-toggle"
+          type="button"
+          data-action="toggleSidebar"
+          aria-label="Ouvrir le menu"
+        >
           <Icone bi="bi-list" taille="1em" />
         </button>
         <span className="topbar-title">Sentinelle</span>
-        <span className="theme-toggle" data-action="toggleTheme" title="Changer le theme" aria-label="Changer le theme" role="button" tabIndex={0}>
+        <span
+          className="theme-toggle"
+          data-action="toggleTheme"
+          title="Changer le theme"
+          aria-label="Changer le theme"
+          role="button"
+          tabIndex={0}
+        >
           <span className="js-theme-icon" aria-hidden="true">
             🌙
           </span>
@@ -105,18 +130,28 @@ export function Shell({ user, counts, pathname, flashes, csrf, nonce, children, 
               {dom.entries
                 .filter((e) => !e.perm || user.canView(e.perm))
                 .map((e) => (
-                  <a key={e.endpoint} href={e.href} className={`sidebar-link${entreeActif?.endpoint === e.endpoint ? " active" : ""}`}>
+                  <a
+                    key={e.endpoint}
+                    href={e.href}
+                    className={`sidebar-link${entreeActif?.endpoint === e.endpoint ? " active" : ""}`}
+                  >
                     <Icone bi={e.icon} />
                     <span>{e.label}</span>
                     {e.count && counts[e.count] ? (
-                      <span className="badge bg-danger rounded-pill ms-auto" title={compte(counts[e.count], "danger")}>
+                      <span
+                        className="badge bg-danger rounded-pill ms-auto"
+                        title={compte(counts[e.count], "danger")}
+                      >
                         {counts[e.count]}
                       </span>
                     ) : null}
                   </a>
                 ))}
               {dom.key === "aujourdhui" && user.canEdit() && counts.trash ? (
-                <a href="/trash" className={`sidebar-link${pathname === "/trash" ? " active" : ""}`}>
+                <a
+                  href="/trash"
+                  className={`sidebar-link${pathname === "/trash" ? " active" : ""}`}
+                >
                   <Icone bi="bi-trash3" />
                   <span>Corbeille</span>
                   <span className="badge bg-secondary rounded-pill ms-auto">{counts.trash}</span>
@@ -137,9 +172,15 @@ export function Shell({ user, counts, pathname, flashes, csrf, nonce, children, 
                 <Icone bi="bi-chevron-right" taille="1em" />
               </summary>
               {ADMINISTRATION.entries
-                .filter((e) => (e.admin && user.isAdmin) || (!e.admin && e.perm && user.canView(e.perm)))
+                .filter(
+                  (e) => (e.admin && user.isAdmin) || (!e.admin && e.perm && user.canView(e.perm)),
+                )
                 .map((e) => (
-                  <a key={e.endpoint} href={e.href} className={`sidebar-link${entreeActif?.endpoint === e.endpoint ? " active" : ""}`}>
+                  <a
+                    key={e.endpoint}
+                    href={e.href}
+                    className={`sidebar-link${entreeActif?.endpoint === e.endpoint ? " active" : ""}`}
+                  >
                     <Icone bi={e.icon} />
                     <span>{e.label}</span>
                   </a>
@@ -159,7 +200,9 @@ export function Shell({ user, counts, pathname, flashes, csrf, nonce, children, 
                   <span>{user.username}</span>
                   <Lucide nom="chevron-down" taille={14} classes="sidebar-caret" />
                 </span>
-                <span className="sidebar-role">{user.isAdmin ? "Administrateur" : "Utilisateur"}</span>
+                <span className="sidebar-role">
+                  {user.isAdmin ? "Administrateur" : "Utilisateur"}
+                </span>
               </span>
             </summary>
             <div className="sidebar-user-menu" role="menu">
@@ -172,14 +215,25 @@ export function Shell({ user, counts, pathname, flashes, csrf, nonce, children, 
                 Sécurité
               </a>
               <div className="sidebar-user-sep" role="separator" />
-              <a href="/logout" className="sidebar-user-item sidebar-user-item--danger" role="menuitem">
+              <a
+                href="/logout"
+                className="sidebar-user-item sidebar-user-item--danger"
+                role="menuitem"
+              >
                 <Lucide nom="log-out" taille={14} />
                 Déconnexion
               </a>
             </div>
           </details>
           <span className="sidebar-footer-icons">
-            <span className="theme-toggle" data-action="toggleTheme" title="Changer le thème" aria-label="Changer le thème" role="button" tabIndex={0}>
+            <span
+              className="theme-toggle"
+              data-action="toggleTheme"
+              title="Changer le thème"
+              aria-label="Changer le thème"
+              role="button"
+              tabIndex={0}
+            >
               <span id="theme-icon" className="js-theme-icon" aria-hidden="true">
                 🌙
               </span>
@@ -193,14 +247,17 @@ export function Shell({ user, counts, pathname, flashes, csrf, nonce, children, 
         {fil.length ? (
           <nav className="fil-ariane" aria-label="Fil d'Ariane">
             {fil.map(([label, url], i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: liste figée au rendu
               <span key={i}>
                 {i > 0 ? (
                   <span className="fil-sep" aria-hidden="true">
                     ›
                   </span>
                 ) : null}
-                {url ? <a href={url}>{label}</a> : <span className={i === fil.length - 1 ? "fil-actuel" : undefined}>{label}</span>}
+                {url ? (
+                  <a href={url}>{label}</a>
+                ) : (
+                  <span className={i === fil.length - 1 ? "fil-actuel" : undefined}>{label}</span>
+                )}
               </span>
             ))}
           </nav>

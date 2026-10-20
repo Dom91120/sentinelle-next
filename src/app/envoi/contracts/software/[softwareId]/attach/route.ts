@@ -15,10 +15,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ softwar
     const retour = `/inventory/logiciels/${softwareId}`;
     const cid = parseInt_(form.get("contract_id"), null) ?? 0;
     const contrat = cid ? await prisma.contract.findUnique({ where: { id: cid } }) : null;
-    if (!contrat || !contrat.isActive) return redirigerAvecMessage(retour, "Choisissez le marché à rattacher.", "danger");
-    if (await prisma.contractSoftware.findUnique({ where: { contractId_softwareId: { contractId: contrat.id, softwareId } } })) return redirigerAvecMessage(retour, "Ce marché couvre déjà ce logiciel.", "warning");
+    if (!contrat?.isActive)
+      return redirigerAvecMessage(retour, "Choisissez le marché à rattacher.", "danger");
+    if (
+      await prisma.contractSoftware.findUnique({
+        where: { contractId_softwareId: { contractId: contrat.id, softwareId } },
+      })
+    )
+      return redirigerAvecMessage(retour, "Ce marché couvre déjà ce logiciel.", "warning");
     await prisma.contractSoftware.create({ data: { contractId: contrat.id, softwareId } });
-    await auditRecord("rattachement marche", `${contrat.name} -> ${sw.name}`, "contrats", user.username);
+    await auditRecord(
+      "rattachement marche",
+      `${contrat.name} -> ${sw.name}`,
+      "contrats",
+      user.username,
+    );
     return redirigerAvecMessage(retour, `Marché « ${contrat.name} » rattaché`, "success");
   });
 }

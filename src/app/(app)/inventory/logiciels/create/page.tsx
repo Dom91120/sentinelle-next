@@ -15,7 +15,13 @@ export default async function SoftwareCreate() {
   return (
     <>
       <EnteteForm titre="Ajouter un logiciel" retour="/inventory/logiciels" />
-      <FormulaireLogiciel item={null} ctx={ctx} page={page} retour="/inventory/logiciels" rattachements={await rattachementsDe(prisma, null)} />
+      <FormulaireLogiciel
+        item={null}
+        ctx={ctx}
+        page={page}
+        retour="/inventory/logiciels"
+        rattachements={await rattachementsDe(prisma, null)}
+      />
     </>
   );
 }

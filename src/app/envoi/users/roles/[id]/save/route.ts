@@ -12,7 +12,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const admin = await requireAdmin();
     const role = await prisma.role.findUnique({ where: { id } });
     if (!role) return pasTrouve();
-    const description = typeof form.get("description") === "string" ? (form.get("description") as string) : role.description;
+    const description =
+      typeof form.get("description") === "string"
+        ? (form.get("description") as string)
+        : role.description;
     let permissions = role.permissions;
     if (!role.isAdmin) {
       const perms: Record<string, number> = {};
@@ -22,7 +25,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       }
       permissions = perms;
     }
-    await prisma.role.update({ where: { id }, data: { description, permissions: permissions ?? undefined } });
+    await prisma.role.update({
+      where: { id },
+      data: { description, permissions: permissions ?? undefined },
+    });
     await auditRecord("modification role", role.name, "roles", admin.username);
     return redirigerAvecMessage("/users/roles", `Role « ${role.name} » enregistre`, "success");
   });

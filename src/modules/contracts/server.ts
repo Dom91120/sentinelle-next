@@ -10,12 +10,26 @@ export function natureLabel(c: { nature: string | null }): string {
 
 export async function formContext(logicielsChoisis: number[] = []) {
   const [kindOptions, suppliers, equipments, softwareList] = await Promise.all([
-    prisma.referential.findMany({ where: { kind: "contract_kind", isActive: true }, orderBy: [{ position: "asc" }, { label: "asc" }] }),
+    prisma.referential.findMany({
+      where: { kind: "contract_kind", isActive: true },
+      orderBy: [{ position: "asc" }, { label: "asc" }],
+    }),
     prisma.supplier.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
-    prisma.software.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, include: { supplier: true } }),
+    prisma.software.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      include: { supplier: true },
+    }),
   ]);
-  return { logicielsChoisis, kindOptions, natureLabels: CONTRACT_NATURE_LABELS, suppliers, equipments, softwareList };
+  return {
+    logicielsChoisis,
+    kindOptions,
+    natureLabels: CONTRACT_NATURE_LABELS,
+    suppliers,
+    equipments,
+    softwareList,
+  };
 }
 
 export type FormContext = Awaited<ReturnType<typeof formContext>>;
@@ -30,9 +44,18 @@ function ids(f: FormData, cle: string): number[] {
 export type Couverts = { software: number[]; equipment: number[] };
 
 /** `_fill` : les champs d'un contrat depuis le formulaire, et les éléments couverts à poser. */
-export async function depuisFormulaire(f: FormData): Promise<{ data: Prisma.ContractUncheckedUpdateInput; couverts: Couverts }> {
+export async function depuisFormulaire(
+  f: FormData,
+): Promise<{ data: Prisma.ContractUncheckedUpdateInput; couverts: Couverts }> {
   const typeId = parseInt_(f.get("kind_id"), null);
-  const kindId = typeId && (await prisma.referential.findFirst({ where: { id: typeId, kind: "contract_kind" }, select: { id: true } })) ? typeId : null;
+  const kindId =
+    typeId &&
+    (await prisma.referential.findFirst({
+      where: { id: typeId, kind: "contract_kind" },
+      select: { id: true },
+    }))
+      ? typeId
+      : null;
   const natureDemande = f.get("nature");
   const duree = parseInt_(f.get("firm_years"), null, 0);
   const renouv = parseInt_(f.get("renewals"), null, 0);
@@ -40,7 +63,10 @@ export async function depuisFormulaire(f: FormData): Promise<{ data: Prisma.Cont
   const data: Prisma.ContractUncheckedUpdateInput = {
     name: champ(f, "name"),
     kindId,
-    nature: typeof natureDemande === "string" && natureDemande in CONTRACT_NATURE_LABELS ? natureDemande : null,
+    nature:
+      typeof natureDemande === "string" && natureDemande in CONTRACT_NATURE_LABELS
+        ? natureDemande
+        : null,
     supplierId: parseInt_(f.get("supplier_id"), null),
     reference: champOuNull(f, "reference"),
     supplierReference: champOuNull(f, "supplier_reference"),
@@ -56,7 +82,10 @@ export async function depuisFormulaire(f: FormData): Promise<{ data: Prisma.Cont
     autoRenew: f.get("auto_renew") === "on",
     budgetCode: champOuNull(f, "budget_code"),
     orderSignedOn: parseDate(f.get("order_signed_on")),
-    description: typeof f.get("description") === "string" && f.get("description") ? (f.get("description") as string) : null,
+    description:
+      typeof f.get("description") === "string" && f.get("description")
+        ? (f.get("description") as string)
+        : null,
   };
   // Éléments couverts : une seule liste « famille:id » (covered_ids), et les deux listes historiques.
   const couverts: Couverts = { software: [], equipment: [] };
@@ -76,13 +105,29 @@ export async function poserCouverts(contractId: number, couverts: Couverts): Pro
   const eids = [...new Set(couverts.equipment)];
   const sids = [...new Set(couverts.software)];
   const [equipements, logiciels] = await Promise.all([
-    eids.length ? prisma.equipment.findMany({ where: { id: { in: eids }, isActive: true }, select: { id: true } }) : Promise.resolve([]),
-    sids.length ? prisma.software.findMany({ where: { id: { in: sids }, isActive: true }, select: { id: true } }) : Promise.resolve([]),
+    eids.length
+      ? prisma.equipment.findMany({
+          where: { id: { in: eids }, isActive: true },
+          select: { id: true },
+        })
+      : Promise.resolve([]),
+    sids.length
+      ? prisma.software.findMany({
+          where: { id: { in: sids }, isActive: true },
+          select: { id: true },
+        })
+      : Promise.resolve([]),
   ]);
   await prisma.contractEquipment.deleteMany({ where: { contractId } });
-  if (equipements.length) await prisma.contractEquipment.createMany({ data: equipements.map((e) => ({ contractId, equipmentId: e.id })) });
+  if (equipements.length)
+    await prisma.contractEquipment.createMany({
+      data: equipements.map((e) => ({ contractId, equipmentId: e.id })),
+    });
   await prisma.contractSoftware.deleteMany({ where: { contractId } });
-  if (logiciels.length) await prisma.contractSoftware.createMany({ data: logiciels.map((s) => ({ contractId, softwareId: s.id })) });
+  if (logiciels.length)
+    await prisma.contractSoftware.createMany({
+      data: logiciels.map((s) => ({ contractId, softwareId: s.id })),
+    });
 }
 
 /** Les éléments couverts d'un contrat (ids). */

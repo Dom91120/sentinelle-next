@@ -1,8 +1,9 @@
 /** users/form.html */
-import type { Role, User } from "@/generated/prisma/client";
+
 import { EnteteForm, PiedForm, Section } from "@/components/formulaire";
 import { Icone } from "@/components/icones";
 import { ScriptDiffere } from "@/components/scripts";
+import type { Role, User } from "@/generated/prisma/client";
 import { roleLabel } from "@/modules/users/server";
 
 const PW_JS = `(function () {
@@ -23,7 +24,17 @@ const PW_JS = `(function () {
     });
 })();`;
 
-export function FormulaireUtilisateur({ user, roles, csrf, nonce }: { user: User | null; roles: Role[]; csrf: string; nonce?: string }) {
+export function FormulaireUtilisateur({
+  user,
+  roles,
+  csrf,
+  nonce,
+}: {
+  user: User | null;
+  roles: Role[];
+  csrf: string;
+  nonce?: string;
+}) {
   const ldap = user?.authSource === "ldap";
   return (
     <>
@@ -37,11 +48,33 @@ export function FormulaireUtilisateur({ user, roles, csrf, nonce }: { user: User
               <Section titre="Identité" icone="bi-person" couleur="indigo">
                 <div className="mb-3">
                   <label className="form-label fw-medium">Nom d'utilisateur</label>
-                  {user ? <input type="text" className="form-control" defaultValue={user.username} disabled /> : <input type="text" name="username" className="form-control" required placeholder="Nom d'utilisateur" />}
+                  {user ? (
+                    <input
+                      type="text"
+                      className="form-control"
+                      defaultValue={user.username}
+                      disabled
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      name="username"
+                      className="form-control"
+                      required
+                      placeholder="Nom d'utilisateur"
+                    />
+                  )}
                 </div>
                 <div className="mb-3">
                   <label className="form-label fw-medium">Email *</label>
-                  <input type="email" name="email" className="form-control" required defaultValue={user?.email ?? ""} placeholder="email@domaine.com" />
+                  <input
+                    type="email"
+                    name="email"
+                    className="form-control"
+                    required
+                    defaultValue={user?.email ?? ""}
+                    placeholder="email@domaine.com"
+                  />
                 </div>
               </Section>
 
@@ -51,18 +84,39 @@ export function FormulaireUtilisateur({ user, roles, csrf, nonce }: { user: User
                     <label className="form-label fw-medium">Mot de passe</label>
                     <p className="text-muted small mb-0">
                       <Icone bi="bi-diagram-3" taille="1em" classes="me-1" />
-                      Compte <strong>Active Directory</strong> : l'authentification et le mot de passe sont gérés par l'annuaire, pas ici.
+                      Compte <strong>Active Directory</strong> : l'authentification et le mot de
+                      passe sont gérés par l'annuaire, pas ici.
                     </p>
                   </div>
                 ) : (
                   <>
                     <div className="mb-3">
-                      <label className="form-label fw-medium">Mot de passe {user ? "(laisser vide pour ne pas changer)" : "*"}</label>
-                      <input type="password" name="password" id="pw1" className="form-control" required={!user} minLength={8} placeholder="Minimum 8 caracteres" />
+                      <label className="form-label fw-medium">
+                        Mot de passe {user ? "(laisser vide pour ne pas changer)" : "*"}
+                      </label>
+                      <input
+                        type="password"
+                        name="password"
+                        id="pw1"
+                        className="form-control"
+                        required={!user}
+                        minLength={8}
+                        placeholder="Minimum 8 caracteres"
+                      />
                     </div>
                     <div className="mb-3">
-                      <label className="form-label fw-medium">Confirmer le mot de passe {user ? "(idem)" : "*"}</label>
-                      <input type="password" name="password_confirm" id="pw2" className="form-control" required={!user} minLength={8} placeholder="Ressaisir le mot de passe" />
+                      <label className="form-label fw-medium">
+                        Confirmer le mot de passe {user ? "(idem)" : "*"}
+                      </label>
+                      <input
+                        type="password"
+                        name="password_confirm"
+                        id="pw2"
+                        className="form-control"
+                        required={!user}
+                        minLength={8}
+                        placeholder="Ressaisir le mot de passe"
+                      />
                       <small className="text-danger d-none" id="pwMismatch">
                         <Icone bi="bi-exclamation-triangle" taille="1em" classes="me-1" />
                         Les deux mots de passe ne correspondent pas.
@@ -75,7 +129,12 @@ export function FormulaireUtilisateur({ user, roles, csrf, nonce }: { user: User
               <Section titre="Rôle" icone="bi-person-badge" couleur="violet">
                 <div className="mb-3">
                   <label className="form-label fw-medium">Rôle *</label>
-                  <select name="role" className="form-select" required defaultValue={user?.role ?? roles[0]?.name ?? "viewer"}>
+                  <select
+                    name="role"
+                    className="form-select"
+                    required
+                    defaultValue={user?.role ?? roles[0]?.name ?? "viewer"}
+                  >
                     {roles.map((r) => (
                       <option key={r.id} value={r.name}>
                         {roleLabel(r.name)}

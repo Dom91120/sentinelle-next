@@ -2,26 +2,82 @@
 import { Icone } from "@/components/icones";
 import { EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 
-export function QaButton({ modalId, targetId, title = "Ajouter" }: { modalId: string; targetId: string; title?: string }) {
+export function QaButton({
+  modalId,
+  targetId,
+  title = "Ajouter",
+}: {
+  modalId: string;
+  targetId: string;
+  title?: string;
+}) {
   return (
-    <button type="button" className="btn btn-outline-primary" title={title} data-bs-toggle="modal" data-bs-target={`#${modalId}`} data-qa-open={modalId} data-qa-target={targetId}>
+    <button
+      type="button"
+      className="btn btn-outline-primary"
+      title={title}
+      data-bs-toggle="modal"
+      data-bs-target={`#${modalId}`}
+      data-qa-open={modalId}
+      data-qa-target={targetId}
+    >
       <Icone bi="bi-plus-lg" taille="1em" />
     </button>
   );
 }
 
-export function QaAddLink({ modalId, targetId, text = "Ajouter" }: { modalId: string; targetId: string; text?: string }) {
+export function QaAddLink({
+  modalId,
+  targetId,
+  text = "Ajouter",
+}: {
+  modalId: string;
+  targetId: string;
+  text?: string;
+}) {
   return (
-    <button type="button" className="btn btn-sm btn-outline-primary" title={text} data-bs-toggle="modal" data-bs-target={`#${modalId}`} data-qa-open={modalId} data-qa-target={targetId}>
+    <button
+      type="button"
+      className="btn btn-sm btn-outline-primary"
+      title={text}
+      data-bs-toggle="modal"
+      data-bs-target={`#${modalId}`}
+      data-qa-open={modalId}
+      data-qa-target={targetId}
+    >
       <Icone bi="bi-plus-lg" taille="1em" classes="me-1" />
       {text}
     </button>
   );
 }
 
-function Modal({ id, endpoint, titre, icone, csrf, children, footer, large }: { id: string; endpoint: string; titre: string; icone: string; csrf: string; children: React.ReactNode; footer?: React.ReactNode; large?: boolean }) {
+function Modal({
+  id,
+  endpoint,
+  titre,
+  icone,
+  csrf,
+  children,
+  footer,
+  large,
+}: {
+  id: string;
+  endpoint: string;
+  titre: string;
+  icone: string;
+  csrf: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+  large?: boolean;
+}) {
   return (
-    <div className="modal fade" id={id} tabIndex={-1} aria-hidden="true" data-qa-endpoint={endpoint}>
+    <div
+      className="modal fade"
+      id={id}
+      tabIndex={-1}
+      aria-hidden="true"
+      data-qa-endpoint={endpoint}
+    >
       <div className={`modal-dialog${large ? " modal-lg" : ""}`}>
         <div className="modal-content">
           <div className="modal-header">
@@ -29,7 +85,12 @@ function Modal({ id, endpoint, titre, icone, csrf, children, footer, large }: { 
               <Icone bi={icone} taille="1em" classes="me-2" />
               {titre}
             </h5>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Fermer" />
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            />
           </div>
           <div className="modal-body">
             <input type="hidden" data-qa-csrf value={csrf} />
@@ -57,15 +118,30 @@ function Modal({ id, endpoint, titre, icone, csrf, children, footer, large }: { 
 
 export function QaModalSupplier({ csrf }: { csrf: string }) {
   return (
-    <Modal id="qaModalSupplier" endpoint="/suppliers/quick-create" titre="Nouveau fournisseur" icone="bi-truck" csrf={csrf}>
+    <Modal
+      id="qaModalSupplier"
+      endpoint="/suppliers/quick-create"
+      titre="Nouveau fournisseur"
+      icone="bi-truck"
+      csrf={csrf}
+    >
       <div className="mb-2">
         <label className="form-label small">Nom *</label>
-        <input type="text" data-qa-field="name" data-qa-required className="form-control form-control-sm" />
+        <input
+          type="text"
+          data-qa-field="name"
+          data-qa-required
+          className="form-control form-control-sm"
+        />
       </div>
       <div className="row g-2">
         <div className="col-md-6">
           <label className="form-label small">Contact</label>
-          <input type="text" data-qa-field="contact_name" className="form-control form-control-sm" />
+          <input
+            type="text"
+            data-qa-field="contact_name"
+            className="form-control form-control-sm"
+          />
         </div>
         <div className="col-md-6">
           <label className="form-label small">Téléphone</label>
@@ -82,39 +158,78 @@ export function QaModalSupplier({ csrf }: { csrf: string }) {
 
 export function QaModalContract({ csrf }: { csrf: string }) {
   return (
-    <Modal id="qaModalContract" endpoint="/contracts/quick-create" titre="Nouveau contrat" icone="bi-file-earmark-text" csrf={csrf}>
+    <Modal
+      id="qaModalContract"
+      endpoint="/contracts/quick-create"
+      titre="Nouveau contrat"
+      icone="bi-file-earmark-text"
+      csrf={csrf}
+    >
       <div className="mb-2">
         <label className="form-label small">Nom *</label>
-        <input type="text" data-qa-field="name" data-qa-required className="form-control form-control-sm" />
+        <input
+          type="text"
+          data-qa-field="name"
+          data-qa-required
+          className="form-control form-control-sm"
+        />
       </div>
       <div className="mb-2">
         <label className="form-label small">Échéance</label>
         <input type="date" data-qa-field="end_date" className="form-control form-control-sm" />
       </div>
-      <div className="form-text">Détails (type, préavis, coût…) à compléter ensuite sur la fiche.</div>
+      <div className="form-text">
+        Détails (type, préavis, coût…) à compléter ensuite sur la fiche.
+      </div>
     </Modal>
   );
 }
 
 export function QaModalSoftware({ csrf }: { csrf: string }) {
   return (
-    <Modal id="qaModalSoftware" endpoint="/inventory/logiciels/quick-create" titre="Nouvelle application" icone="bi-window-stack" csrf={csrf}>
+    <Modal
+      id="qaModalSoftware"
+      endpoint="/inventory/logiciels/quick-create"
+      titre="Nouvelle application"
+      icone="bi-window-stack"
+      csrf={csrf}
+    >
       <div className="mb-2">
         <label className="form-label small">Nom *</label>
-        <input type="text" data-qa-field="name" data-qa-required className="form-control form-control-sm" placeholder="ex: SIRH, GLPI, Office 365…" />
+        <input
+          type="text"
+          data-qa-field="name"
+          data-qa-required
+          className="form-control form-control-sm"
+          placeholder="ex: SIRH, GLPI, Office 365…"
+        />
       </div>
-      <div className="form-text">Détails (éditeur, serveurs, contrat…) à compléter ensuite sur la fiche du logiciel.</div>
+      <div className="form-text">
+        Détails (éditeur, serveurs, contrat…) à compléter ensuite sur la fiche du logiciel.
+      </div>
     </Modal>
   );
 }
 
 export function QaModalEquipment({ csrf }: { csrf: string }) {
   return (
-    <Modal id="qaModalEquipment" endpoint="/inventory/quick-create" titre="Nouvel équipement" icone="bi-hdd-stack" csrf={csrf}>
+    <Modal
+      id="qaModalEquipment"
+      endpoint="/inventory/quick-create"
+      titre="Nouvel équipement"
+      icone="bi-hdd-stack"
+      csrf={csrf}
+    >
       <div className="row g-2">
         <div className="col-md-7">
           <label className="form-label small">Nom *</label>
-          <input type="text" data-qa-field="name" data-qa-required className="form-control form-control-sm" placeholder="ex: SRV-APP01" />
+          <input
+            type="text"
+            data-qa-field="name"
+            data-qa-required
+            className="form-control form-control-sm"
+            placeholder="ex: SRV-APP01"
+          />
         </div>
         <div className="col-md-5">
           <label className="form-label small">Type</label>
@@ -127,7 +242,9 @@ export function QaModalEquipment({ csrf }: { csrf: string }) {
           </select>
         </div>
       </div>
-      <div className="form-text">Détails (OS, réseau, garantie…) à compléter ensuite sur la fiche.</div>
+      <div className="form-text">
+        Détails (OS, réseau, garantie…) à compléter ensuite sur la fiche.
+      </div>
     </Modal>
   );
 }
@@ -156,13 +273,26 @@ export function QaModalServer({ csrf }: { csrf: string }) {
       <div className="row g-2 align-items-end">
         <div className="col-md-4">
           <label className="form-label small">Nom du serveur *</label>
-          <input type="text" data-qa-field="name" data-qa-required className="form-control form-control-sm" placeholder="Ex : SRV-AFFGE" maxLength={120} />
+          <input
+            type="text"
+            data-qa-field="name"
+            data-qa-required
+            className="form-control form-control-sm"
+            placeholder="Ex : SRV-AFFGE"
+            maxLength={120}
+          />
         </div>
         <div className="col-auto text-center">
           <label className="form-label small d-block" htmlFor="qaSrvVirtuel">
             Virtuel
           </label>
-          <input type="checkbox" className="form-check-input" id="qaSrvVirtuel" defaultChecked data-virtuel-kind />
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="qaSrvVirtuel"
+            defaultChecked
+            data-virtuel-kind
+          />
           <input type="hidden" data-qa-field="kind" defaultValue="vm" />
         </div>
         <div className="col-auto">
@@ -175,15 +305,30 @@ export function QaModalServer({ csrf }: { csrf: string }) {
         </div>
         <div className="col-md">
           <label className="form-label small">Système</label>
-          <input type="text" data-qa-field="os" className="form-control form-control-sm" placeholder="Ex : Windows Server 2022" />
+          <input
+            type="text"
+            data-qa-field="os"
+            className="form-control form-control-sm"
+            placeholder="Ex : Windows Server 2022"
+          />
         </div>
         <div className="col-md-3">
           <label className="form-label small">Emplacement</label>
-          <input type="text" data-qa-field="location" className="form-control form-control-sm" placeholder="Ex : salle serveur" />
+          <input
+            type="text"
+            data-qa-field="location"
+            className="form-control form-control-sm"
+            placeholder="Ex : salle serveur"
+          />
         </div>
         <div className="col-12">
           <label className="form-label small">Observations</label>
-          <textarea data-qa-field="observations" className="form-control form-control-sm" rows={3} placeholder="Informations libres : sauvegarde, exploitant, particularités…" />
+          <textarea
+            data-qa-field="observations"
+            className="form-control form-control-sm"
+            rows={3}
+            placeholder="Informations libres : sauvegarde, exploitant, particularités…"
+          />
         </div>
       </div>
     </Modal>

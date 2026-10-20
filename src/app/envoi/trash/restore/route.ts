@@ -9,11 +9,20 @@ import { invalidateNavCounts } from "@/server/nav";
 export async function POST(req: Request) {
   return traiterFormulaire(req, async (form) => {
     const user = await requireUser();
-    const res = await restore(user, champ(form, "entity_type"), champ(form, "entity_id") || "0", user.username);
+    const res = await restore(
+      user,
+      champ(form, "entity_type"),
+      champ(form, "entity_id") || "0",
+      user.username,
+    );
     if (res) {
       await auditRecord("restauration", `${res[0]} : ${res[1]}`, "corbeille", user.username);
       invalidateNavCounts();
     }
-    return redirigerAvecMessage("/trash", res ? "Élément restauré." : "Restauration impossible.", res ? "success" : "danger");
+    return redirigerAvecMessage(
+      "/trash",
+      res ? "Élément restauré." : "Restauration impossible.",
+      res ? "success" : "danger",
+    );
   });
 }

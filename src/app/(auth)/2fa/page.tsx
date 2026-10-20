@@ -25,7 +25,6 @@ export default async function TwoFactorPage() {
             <p className="text-muted">Saisissez le code de votre application d'authentification</p>
           </div>
           {flashes.map(([category, message], i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: liste figée au rendu
             <div key={i} className={`alert alert-${category} py-2 small mb-3`}>
               {message}
             </div>

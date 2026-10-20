@@ -1,4 +1,4 @@
-import { seConnecter, safeNext } from "@/server/connexion";
+import { safeNext, seConnecter } from "@/server/connexion";
 import { getCurrentUser } from "@/server/guards";
 import { clientIp, redirection, redirigerAvecMessage, traiterFormulaire } from "@/server/http";
 

@@ -8,7 +8,17 @@ export async function POST(req: Request) {
   return traiterFormulaire(req, async () => {
     const user = await requireUser();
     const n = await purgeAll(user);
-    if (n) await auditRecord("corbeille videe", `${n} element(s) supprime(s)`, "corbeille", user.username);
-    return redirigerAvecMessage("/trash", n ? `Corbeille vidée (${n} élément(s) supprimé(s) définitivement).` : "Rien à supprimer.", n ? "success" : "info");
+    if (n)
+      await auditRecord(
+        "corbeille videe",
+        `${n} element(s) supprime(s)`,
+        "corbeille",
+        user.username,
+      );
+    return redirigerAvecMessage(
+      "/trash",
+      n ? `Corbeille vidée (${n} élément(s) supprimé(s) définitivement).` : "Rien à supprimer.",
+      n ? "success" : "info",
+    );
   });
 }

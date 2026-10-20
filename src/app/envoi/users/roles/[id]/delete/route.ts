@@ -11,8 +11,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const admin = await requireAdmin();
     const role = await prisma.role.findUnique({ where: { id } });
     if (!role) return pasTrouve();
-    if (["admin", "editor", "viewer"].includes(role.name)) return redirigerAvecMessage("/users/roles", "Les roles par defaut ne peuvent pas etre supprimes.", "danger");
-    if ((await prisma.user.count({ where: { role: role.name } })) > 0) return redirigerAvecMessage("/users/roles", "Role utilise par des utilisateurs : reassignez-les d abord.", "danger");
+    if (["admin", "editor", "viewer"].includes(role.name))
+      return redirigerAvecMessage(
+        "/users/roles",
+        "Les roles par defaut ne peuvent pas etre supprimes.",
+        "danger",
+      );
+    if ((await prisma.user.count({ where: { role: role.name } })) > 0)
+      return redirigerAvecMessage(
+        "/users/roles",
+        "Role utilise par des utilisateurs : reassignez-les d abord.",
+        "danger",
+      );
     await prisma.role.delete({ where: { id } });
     await auditRecord("suppression role", role.name, "roles", admin.username);
     return redirigerAvecMessage("/users/roles", "Role supprime.", "success");

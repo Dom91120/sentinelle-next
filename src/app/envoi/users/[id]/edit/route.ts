@@ -16,20 +16,46 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const retour = `/users/${id}/edit`;
     const email = champ(form, "email");
     const newRole = champ(form, "role") || "viewer";
-    if (!(await validRoleNames()).has(newRole)) return redirigerAvecMessage(retour, "Role invalide.", "danger");
+    if (!(await validRoleNames()).has(newRole))
+      return redirigerAvecMessage(retour, "Role invalide.", "danger");
     if (newRole !== user.role) {
-      if (user.id === admin.id) return redirigerAvecMessage(retour, "Vous ne pouvez pas modifier votre propre role.", "danger");
+      if (user.id === admin.id)
+        return redirigerAvecMessage(
+          retour,
+          "Vous ne pouvez pas modifier votre propre role.",
+          "danger",
+        );
       const admins = await adminRoleNames();
-      if (admins.has(user.role) && !admins.has(newRole) && (await adminUserCount()) <= 1) return redirigerAvecMessage(retour, "Impossible de retirer le dernier administrateur.", "danger");
+      if (admins.has(user.role) && !admins.has(newRole) && (await adminUserCount()) <= 1)
+        return redirigerAvecMessage(
+          retour,
+          "Impossible de retirer le dernier administrateur.",
+          "danger",
+        );
     }
-    const newPassword = typeof form.get("password") === "string" ? (form.get("password") as string) : "";
-    const confirm = typeof form.get("password_confirm") === "string" ? (form.get("password_confirm") as string) : "";
+    const newPassword =
+      typeof form.get("password") === "string" ? (form.get("password") as string) : "";
+    const confirm =
+      typeof form.get("password_confirm") === "string"
+        ? (form.get("password_confirm") as string)
+        : "";
     const minlen = admin.settings.PASSWORD_MIN_LENGTH || 8;
-    if (newPassword && newPassword.length < minlen) return redirigerAvecMessage(retour, `Le mot de passe doit contenir au moins ${minlen} caracteres`, "danger");
-    if (newPassword && newPassword !== confirm) return redirigerAvecMessage(retour, "Les deux mots de passe ne correspondent pas.", "danger");
+    if (newPassword && newPassword.length < minlen)
+      return redirigerAvecMessage(
+        retour,
+        `Le mot de passe doit contenir au moins ${minlen} caracteres`,
+        "danger",
+      );
+    if (newPassword && newPassword !== confirm)
+      return redirigerAvecMessage(retour, "Les deux mots de passe ne correspondent pas.", "danger");
     await prisma.user.update({ where: { id }, data: { email, role: newRole } });
     if (newPassword) await poserMotDePasse(id, newPassword);
-    await auditRecord("modification utilisateur", `${user.username} (role ${newRole})`, "utilisateurs", admin.username);
+    await auditRecord(
+      "modification utilisateur",
+      `${user.username} (role ${newRole})`,
+      "utilisateurs",
+      admin.username,
+    );
     return redirigerAvecMessage("/users", `Utilisateur ${user.username} modifie`, "success");
   });
 }

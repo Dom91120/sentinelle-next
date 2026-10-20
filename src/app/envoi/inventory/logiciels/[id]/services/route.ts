@@ -18,7 +18,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       .map((v) => parseInt_(v, null))
       .filter((v): v is number => Boolean(v));
     const n = await poserServices(id, ids);
-    await auditRecord("services utilisateurs", `${item.name} : ${n} service(s)`, "inventory", user.username);
+    await auditRecord(
+      "services utilisateurs",
+      `${item.name} : ${n} service(s)`,
+      "inventory",
+      user.username,
+    );
     return redirection(`/inventory/logiciels/${id}#liaisons`);
   });
 }

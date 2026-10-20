@@ -5,14 +5,42 @@ import { champ, champOuNull, idOuNull } from "@/lib/forms-util";
 import { aujourdhui } from "@/lib/libelles";
 import { prisma } from "@/server/db";
 
-export const BACKUP_TYPE_LABELS: Record<string, string> = { full: "Complet", incremental: "Incrémental", differential: "Différentiel", snapshot: "Snapshot" };
-export const BACKUP_TYPE_LABELS_PLAIN: Record<string, string> = { full: "Complet", incremental: "Incremental", differential: "Differentiel", snapshot: "Snapshot" };
-export const BACKUP_TYPE_LABELS_FEM: Record<string, string> = { full: "Complète", incremental: "Incrémentale", differential: "Différentielle", snapshot: "Snapshot" };
-export const FREQ_LABELS: Record<string, string> = { daily: "Quotidienne", weekly: "Hebdomadaire", monthly: "Mensuelle" };
-export const FREQ_LABELS_LOWER: Record<string, string> = { daily: "quotidienne", weekly: "hebdomadaire", monthly: "mensuelle" };
+export const BACKUP_TYPE_LABELS: Record<string, string> = {
+  full: "Complet",
+  incremental: "Incrémental",
+  differential: "Différentiel",
+  snapshot: "Snapshot",
+};
+export const BACKUP_TYPE_LABELS_PLAIN: Record<string, string> = {
+  full: "Complet",
+  incremental: "Incremental",
+  differential: "Differentiel",
+  snapshot: "Snapshot",
+};
+export const BACKUP_TYPE_LABELS_FEM: Record<string, string> = {
+  full: "Complète",
+  incremental: "Incrémentale",
+  differential: "Différentielle",
+  snapshot: "Snapshot",
+};
+export const FREQ_LABELS: Record<string, string> = {
+  daily: "Quotidienne",
+  weekly: "Hebdomadaire",
+  monthly: "Mensuelle",
+};
+export const FREQ_LABELS_LOWER: Record<string, string> = {
+  daily: "quotidienne",
+  weekly: "hebdomadaire",
+  monthly: "mensuelle",
+};
 
 export async function formContext() {
-  return { equipments: await prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }) };
+  return {
+    equipments: await prisma.equipment.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+    }),
+  };
 }
 
 export type FormContext = Awaited<ReturnType<typeof formContext>>;
@@ -43,11 +71,13 @@ export function serviceName(f: FormData): string {
 // ── Ingestion des mails de sauvegarde (backup_ingest.py) ──
 
 // Détection par MOTS ENTIERS pour éviter les faux positifs comme « Ko ».
-const RE_FAIL = /\b(failed|failure|fail|echec|échec|erreur|error|aborted|interrompu|unsuccessful)\b/iu;
+const RE_FAIL =
+  /\b(failed|failure|fail|echec|échec|erreur|error|aborted|interrompu|unsuccessful)\b/iu;
 const RE_WARN = /\b(warning|avertissement|partial|partiel)\b/iu;
 const RE_SUCCESS = /\b(success|succes|succès|reussi|réussi|completed|complete|terminé|termine)\b/iu;
 // Tag de statut entre crochets dans l'objet (format Veeam : [Success]/[Warning]/[Failed]).
-const RE_BRACKET = /\[\s*(success|succès|succes|ok|warning|avertissement|failed|failure|error|erreur|echec|échec)\s*\]/iu;
+const RE_BRACKET =
+  /\[\s*(success|succès|succes|ok|warning|avertissement|failed|failure|error|erreur|echec|échec)\s*\]/iu;
 
 function mapBracket(word: string): string {
   const w = word.toLowerCase();
@@ -57,7 +87,10 @@ function mapBracket(word: string): string {
 }
 
 /** Statut global déduit d'un mail (un mail = un compte-rendu de backup). */
-export function detectStatus(subject: string | null | undefined, body: string | null | undefined): string | null {
+export function detectStatus(
+  subject: string | null | undefined,
+  body: string | null | undefined,
+): string | null {
   const s = subject ?? "";
   const text = `${s}\n${body ?? ""}`;
   const m = RE_BRACKET.exec(s);
@@ -71,7 +104,11 @@ export function detectStatus(subject: string | null | undefined, body: string | 
 export type IngestResult = { backup: string; status: string };
 
 /** Enregistre le check du jour pour les backups mentionnés dans le mail. */
-export async function parseAndRecord(subjectIn: string | null | undefined, bodyIn: string | null | undefined, source = "mail"): Promise<IngestResult[]> {
+export async function parseAndRecord(
+  subjectIn: string | null | undefined,
+  bodyIn: string | null | undefined,
+  source = "mail",
+): Promise<IngestResult[]> {
   const today = aujourdhui();
   const subject = subjectIn ?? "";
   const body = bodyIn ?? "";
@@ -86,13 +123,33 @@ export async function parseAndRecord(subjectIn: string | null | undefined, bodyI
     // Nom dans l'objet, aucune erreur détectée : le compte-rendu existe, backup OK.
     if (status === null && subjectL.includes(name)) status = "ok";
     if (status === null) continue;
-    const existing = await prisma.backupCheck.findUnique({ where: { backupId_checkDate: { backupId: b.id, checkDate: today } } });
+    const existing = await prisma.backupCheck.findUnique({
+      where: { backupId_checkDate: { backupId: b.id, checkDate: today } },
+    });
     if (existing) {
-      await prisma.backupCheck.update({ where: { id: existing.id }, data: { status, checkedBy: source, comment: `Mis a jour via ${source}` } });
+      await prisma.backupCheck.update({
+        where: { id: existing.id },
+        data: { status, checkedBy: source, comment: `Mis a jour via ${source}` },
+      });
     } else {
-      await prisma.backupCheck.create({ data: { backupId: b.id, checkDate: today, status, checkedBy: source, comment: `Enregistre via ${source}` } });
+      await prisma.backupCheck.create({
+        data: {
+          backupId: b.id,
+          checkDate: today,
+          status,
+          checkedBy: source,
+          comment: `Enregistre via ${source}`,
+        },
+      });
     }
-    await prisma.backupHistory.create({ data: { backupId: b.id, action: "mail_ingest", comment: `Statut ${status} deduit du mail de backup`, performedBy: source } });
+    await prisma.backupHistory.create({
+      data: {
+        backupId: b.id,
+        action: "mail_ingest",
+        comment: `Statut ${status} deduit du mail de backup`,
+        performedBy: source,
+      },
+    });
     results.push({ backup: b.serviceName, status });
   }
   return results;
@@ -126,10 +183,16 @@ export async function extractEmail(filePath: string): Promise<[string, string]> 
   return [path.basename(filePath), content];
 }
 
-export type ScanSummary = { error?: string; files: { file: string; updated?: IngestResult[]; error?: string }[] };
+export type ScanSummary = {
+  error?: string;
+  files: { file: string; updated?: IngestResult[]; error?: string }[];
+};
 
 /** Traite chaque fichier-mail du répertoire, enregistre les checks et déplace le fichier dans « traites ». */
-export async function scanInbox(directory: string | null | undefined, source = "mail-dossier"): Promise<ScanSummary> {
+export async function scanInbox(
+  directory: string | null | undefined,
+  source = "mail-dossier",
+): Promise<ScanSummary> {
   if (!directory) return { error: `Repertoire introuvable : ${directory}`, files: [] };
   let stat: Awaited<ReturnType<typeof fs.stat>>;
   try {

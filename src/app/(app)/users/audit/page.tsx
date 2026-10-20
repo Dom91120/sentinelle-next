@@ -9,7 +9,14 @@ import { paginate, resolvePerPage } from "@/server/paging";
 export const metadata = { title: "Journal d'audit - Sentinelle" };
 
 type Params = Promise<Record<string, string | string[] | undefined>>;
-type Ligne = { when: Date; cat: string; action: string; comment: string | null; by: string | null; url: string | null };
+type Ligne = {
+  when: Date;
+  cat: string;
+  action: string;
+  comment: string | null;
+  by: string | null;
+  url: string | null;
+};
 
 const CAP = 3000;
 
@@ -19,7 +26,20 @@ export default async function Audit({ searchParams }: { searchParams: Params }) 
   await requireAdmin();
   const params = await searchParams;
   const rows: Ligne[] = [];
-  const prendre = (cat: string, prefix: string) => (h: { performedAt: Date; action: string; comment: string | null; performedBy: string | null }, fk: number) => rows.push({ when: h.performedAt, cat, action: h.action, comment: h.comment, by: h.performedBy, url: `/${prefix}/${fk}` });
+  const prendre =
+    (cat: string, prefix: string) =>
+    (
+      h: { performedAt: Date; action: string; comment: string | null; performedBy: string | null },
+      fk: number,
+    ) =>
+      rows.push({
+        when: h.performedAt,
+        cat,
+        action: h.action,
+        comment: h.comment,
+        by: h.performedBy,
+        url: `/${prefix}/${fk}`,
+      });
   const [a, c, d, b, t, r, u, logs] = await Promise.all([
     prisma.accountHistory.findMany({ orderBy: { performedAt: "desc" }, take: CAP }),
     prisma.certificateHistory.findMany({ orderBy: { performedAt: "desc" }, take: CAP }),
@@ -37,13 +57,27 @@ export default async function Audit({ searchParams }: { searchParams: Params }) 
   for (const h of t) prendre("Test", "tests")(h, h.testId);
   for (const h of r) prendre("Revue", "reviews")(h, h.reviewId);
   for (const h of u) prendre("Mise a jour", "updates")(h, h.updateId);
-  for (const l of logs) rows.push({ when: l.performedAt, cat: l.category || "Système", action: l.action, comment: l.detail, by: l.username, url: null });
+  for (const l of logs)
+    rows.push({
+      when: l.performedAt,
+      cat: l.category || "Système",
+      action: l.action,
+      comment: l.detail,
+      by: l.username,
+      url: null,
+    });
 
   const q = String(params.q ?? "").trim();
   let lignes = rows;
   if (q) {
     const ql = q.toLowerCase();
-    lignes = rows.filter((x) => [x.action, x.comment, x.by, x.cat].map((v) => v ?? "").join(" ").toLowerCase().includes(ql));
+    lignes = rows.filter((x) =>
+      [x.action, x.comment, x.by, x.cat]
+        .map((v) => v ?? "")
+        .join(" ")
+        .toLowerCase()
+        .includes(ql),
+    );
   }
   lignes.sort((x, y) => y.when.getTime() - x.when.getTime());
   const perPage = await resolvePerPage(params, page.user, "users.audit");
@@ -69,7 +103,13 @@ export default async function Audit({ searchParams }: { searchParams: Params }) 
             <Icone bi="bi-search" taille="1em" />
           </span>
           {perPageParam ? <input type="hidden" name="per_page" value={perPageParam} /> : null}
-          <input type="text" name="q" defaultValue={q} className="form-control" placeholder="Rechercher (action, détail, utilisateur, catégorie)..." />
+          <input
+            type="text"
+            name="q"
+            defaultValue={q}
+            className="form-control"
+            placeholder="Rechercher (action, détail, utilisateur, catégorie)..."
+          />
           <button type="submit" className="btn btn-primary">
             Rechercher
           </button>
@@ -100,7 +140,10 @@ export default async function Audit({ searchParams }: { searchParams: Params }) 
                     <td style={{ width: 150, whiteSpace: "nowrap" }}>{dateHeure(x.when)}</td>
                     <td>
                       {x.url ? (
-                        <a href={x.url} className="badge bg-light text-dark border text-decoration-none">
+                        <a
+                          href={x.url}
+                          className="badge bg-light text-dark border text-decoration-none"
+                        >
                           {x.cat}
                         </a>
                       ) : (

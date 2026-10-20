@@ -20,7 +20,13 @@ export default async function SoftwareEdit({ params }: { params: Promise<{ id: s
   return (
     <>
       <EnteteForm titre="Modifier le logiciel" retour={retour} />
-      <FormulaireLogiciel item={item} ctx={ctx} page={page} retour={retour} rattachements={await rattachementsDe(prisma, id)} />
+      <FormulaireLogiciel
+        item={item}
+        ctx={ctx}
+        page={page}
+        retour={retour}
+        rattachements={await rattachementsDe(prisma, id)}
+      />
     </>
   );
 }

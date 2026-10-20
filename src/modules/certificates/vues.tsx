@@ -1,14 +1,26 @@
 /** Les gabarits des certificats (port de certificates/_form_corps.html et _synthese.html). */
-import { ScriptDiffere } from "@/components/scripts";
-import type { Certificate, Domain, Equipment, Referential, Supplier, UserService } from "@/generated/prisma/client";
+
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
 import { Icone } from "@/components/icones";
 import { EquipmentSelect } from "@/components/partials";
+import { ScriptDiffere } from "@/components/scripts";
 import { euros, Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
+import type {
+  Certificate,
+  Domain,
+  Equipment,
+  Referential,
+  Supplier,
+  UserService,
+} from "@/generated/prisma/client";
 import { CERT_VALIDITY_LABELS, CIVILITY_LABELS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
-import { certificateHolderLabel, certificateSupportLabel, certificateUsageLabel } from "@/lib/statuts";
+import {
+  certificateHolderLabel,
+  certificateSupportLabel,
+  certificateUsageLabel,
+} from "@/lib/statuts";
 import type { FormContext } from "@/modules/certificates/server";
 import type { CurrentUser } from "@/server/guards";
 
@@ -66,14 +78,36 @@ export type FormProps = FormContext & {
 };
 
 /** certificates/_form_corps.html */
-export function FormCorps({ certificate, kind, equipments, suppliers, services, usageOptions, supportOptions, user, csrf, nonce, retour, actionForm }: FormProps) {
+export function FormCorps({
+  certificate,
+  kind,
+  equipments,
+  suppliers,
+  services,
+  usageOptions,
+  supportOptions,
+  user,
+  csrf,
+  nonce,
+  retour,
+  actionForm,
+}: FormProps) {
   const signature = kind === "signature";
   const c = certificate;
-  const nature = (type: "tls" | "signature") => ({ "data-nature": type, hidden: (type === "signature") !== signature || undefined });
+  const nature = (type: "tls" | "signature") => ({
+    "data-nature": type,
+    hidden: (type === "signature") !== signature || undefined,
+  });
   return (
     <>
       <div className="form-seul">
-        <form method="POST" id="form-principal" className="formulaire fiche-saisie" data-edition-visible action={actionForm}>
+        <form
+          method="POST"
+          id="form-principal"
+          className="formulaire fiche-saisie"
+          data-edition-visible
+          action={actionForm}
+        >
           <input type="hidden" name="csrf_token" value={csrf} />
           <div className="data-card mb-3">
             <RubriqueForm titre="Certificat" icone="bi-patch-check" couleur="sky">
@@ -82,20 +116,45 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                   <label className="form-label fw-medium" htmlFor="certKind">
                     Type
                   </label>
-                  <select name="kind" id="certKind" className="form-select l-contenu" defaultValue={signature ? "signature" : "tls"}>
+                  <select
+                    name="kind"
+                    id="certKind"
+                    className="form-select l-contenu"
+                    defaultValue={signature ? "signature" : "tls"}
+                  >
                     <option value="tls">Serveur (TLS)</option>
                     <option value="signature">Nominatif (personne ou service)</option>
                   </select>
                 </div>
                 <div className="col-md mb-3" {...nature("tls")}>
                   <label className="form-label fw-medium">Nom *</label>
-                  <input type="text" name="service_name" className="form-control" defaultValue={c?.serviceName ?? ""} required placeholder="ex: Site web, API, VPN..." />
+                  <input
+                    type="text"
+                    name="service_name"
+                    className="form-control"
+                    defaultValue={c?.serviceName ?? ""}
+                    required
+                    placeholder="ex: Site web, API, VPN..."
+                  />
                 </div>
                 <div className="col-md mb-3" {...nature("tls")}>
                   <label className="form-label fw-medium">Domaine *</label>
                   <div className="input-group">
-                    <input type="text" name="domain" id="domainInput" className="form-control" defaultValue={c?.domain ?? ""} required placeholder="exemple.votredomaine.fr" />
-                    <button type="button" className="btn btn-outline-primary" id="checkTlsBtn" title="Lire le certificat du domaine">
+                    <input
+                      type="text"
+                      name="domain"
+                      id="domainInput"
+                      className="form-control"
+                      defaultValue={c?.domain ?? ""}
+                      required
+                      placeholder="exemple.votredomaine.fr"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary"
+                      id="checkTlsBtn"
+                      title="Lire le certificat du domaine"
+                    >
                       <Icone bi="bi-shield-check" taille="1em" /> Vérifier
                     </button>
                   </div>
@@ -104,7 +163,11 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                 </div>
                 <div className="col-md-auto mb-3" {...nature("signature")}>
                   <label className="form-label fw-medium">Civilité</label>
-                  <select name="civility" className="form-select l-contenu" defaultValue={c?.civility ?? ""}>
+                  <select
+                    name="civility"
+                    className="form-select l-contenu"
+                    defaultValue={c?.civility ?? ""}
+                  >
                     <option value="">—</option>
                     {Object.entries(CIVILITY_LABELS).map(([v, l]) => (
                       <option key={v} value={v}>
@@ -115,21 +178,44 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                 </div>
                 <div className="col-md mb-3" {...nature("signature")}>
                   <label className="form-label fw-medium">Nom *</label>
-                  <input type="text" name="holder" className="form-control" required defaultValue={c?.holder ?? ""} data-ad-search data-ad-email="holder_email" placeholder="ARNAUD, ou SERVEUR CLIENT RGS" />
+                  <input
+                    type="text"
+                    name="holder"
+                    className="form-control"
+                    required
+                    defaultValue={c?.holder ?? ""}
+                    data-ad-search
+                    data-ad-email="holder_email"
+                    placeholder="ARNAUD, ou SERVEUR CLIENT RGS"
+                  />
                 </div>
                 <div className="col-md mb-3" {...nature("signature")}>
                   <label className="form-label fw-medium">Prénom</label>
-                  <input type="text" name="first_name" className="form-control" defaultValue={c?.firstName ?? ""} />
+                  <input
+                    type="text"
+                    name="first_name"
+                    className="form-control"
+                    defaultValue={c?.firstName ?? ""}
+                  />
                 </div>
                 <div className="col-md mb-3" {...nature("signature")}>
                   <label className="form-label fw-medium">Email</label>
-                  <input type="email" name="holder_email" className="form-control" defaultValue={c?.holderEmail ?? ""} />
+                  <input
+                    type="email"
+                    name="holder_email"
+                    className="form-control"
+                    defaultValue={c?.holderEmail ?? ""}
+                  />
                 </div>
               </div>
               <div className="row" {...nature("signature")}>
                 <div className="col-md-auto mb-3">
                   <label className="form-label fw-medium">Service utilisateur</label>
-                  <select name="service_id" className="form-select l-contenu" defaultValue={c?.serviceId ?? ""}>
+                  <select
+                    name="service_id"
+                    className="form-select l-contenu"
+                    defaultValue={c?.serviceId ?? ""}
+                  >
                     <option value="">— Aucun —</option>
                     {services.map((sv) => (
                       <option key={sv.id} value={sv.id}>
@@ -140,7 +226,13 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                 </div>
                 <div className="col-md mb-3">
                   <label className="form-label fw-medium">Fonction</label>
-                  <input type="text" name="holder_role" className="form-control" defaultValue={c?.holderRole ?? ""} placeholder="Maire, Adjoint, DGA, Agent..." />
+                  <input
+                    type="text"
+                    name="holder_role"
+                    className="form-control"
+                    defaultValue={c?.holderRole ?? ""}
+                    placeholder="Maire, Adjoint, DGA, Agent..."
+                  />
                 </div>
               </div>
 
@@ -149,7 +241,11 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                   <label className="form-label fw-medium" title="Autorité de certification">
                     Émetteur
                   </label>
-                  <select name="supplier_id" className="form-select" defaultValue={c?.supplierId ?? ""}>
+                  <select
+                    name="supplier_id"
+                    className="form-select"
+                    defaultValue={c?.supplierId ?? ""}
+                  >
                     <option value="">— Sélectionner —</option>
                     {suppliers.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -160,7 +256,11 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                 </div>
                 <div className="col-md mb-3">
                   <label className="form-label fw-medium">Support</label>
-                  <select name="support_id" className="form-select" defaultValue={c?.supportId ?? ""}>
+                  <select
+                    name="support_id"
+                    className="form-select"
+                    defaultValue={c?.supportId ?? ""}
+                  >
                     <option value="">— Non renseigné —</option>
                     {supportOptions.map((u) => (
                       <option key={u.id} value={u.id}>
@@ -171,7 +271,12 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                 </div>
                 <div className="col-md mb-3">
                   <label className="form-label fw-medium">Usage</label>
-                  <select name="usage_id" id="certUsage" className="form-select" defaultValue={c?.usageId ?? ""}>
+                  <select
+                    name="usage_id"
+                    id="certUsage"
+                    className="form-select"
+                    defaultValue={c?.usageId ?? ""}
+                  >
                     <option value="">— Non renseigné —</option>
                     {usageOptions.map((u) => (
                       <option key={u.id} value={u.id} data-portee={u.scope || "tous"}>
@@ -181,33 +286,64 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                   </select>
                 </div>
                 <div className="col-md mb-3" {...nature("signature")}>
-                  <label className="form-label fw-medium" title="Intitulé du certificat chez l'autorité, niveau de garantie compris">
+                  <label
+                    className="form-label fw-medium"
+                    title="Intitulé du certificat chez l'autorité, niveau de garantie compris"
+                  >
                     Intitulé
                   </label>
-                  <input type="text" name="level" className="form-control" defaultValue={c?.level ?? ""} placeholder="Décideur - G2, RGS**..." />
+                  <input
+                    type="text"
+                    name="level"
+                    className="form-control"
+                    defaultValue={c?.level ?? ""}
+                    placeholder="Décideur - G2, RGS**..."
+                  />
                 </div>
                 <div className="col-md mb-3">
                   <label className="form-label fw-medium">N° de série</label>
-                  <input type="text" name="serial_number" className="form-control" defaultValue={c?.serialNumber ?? ""} />
+                  <input
+                    type="text"
+                    name="serial_number"
+                    className="form-control"
+                    defaultValue={c?.serialNumber ?? ""}
+                  />
                 </div>
                 <div className="w-100" {...nature("signature")} />
                 <div className="col-md-auto mb-3">
                   <label className="form-label fw-medium" title="Date d'émission">
                     Émis le
                   </label>
-                  <input type="date" name="issued_at" className="form-control l-date" defaultValue={isoDate(c?.issuedAt)} />
+                  <input
+                    type="date"
+                    name="issued_at"
+                    className="form-control l-date"
+                    defaultValue={isoDate(c?.issuedAt)}
+                  />
                 </div>
                 <div className="col-md-auto mb-3">
-                  <label className="form-label fw-medium" title="Date d'expiration. Laissée vide, la fiche passe en orange : à compléter.">
+                  <label
+                    className="form-label fw-medium"
+                    title="Date d'expiration. Laissée vide, la fiche passe en orange : à compléter."
+                  >
                     Expire le
                   </label>
-                  <input type="date" name="expiry_date" className="form-control l-date" defaultValue={isoDate(c?.expiryDate)} />
+                  <input
+                    type="date"
+                    name="expiry_date"
+                    className="form-control l-date"
+                    defaultValue={isoDate(c?.expiryDate)}
+                  />
                 </div>
                 <div className="col-md-auto mb-3">
                   <label className="form-label fw-medium" title="« Expiré » se déduit de la date.">
                     Validité
                   </label>
-                  <select name="validity" className="form-select l-contenu" defaultValue={c?.validity ?? "valide"}>
+                  <select
+                    name="validity"
+                    className="form-select l-contenu"
+                    defaultValue={c?.validity ?? "valide"}
+                  >
                     {Object.entries(CERT_VALIDITY_LABELS).map(([v, l]) => (
                       <option key={v} value={v}>
                         {l}
@@ -216,26 +352,58 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                   </select>
                 </div>
                 <div className="col-md-auto mb-3" {...nature("signature")}>
-                  <label className="form-label fw-medium" title="Durée commandée, en années. Ce qui a été commandé ; les dates disent ce qui a été délivré.">
+                  <label
+                    className="form-label fw-medium"
+                    title="Durée commandée, en années. Ce qui a été commandé ; les dates disent ce qui a été délivré."
+                  >
                     Durée (ans)
                   </label>
-                  <input type="number" name="duration_years" className="form-control l-jours" min={0} max={10} defaultValue={c?.durationYears ?? ""} />
+                  <input
+                    type="number"
+                    name="duration_years"
+                    className="form-control l-jours"
+                    min={0}
+                    max={10}
+                    defaultValue={c?.durationYears ?? ""}
+                  />
                 </div>
                 <div className="col-md-auto mb-3" {...nature("signature")}>
                   <label className="form-label fw-medium" title="Montant TTC, en euros">
                     Montant TTC
                   </label>
-                  <input type="text" name="amount_ttc" className="form-control l-montant" inputMode="decimal" defaultValue={c?.amountTtc ?? ""} />
+                  <input
+                    type="text"
+                    name="amount_ttc"
+                    className="form-control l-montant"
+                    inputMode="decimal"
+                    defaultValue={c?.amountTtc ?? ""}
+                  />
                 </div>
                 <div className="col-md-auto mb-3" {...nature("signature")}>
                   <label className="form-label fw-medium" title="Imputation budgétaire">
                     Imputation
                   </label>
-                  <input type="text" name="budget_code" className="form-control l-montant" defaultValue={c?.budgetCode ?? ""} placeholder="60632" />
+                  <input
+                    type="text"
+                    name="budget_code"
+                    className="form-control l-montant"
+                    defaultValue={c?.budgetCode ?? ""}
+                    placeholder="60632"
+                  />
                 </div>
                 <div className="col-md mb-3" {...nature("signature")}>
                   <label className="form-label fw-medium">Code de révocation</label>
-                  <input type="text" name="revocation_code" className="form-control" autoComplete="off" placeholder={c?.revocationCode ? "enregistré — laisser vide pour le garder" : "code remis par l’autorité"} />
+                  <input
+                    type="text"
+                    name="revocation_code"
+                    className="form-control"
+                    autoComplete="off"
+                    placeholder={
+                      c?.revocationCode
+                        ? "enregistré — laisser vide pour le garder"
+                        : "code remis par l’autorité"
+                    }
+                  />
                   <div className="form-text">
                     Il invalide le certificat — un secret. Saisir <code>-</code> pour l'effacer.
                   </div>
@@ -245,14 +413,26 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
                     &nbsp;
                   </span>
                   <div className="form-check form-switch saisie-interrupteur">
-                    <input type="checkbox" name="auto_renew" className="form-check-input" id="autoRenew" defaultChecked={Boolean(c?.autoRenew)} />
+                    <input
+                      type="checkbox"
+                      name="auto_renew"
+                      className="form-check-input"
+                      id="autoRenew"
+                      defaultChecked={Boolean(c?.autoRenew)}
+                    />
                     <label className="form-check-label" htmlFor="autoRenew">
                       Auto-renouvellement
                     </label>
                   </div>
                 </div>
                 <div className="col-md mb-3" {...nature("tls")}>
-                  <EquipmentSelect equipments={equipments} selectedId={c?.equipmentId} compact user={user} csrf={csrf} />
+                  <EquipmentSelect
+                    equipments={equipments}
+                    selectedId={c?.equipmentId}
+                    compact
+                    user={user}
+                    csrf={csrf}
+                  />
                 </div>
               </div>
             </RubriqueForm>
@@ -260,12 +440,23 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
             <RubriqueForm titre="Notes" icone="bi-journal-text" couleur="slate">
               <div className="mb-3">
                 <label className="form-label fw-medium">Description / Notes</label>
-                <textarea name="description" className="form-control" rows={3} placeholder="Informations complémentaires..." defaultValue={c?.description ?? ""} />
+                <textarea
+                  name="description"
+                  className="form-control"
+                  rows={3}
+                  placeholder="Informations complémentaires..."
+                  defaultValue={c?.description ?? ""}
+                />
               </div>
             </RubriqueForm>
           </div>
 
-          <PiedForm retour={retour} libelle={c ? "Enregistrer" : "Ajouter"} supprimer={c && user.canDelete("certificates") ? `/certificates/${c.id}/delete` : null} confirmation="Supprimer ce certificat ?" />
+          <PiedForm
+            retour={retour}
+            libelle={c ? "Enregistrer" : "Ajouter"}
+            supprimer={c && user.canDelete("certificates") ? `/certificates/${c.id}/delete` : null}
+            confirmation="Supprimer ce certificat ?"
+          />
         </form>
       </div>
 
@@ -277,11 +468,20 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
 }
 
 /** certificates/_synthese.html */
-export function Synthese({ c, revocationCode }: { c: CertificatComplet; revocationCode: string | null }) {
+export function Synthese({
+  c,
+  revocationCode,
+}: {
+  c: CertificatComplet;
+  revocationCode: string | null;
+}) {
   const signature = c.kind === "signature";
   const validite = CERT_VALIDITY_LABELS[c.validity ?? ""] ?? "Valide";
   return (
-    <div className="data-card mb-3 synthese synthese--cases" style={{ "--lu-intitule": "75px" } as React.CSSProperties}>
+    <div
+      className="data-card mb-3 synthese synthese--cases"
+      style={{ "--lu-intitule": "75px" } as React.CSSProperties}
+    >
       {signature ? (
         <Rubrique titre="Certificat" bi="bi-patch-check" couleur="sky">
           <Rangee>
@@ -309,12 +509,21 @@ export function Synthese({ c, revocationCode }: { c: CertificatComplet; revocati
             <Lu label="Émis le" valeur={c.issuedAt ? dateCourte(c.issuedAt) : null} />
             <Lu label="Expire le" valeur={c.expiryDate ? dateCourte(c.expiryDate) : null} />
             <Lu label="Validité" valeur={validite} />
-            <Lu label="Durée" valeur={c.durationYears ? `${c.durationYears} an${c.durationYears > 1 ? "s" : ""}` : null} titre="Durée commandée" />
+            <Lu
+              label="Durée"
+              valeur={
+                c.durationYears ? `${c.durationYears} an${c.durationYears > 1 ? "s" : ""}` : null
+              }
+              titre="Durée commandée"
+            />
             <Lu label="Montant TTC" valeur={euros(c.amountTtc)} />
             <Lu label="Imputation" valeur={c.budgetCode} titre="Imputation budgétaire" />
             <LuBloc label="Équipement" facultatif>
               {c.equipment ? (
-                <a href={`/inventory/${c.equipment.id}`} title={EQUIPMENT_KIND_LABELS[c.equipment.kind] ?? c.equipment.kind}>
+                <a
+                  href={`/inventory/${c.equipment.id}`}
+                  title={EQUIPMENT_KIND_LABELS[c.equipment.kind] ?? c.equipment.kind}
+                >
                   {c.equipment.name}
                 </a>
               ) : null}
@@ -334,7 +543,13 @@ export function Synthese({ c, revocationCode }: { c: CertificatComplet; revocati
                 </span>
               )}
             </LuBloc>
-            <LuBloc label="Émetteur">{c.supplier ? <a href={`/suppliers/${c.supplierId}`}>{c.supplier.name}</a> : c.issuer || null}</LuBloc>
+            <LuBloc label="Émetteur">
+              {c.supplier ? (
+                <a href={`/suppliers/${c.supplierId}`}>{c.supplier.name}</a>
+              ) : (
+                c.issuer || null
+              )}
+            </LuBloc>
             <Lu label="Support" valeur={certificateSupportLabel(c)} />
             <Lu label="Usage" valeur={certificateUsageLabel(c)} />
             <Lu label="N° de série" valeur={c.serialNumber} />
@@ -343,10 +558,17 @@ export function Synthese({ c, revocationCode }: { c: CertificatComplet; revocati
             <Lu label="Émis le" valeur={c.issuedAt ? dateCourte(c.issuedAt) : null} />
             <Lu label="Expire le" valeur={c.expiryDate ? dateCourte(c.expiryDate) : null} />
             <Lu label="Validité" valeur={validite} />
-            <Lu label="Renouv." valeur={c.autoRenew ? "Automatique" : "Manuel"} titre="Renouvellement" />
+            <Lu
+              label="Renouv."
+              valeur={c.autoRenew ? "Automatique" : "Manuel"}
+              titre="Renouvellement"
+            />
             <LuBloc label="Équipement" facultatif>
               {c.equipment ? (
-                <a href={`/inventory/${c.equipment.id}`} title={EQUIPMENT_KIND_LABELS[c.equipment.kind] ?? c.equipment.kind}>
+                <a
+                  href={`/inventory/${c.equipment.id}`}
+                  title={EQUIPMENT_KIND_LABELS[c.equipment.kind] ?? c.equipment.kind}
+                >
                   {c.equipment.name}
                 </a>
               ) : null}
@@ -371,7 +593,9 @@ export function Synthese({ c, revocationCode }: { c: CertificatComplet; revocati
             <button type="button" className="btn btn-sm btn-outline-secondary" id="revealCode">
               <Icone bi="bi-eye" taille="1em" classes="me-1" /> Afficher
             </button>
-            <small className="text-muted">Il invalide le certificat — perte, vol, départ du titulaire.</small>
+            <small className="text-muted">
+              Il invalide le certificat — perte, vol, départ du titulaire.
+            </small>
           </div>
         </div>
       ) : null}

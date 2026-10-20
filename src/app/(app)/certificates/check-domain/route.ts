@@ -10,7 +10,11 @@ export async function GET(req: Request) {
     if (!domain) return json({ ok: false, error: "Renseignez d'abord le domaine." }, 400);
     try {
       const info = await fetchCertInfo(domain);
-      return json({ ok: true, expiry_date: info.expiryDate.toISOString().slice(0, 10), issuer: info.issuer ?? "" });
+      return json({
+        ok: true,
+        expiry_date: info.expiryDate.toISOString().slice(0, 10),
+        issuer: info.issuer ?? "",
+      });
     } catch (e) {
       return json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }

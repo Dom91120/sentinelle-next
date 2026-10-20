@@ -1,5 +1,13 @@
 import { notFound } from "next/navigation";
-import { Activite, BandeauEcheance, BoutonModal, Entete, Historique, MenuLien, ModalAction } from "@/components/fiche";
+import {
+  Activite,
+  BandeauEcheance,
+  BoutonModal,
+  Entete,
+  Historique,
+  MenuLien,
+  ModalAction,
+} from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
 import { TEST_TYPE_LABELS } from "@/lib/constantes";
@@ -37,17 +45,47 @@ export default async function TestDetail({ params }: { params: Promise<{ id: str
         titre={test.name}
         sousTitre={sousTitre}
         statut={statut}
-        primaire={peutEditer ? <BoutonModal id="effectue" libelle="Marquer effectué" icone="bi-check-lg" /> : null}
-        menu={[<MenuLien key="pdf" url={`/tests/${id}/pdf`} libelle="Exporter en PDF" icone="bi-file-earmark-pdf" />]}
+        primaire={
+          peutEditer ? (
+            <BoutonModal id="effectue" libelle="Marquer effectué" icone="bi-check-lg" />
+          ) : null
+        }
+        menu={[
+          <MenuLien
+            key="pdf"
+            url={`/tests/${id}/pdf`}
+            libelle="Exporter en PDF"
+            icone="bi-file-earmark-pdf"
+          />,
+        ]}
         voisins={voisins}
         base="/tests"
-        bandeau={<BandeauEcheance libelle="Prochaine échéance" date={test.nextDue} statut={statut} passe="retard" debut={test.lastPerformed} complement={test.lastPerformed ? `dernière exéc. ${dateCourte(test.lastPerformed)}` : "jamais exécuté"} sansDate="à planifier" />}
+        bandeau={
+          <BandeauEcheance
+            libelle="Prochaine échéance"
+            date={test.nextDue}
+            statut={statut}
+            passe="retard"
+            debut={test.lastPerformed}
+            complement={
+              test.lastPerformed
+                ? `dernière exéc. ${dateCourte(test.lastPerformed)}`
+                : "jamais exécuté"
+            }
+            sansDate="à planifier"
+          />
+        }
       />
 
       <BarreOnglets id="ficheTest" modifier={peutEditer ? `/tests/${id}/edit` : null} surPlace>
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}
-        <Onglet cible="historique" libelle="Historique" icone="bi-clock-history" compteur={histories.length} />
+        <Onglet
+          cible="historique"
+          libelle="Historique"
+          icone="bi-clock-history"
+          compteur={histories.length}
+        />
       </BarreOnglets>
 
       <Volets>
@@ -66,7 +104,14 @@ export default async function TestDetail({ params }: { params: Promise<{ id: str
         {peutEditer ? (
           <Volet cible="details">
             <fieldset className="edition-verrou" data-edition-verrou disabled>
-              <FormCorps test={test} {...ctx} user={user} csrf={csrf} retour={`/tests/${id}#details`} actionForm={`/tests/${id}/edit`} />
+              <FormCorps
+                test={test}
+                {...ctx}
+                user={user}
+                csrf={csrf}
+                retour={`/tests/${id}#details`}
+                actionForm={`/tests/${id}/edit`}
+              />
             </fieldset>
           </Volet>
         ) : null}
@@ -77,7 +122,14 @@ export default async function TestDetail({ params }: { params: Promise<{ id: str
       </Volets>
 
       {peutEditer ? (
-        <ModalAction id="effectue" titre="Marquer le test effectué" action={`/tests/${id}/complete`} csrf={csrf} bouton="Marquer effectué" aide="Date l'exécution à aujourd'hui et recalcule la prochaine échéance selon la fréquence.">
+        <ModalAction
+          id="effectue"
+          titre="Marquer le test effectué"
+          action={`/tests/${id}/complete`}
+          csrf={csrf}
+          bouton="Marquer effectué"
+          aide="Date l'exécution à aujourd'hui et recalcule la prochaine échéance selon la fréquence."
+        >
           <div className="mb-3">
             <label className="form-label" htmlFor="outcome">
               Résultat
@@ -91,7 +143,13 @@ export default async function TestDetail({ params }: { params: Promise<{ id: str
             <label className="form-label" htmlFor="result">
               Détails du résultat
             </label>
-            <textarea name="result" id="result" className="form-control" rows={3} placeholder="Ce qui a été vérifié, ce qui a été constaté…" />
+            <textarea
+              name="result"
+              id="result"
+              className="form-control"
+              rows={3}
+              placeholder="Ce qui a été vérifié, ce qui a été constaté…"
+            />
           </div>
           <div>
             <label className="form-label" htmlFor="test_comment">

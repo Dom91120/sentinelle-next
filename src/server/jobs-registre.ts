@@ -5,12 +5,23 @@
  */
 import type { AppSettings } from "@/server/config-store";
 
-export type Tache = { id: string; heure?: number; minute?: number; intervalleMinutes?: number; actif?: (cfg: AppSettings) => boolean };
+export type Tache = {
+  id: string;
+  heure?: number;
+  minute?: number;
+  intervalleMinutes?: number;
+  actif?: (cfg: AppSettings) => boolean;
+};
 
 export const TACHES: Tache[] = [
   { id: "scan_backup_inbox", intervalleMinutes: 30, actif: (cfg) => Boolean(cfg.BACKUP_INBOX_DIR) },
   { id: "backup_database_job", heure: 1, minute: 0 },
-  { id: "sync_ad_passwords", heure: 6, minute: 0, actif: (cfg) => Boolean(cfg.LDAP_ENABLED && cfg.LDAP_BIND_USER) },
+  {
+    id: "sync_ad_passwords",
+    heure: 6,
+    minute: 0,
+    actif: (cfg) => Boolean(cfg.LDAP_ENABLED && cfg.LDAP_BIND_USER),
+  },
   { id: "refresh_eol_cache", heure: 6, minute: 50 },
   { id: "refresh_certificates_tls", heure: 7, minute: 0 },
   { id: "refresh_domains_rdap", heure: 7, minute: 10 },
@@ -59,7 +70,8 @@ export function tachesDues(cfg: AppSettings, depuis: Date, jusqua: Date): Tache[
     const d = new Date(depuis);
     d.setHours(t.heure ?? 0, t.minute ?? 0, 0, 0);
     for (const candidat of [d, new Date(d.getTime() + 86_400_000)]) {
-      if (candidat.getTime() >= depuis.getTime() && candidat.getTime() < jusqua.getTime()) dues.push(t);
+      if (candidat.getTime() >= depuis.getTime() && candidat.getTime() < jusqua.getTime())
+        dues.push(t);
     }
   }
   return dues;

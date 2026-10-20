@@ -14,14 +14,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const contract = await prisma.contract.findUnique({ where: { id } });
     if (!contract) return pasTrouve();
     const { data, couverts } = await depuisFormulaire(form);
-    if (!data.name) return redirigerAvecMessage(`/contracts/${id}/edit`, "Le nom du contrat est obligatoire.", "danger");
+    if (!data.name)
+      return redirigerAvecMessage(
+        `/contracts/${id}/edit`,
+        "Le nom du contrat est obligatoire.",
+        "danger",
+      );
     const oldEnd = contract.endDate;
     const newEnd = (data.endDate as Date | null) ?? null;
     await prisma.contract.update({ where: { id }, data });
     await poserCouverts(id, couverts);
     if ((oldEnd?.getTime() ?? null) !== (newEnd?.getTime() ?? null)) {
       await prisma.contractHistory.create({
-        data: { contractId: id, action: "echeance", comment: `Échéance modifiée : ${oldEnd ? dateCourte(oldEnd) : "-"} -> ${newEnd ? dateCourte(newEnd) : "-"}`, performedBy: user.username },
+        data: {
+          contractId: id,
+          action: "echeance",
+          comment: `Échéance modifiée : ${oldEnd ? dateCourte(oldEnd) : "-"} -> ${newEnd ? dateCourte(newEnd) : "-"}`,
+          performedBy: user.username,
+        },
       });
     }
     invalidateNavCounts();

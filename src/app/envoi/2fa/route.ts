@@ -2,8 +2,8 @@ import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 import { auditRecord } from "@/server/audit";
 import { auth } from "@/server/auth";
-import { safeNext } from "@/server/connexion";
 import { getSettings } from "@/server/config-store";
+import { safeNext } from "@/server/connexion";
 import { prisma } from "@/server/db";
 import { redirection, redirigerAvecMessage, traiterFormulaire } from "@/server/http";
 import { clearPending2fa, pending2fa } from "@/server/session-2fa";
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       const pending = await pending2fa();
       if (!pending) return redirection("/login");
       const user = await prisma.user.findUnique({ where: { id: pending.uid } });
-      if (!user || !user.twoFactorEnabled) {
+      if (!user?.twoFactorEnabled) {
         await clearPending2fa();
         return redirection("/login");
       }
@@ -29,7 +29,8 @@ export async function POST(req: Request) {
         await clearPending2fa();
         return redirigerAvecMessage("/login", "Trop de tentatives. Reessayez plus tard.", "danger");
       };
-      const locked = (u: { totpLockedUntil: Date | null }) => Boolean(u.totpLockedUntil && u.totpLockedUntil > now);
+      const locked = (u: { totpLockedUntil: Date | null }) =>
+        Boolean(u.totpLockedUntil && u.totpLockedUntil > now);
       if (locked(user)) return refuser();
       // L'essai est compté AVANT la vérification, d'un UPDATE atomique.
       const u2 = await prisma.user.update({
@@ -48,16 +49,27 @@ export async function POST(req: Request) {
         ok = false;
       }
       if (ok) {
-        await prisma.user.update({ where: { id: user.id }, data: { totpFailedCount: 0, totpLockedUntil: null } });
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { totpFailedCount: 0, totpLockedUntil: null },
+        });
         const next = safeNext(pending.next);
         await clearPending2fa();
-        await auditRecord(`connexion (2FA)${pending.ldap ? " LDAP" : ""}`, "", "securite", user.username);
+        await auditRecord(
+          `connexion (2FA)${pending.ldap ? " LDAP" : ""}`,
+          "",
+          "securite",
+          user.username,
+        );
         return redirection(next ?? "/");
       }
       if (u2.totpFailedCount >= maxAttempts) {
         await prisma.user.update({
           where: { id: user.id },
-          data: { totpFailedCount: 0, totpLockedUntil: new Date(now.getTime() + lockoutMin * 60000) },
+          data: {
+            totpFailedCount: 0,
+            totpLockedUntil: new Date(now.getTime() + lockoutMin * 60000),
+          },
         });
         await auditRecord("blocage 2FA", user.username, "securite", user.username);
         return refuser();

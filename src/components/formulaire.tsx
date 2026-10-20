@@ -2,7 +2,17 @@
 import { Icone } from "@/components/icones";
 
 /** `entete_form(titre, retour, sous_titre, libelle)` */
-export function EnteteForm({ titre, retour, sousTitre, libelle = "Enregistrer" }: { titre: React.ReactNode; retour: string; sousTitre?: React.ReactNode; libelle?: string }) {
+export function EnteteForm({
+  titre,
+  retour,
+  sousTitre,
+  libelle = "Enregistrer",
+}: {
+  titre: React.ReactNode;
+  retour: string;
+  sousTitre?: React.ReactNode;
+  libelle?: string;
+}) {
   return (
     <div className="page-header form-entete">
       <div>
@@ -22,11 +32,27 @@ export function EnteteForm({ titre, retour, sousTitre, libelle = "Enregistrer" }
 }
 
 /** `pied_form(retour, libelle, supprimer, confirmation)` */
-export function PiedForm({ retour, libelle = "Enregistrer", supprimer, confirmation = "Supprimer cette fiche ?" }: { retour: string; libelle?: string; supprimer?: string | null; confirmation?: string }) {
+export function PiedForm({
+  retour,
+  libelle = "Enregistrer",
+  supprimer,
+  confirmation = "Supprimer cette fiche ?",
+}: {
+  retour: string;
+  libelle?: string;
+  supprimer?: string | null;
+  confirmation?: string;
+}) {
   return (
     <div className="form-pied">
       {supprimer ? (
-        <button type="button" className="btn btn-ghost btn-ghost-danger form-pied-supprimer" data-confirm={confirmation} data-confirm-form="#form-supprimer" data-confirm-action={supprimer}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-ghost-danger form-pied-supprimer"
+          data-confirm={confirmation}
+          data-confirm-form="#form-supprimer"
+          data-confirm-action={supprimer}
+        >
           <Icone bi="bi-trash" taille="1em" classes="me-1" /> Supprimer
         </button>
       ) : null}
@@ -44,9 +70,26 @@ export function PiedForm({ retour, libelle = "Enregistrer", supprimer, confirmat
 }
 
 /** `section(titre, icone, couleur, kinds, aide)` : fieldset de formulaire coloré. */
-export function Section({ titre, icone, couleur = "indigo", kinds, aide, children }: { titre: string; icone: string; couleur?: string; kinds?: string; aide?: string; children: React.ReactNode }) {
+export function Section({
+  titre,
+  icone,
+  couleur = "indigo",
+  kinds,
+  aide,
+  children,
+}: {
+  titre: string;
+  icone: string;
+  couleur?: string;
+  kinds?: string;
+  aide?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <fieldset className={`form-section form-section--${couleur}${kinds ? " kind-section" : ""}`} data-kinds={kinds}>
+    <fieldset
+      className={`form-section form-section--${couleur}${kinds ? " kind-section" : ""}`}
+      data-kinds={kinds}
+    >
       <legend className="form-section-titre">
         <Icone bi={icone} taille="1em" />
         {titre}
@@ -58,7 +101,21 @@ export function Section({ titre, icone, couleur = "indigo", kinds, aide, childre
 }
 
 /** `rubrique_form(...)` : la même section, au format des formulaires en carte. */
-export function RubriqueForm({ titre, icone, couleur = "indigo", kinds, aide, children }: { titre: string; icone: string; couleur?: string; kinds?: string; aide?: string; children: React.ReactNode }) {
+export function RubriqueForm({
+  titre,
+  icone,
+  couleur = "indigo",
+  kinds,
+  aide,
+  children,
+}: {
+  titre: string;
+  icone: string;
+  couleur?: string;
+  kinds?: string;
+  aide?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className={`saisie-rubrique${kinds ? " kind-section" : ""}`} data-kinds={kinds}>
       <div className="card-header-custom d-flex justify-content-between align-items-center">
@@ -76,9 +133,33 @@ export function RubriqueForm({ titre, icone, couleur = "indigo", kinds, aide, ch
 }
 
 /** Un <select> avec options {valeur: libellé}. */
-export function Select({ name, id, options, value, blank, classes = "form-select", required, defaultValue }: { name: string; id?: string; options: [string, string][]; value?: string | null; blank?: string; classes?: string; required?: boolean; defaultValue?: string }) {
+export function Select({
+  name,
+  id,
+  options,
+  value,
+  blank,
+  classes = "form-select",
+  required,
+  defaultValue,
+}: {
+  name: string;
+  id?: string;
+  options: [string, string][];
+  value?: string | null;
+  blank?: string;
+  classes?: string;
+  required?: boolean;
+  defaultValue?: string;
+}) {
   return (
-    <select name={name} id={id} className={classes} required={required} defaultValue={value ?? defaultValue ?? ""}>
+    <select
+      name={name}
+      id={id}
+      className={classes}
+      required={required}
+      defaultValue={value ?? defaultValue ?? ""}
+    >
       {blank !== undefined ? <option value="">{blank}</option> : null}
       {options.map(([v, l]) => (
         <option key={v} value={v}>

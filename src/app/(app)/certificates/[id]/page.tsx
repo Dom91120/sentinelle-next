@@ -1,6 +1,15 @@
 import { notFound } from "next/navigation";
 import { Documents } from "@/components/documents";
-import { Activite, BandeauEcheance, BoutonModal, Entete, Historique, MenuLien, MenuPost, ModalAction } from "@/components/fiche";
+import {
+  Activite,
+  BandeauEcheance,
+  BoutonModal,
+  Entete,
+  Historique,
+  MenuLien,
+  MenuPost,
+  ModalAction,
+} from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
 import { ScriptDiffere } from "@/components/scripts";
@@ -22,16 +31,34 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
   const id = idDeRoute((await params).id);
   const cert = await prisma.certificate.findUnique({
     where: { id },
-    include: { supplier: true, service: true, certUsage: true, support: true, equipment: true, registeredDomain: true },
+    include: {
+      supplier: true,
+      service: true,
+      certUsage: true,
+      support: true,
+      equipment: true,
+      registeredDomain: true,
+    },
   });
   if (!cert) notFound();
   const { user, csrf, nonce } = page;
   const peutEditer = user.canEdit("certificates");
   const docsOn = documentsEnabled(user.settings);
   const [histories, voisins, ctx, snooze, pieces] = await Promise.all([
-    prisma.certificateHistory.findMany({ where: { certificateId: id }, orderBy: { performedAt: "desc" } }),
+    prisma.certificateHistory.findMany({
+      where: { certificateId: id },
+      orderBy: { performedAt: "desc" },
+    }),
     voisinsDe("certificate", id, "serviceName", page),
-    peutEditer ? formContext() : Promise.resolve({ equipments: [], suppliers: [], services: [], usageOptions: [], supportOptions: [] }),
+    peutEditer
+      ? formContext()
+      : Promise.resolve({
+          equipments: [],
+          suppliers: [],
+          services: [],
+          usageOptions: [],
+          supportOptions: [],
+        }),
     getActiveSnooze("certificate", id),
     docsOn ? forParent("certificate", id) : Promise.resolve([]),
   ]);
@@ -45,8 +72,21 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
     : `Certificat TLS · ${cert.domain ?? ""}${cert.supplier || cert.issuer ? ` · ${cert.supplier ? cert.supplier.name : cert.issuer}` : ""}${cert.validity && cert.validity !== "valide" ? ` · ${validityLabel}` : ""}`;
   const complement = `${cert.issuedAt ? `émis le ${dateCourte(cert.issuedAt)}` : ""}${!signature ? `${cert.issuedAt ? " · " : ""}renouv. ${cert.autoRenew ? "automatique" : "manuel"}` : ""}`;
   const menu = [
-    <MenuLien key="pdf" url={`/certificates/${id}/pdf`} libelle="Exporter en PDF" icone="bi-file-earmark-pdf" />,
-    peutEditer && !signature && cert.domain ? <MenuPost key="tls" url={`/certificates/${id}/check-tls`} libelle="Vérifier le TLS maintenant" icone="bi-shield-check" csrf={csrf} /> : null,
+    <MenuLien
+      key="pdf"
+      url={`/certificates/${id}/pdf`}
+      libelle="Exporter en PDF"
+      icone="bi-file-earmark-pdf"
+    />,
+    peutEditer && !signature && cert.domain ? (
+      <MenuPost
+        key="tls"
+        url={`/certificates/${id}/check-tls`}
+        libelle="Vérifier le TLS maintenant"
+        icone="bi-shield-check"
+        csrf={csrf}
+      />
+    ) : null,
   ];
   const revealJs = revocationCode
     ? `(function () { var btn = document.getElementById('revealCode'); var cible = document.getElementById('revocationCode'); if (!btn || !cible) return; btn.addEventListener('click', function () { cible.textContent = ${JSON.stringify(revocationCode)}; btn.remove(); }); })();`
@@ -58,7 +98,11 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
         titre={cert.serviceName}
         sousTitre={sousTitre}
         statut={statut}
-        primaire={peutEditer ? <BoutonModal id="renouveler" libelle="Marquer renouvelé" icone="bi-arrow-repeat" /> : null}
+        primaire={
+          peutEditer ? (
+            <BoutonModal id="renouveler" libelle="Marquer renouvelé" icone="bi-arrow-repeat" />
+          ) : null
+        }
         menu={menu}
         voisins={voisins}
         base="/certificates"
@@ -69,17 +113,35 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
             statut={monitored ? statut : null}
             passe="expiré depuis"
             debut={cert.issuedAt}
-            complement={monitored ? complement : `hors surveillance : ${validityLabel.toLowerCase()}`}
+            complement={
+              monitored ? complement : `hors surveillance : ${validityLabel.toLowerCase()}`
+            }
             sansDate="date d'expiration à renseigner"
           />
         }
       />
 
-      <BarreOnglets id="ficheCertificate" modifier={peutEditer ? `/certificates/${id}/edit` : null} surPlace>
+      <BarreOnglets
+        id="ficheCertificate"
+        modifier={peutEditer ? `/certificates/${id}/edit` : null}
+        surPlace
+      >
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}
-        {docsOn ? <Onglet cible="documents" libelle="Documents" icone="bi-paperclip" compteur={pieces.length} /> : null}
-        <Onglet cible="historique" libelle="Historique" icone="bi-clock-history" compteur={histories.length} />
+        {docsOn ? (
+          <Onglet
+            cible="documents"
+            libelle="Documents"
+            icone="bi-paperclip"
+            compteur={pieces.length}
+          />
+        ) : null}
+        <Onglet
+          cible="historique"
+          libelle="Historique"
+          icone="bi-clock-history"
+          compteur={histories.length}
+        />
       </BarreOnglets>
 
       <Volets>
@@ -90,7 +152,13 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
             </div>
             <div className="col-lg-3">
               <Activite histories={histories} />
-              <SnoozeCard entityType="certificate" entityId={id} user={user} snooze={snooze} csrf={csrf} />
+              <SnoozeCard
+                entityType="certificate"
+                entityId={id}
+                user={user}
+                snooze={snooze}
+                csrf={csrf}
+              />
             </div>
           </div>
         </Volet>
@@ -98,14 +166,29 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
         {peutEditer ? (
           <Volet cible="details">
             <fieldset className="edition-verrou" data-edition-verrou disabled>
-              <FormCorps certificate={cert} kind={cert.kind || "tls"} {...ctx} user={user} csrf={csrf} nonce={nonce} retour={`/certificates/${id}#details`} actionForm={`/certificates/${id}/edit`} />
+              <FormCorps
+                certificate={cert}
+                kind={cert.kind || "tls"}
+                {...ctx}
+                user={user}
+                csrf={csrf}
+                nonce={nonce}
+                retour={`/certificates/${id}#details`}
+                actionForm={`/certificates/${id}/edit`}
+              />
             </fieldset>
           </Volet>
         ) : null}
 
         {docsOn ? (
           <Volet cible="documents">
-            <Documents parentKind="certificate" parentId={id} permission="certificates" user={user} csrf={csrf} />
+            <Documents
+              parentKind="certificate"
+              parentId={id}
+              permission="certificates"
+              user={user}
+              csrf={csrf}
+            />
           </Volet>
         ) : null}
 
@@ -115,18 +198,38 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
       </Volets>
 
       {peutEditer ? (
-        <ModalAction id="renouveler" titre="Marquer le certificat renouvelé" action={`/certificates/${id}/renew`} csrf={csrf} bouton="Marquer renouvelé" icone="bi-arrow-repeat" aide="Enregistre la nouvelle date d'expiration et garde l'ancienne dans l'historique.">
+        <ModalAction
+          id="renouveler"
+          titre="Marquer le certificat renouvelé"
+          action={`/certificates/${id}/renew`}
+          csrf={csrf}
+          bouton="Marquer renouvelé"
+          icone="bi-arrow-repeat"
+          aide="Enregistre la nouvelle date d'expiration et garde l'ancienne dans l'historique."
+        >
           <div className="mb-3">
             <label className="form-label" htmlFor="new_expiry_date">
               Nouvelle date d'expiration <span className="text-danger">*</span>
             </label>
-            <input type="date" name="new_expiry_date" id="new_expiry_date" className="form-control" required />
+            <input
+              type="date"
+              name="new_expiry_date"
+              id="new_expiry_date"
+              className="form-control"
+              required
+            />
           </div>
           <div>
             <label className="form-label" htmlFor="renew_comment">
               Commentaire <span className="text-muted">(optionnel)</span>
             </label>
-            <input type="text" name="comment" id="renew_comment" className="form-control" placeholder="ex : renouvelé chez Sectigo, 1 an" />
+            <input
+              type="text"
+              name="comment"
+              id="renew_comment"
+              className="form-control"
+              placeholder="ex : renouvelé chez Sectigo, 1 an"
+            />
           </div>
         </ModalAction>
       ) : null}

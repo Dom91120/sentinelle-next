@@ -17,11 +17,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const comment = typeof brut === "string" ? brut : "Certificat renouvelé";
     if (newExpiry) {
       const auj = new Date();
-      const issuedAt = new Date(Date.UTC(auj.getUTCFullYear(), auj.getUTCMonth(), auj.getUTCDate()));
+      const issuedAt = new Date(
+        Date.UTC(auj.getUTCFullYear(), auj.getUTCMonth(), auj.getUTCDate()),
+      );
       await prisma.certificate.update({ where: { id }, data: { expiryDate: newExpiry, issuedAt } });
     }
-    await prisma.certificateHistory.create({ data: { certificateId: id, action: "renewed", comment, performedBy: user.username } });
+    await prisma.certificateHistory.create({
+      data: { certificateId: id, action: "renewed", comment, performedBy: user.username },
+    });
     invalidateNavCounts();
-    return redirigerAvecMessage(`/certificates/${id}`, "Certificat marqué comme renouvelé", "success");
+    return redirigerAvecMessage(
+      `/certificates/${id}`,
+      "Certificat marqué comme renouvelé",
+      "success",
+    );
   });
 }

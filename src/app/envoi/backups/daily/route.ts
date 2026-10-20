@@ -10,11 +10,21 @@ export async function POST(req: Request) {
   return traiterFormulaire(req, async (form) => {
     const user = await requireEdit("backups");
     const today = aujourdhui();
-    const backups = await prisma.backup.findMany({ where: { isActive: true }, orderBy: { serviceName: "asc" } });
+    const backups = await prisma.backup.findMany({
+      where: { isActive: true },
+      orderBy: { serviceName: "asc" },
+    });
     for (const b of backups) {
       const status = form.get(`status_${b.id}`);
       const comment = form.get(`comment_${b.id}`);
-      if (typeof status === "string" && status) await recordBackupCheck(b.id, today, status, typeof comment === "string" ? comment : "", user.username);
+      if (typeof status === "string" && status)
+        await recordBackupCheck(
+          b.id,
+          today,
+          status,
+          typeof comment === "string" ? comment : "",
+          user.username,
+        );
     }
     invalidateNavCounts();
     return redirigerAvecMessage("/backups/daily", "Checks quotidiens enregistres", "success");

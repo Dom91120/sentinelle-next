@@ -30,13 +30,20 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
           <h1 className="page-title">
             Comptes <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">Rotation des mots de passe des comptes techniques et d'administration</p>
+          <p className="page-subtitle">
+            Rotation des mots de passe des comptes techniques et d'administration
+          </p>
         </div>
         <div className="page-actions">
           {cfg.LDAP_ENABLED && cfg.LDAP_BIND_USER && user.canEdit("accounts") ? (
             <form method="POST" action="/accounts/sync-ad" className="d-inline">
               <input type="hidden" name="csrf_token" value={csrf} />
-              <button type="submit" className="btn btn-outline-secondary" title="Synchroniser depuis Active Directory" data-confirm="Synchroniser les expirations de mots de passe depuis l'AD ?">
+              <button
+                type="submit"
+                className="btn btn-outline-secondary"
+                title="Synchroniser depuis Active Directory"
+                data-confirm="Synchroniser les expirations de mots de passe depuis l'AD ?"
+              >
                 <Icone bi="bi-arrow-repeat" taille="1em" classes="me-1" /> Synchroniser AD
               </button>
             </form>
@@ -78,20 +85,32 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
                 rows.map((account) => (
                   <tr key={account.id} className={`row-${account.status}`}>
                     <td>
-                      <a href={`/accounts/${account.id}`} className="fw-medium text-decoration-none">
+                      <a
+                        href={`/accounts/${account.id}`}
+                        className="fw-medium text-decoration-none"
+                      >
                         {account.serviceName}
                       </a>
-                      {account.url ? <small className="d-block text-muted">{account.url}</small> : null}
+                      {account.url ? (
+                        <small className="d-block text-muted">{account.url}</small>
+                      ) : null}
                     </td>
                     <td>{account.username}</td>
                     <td>
                       {account.nextPasswordChange ? (
-                        <Cellule principal={dateCourte(account.nextPasswordChange)} secondaire={<DelaiBadge days={account.nextPasswordChange} status={account.status} />} />
+                        <Cellule
+                          principal={dateCourte(account.nextPasswordChange)}
+                          secondaire={
+                            <DelaiBadge days={account.nextPasswordChange} status={account.status} />
+                          }
+                        />
                       ) : (
                         <span className="text-muted">à renseigner</span>
                       )}
                     </td>
-                    <td>{account.lastPasswordChange ? dateCourte(account.lastPasswordChange) : "—"}</td>
+                    <td>
+                      {account.lastPasswordChange ? dateCourte(account.lastPasswordChange) : "—"}
+                    </td>
                     <td>{account.rotationDays ? `tous les ${account.rotationDays} j` : "—"}</td>
                     <td>
                       <StatusBadge status={account.status} />
@@ -99,7 +118,11 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
                   </tr>
                 ))
               ) : (
-                <Vide colonnes={7} message="Aucun compte enregistré." urlAjout={user.canEdit("accounts") ? "/accounts/create" : null} />
+                <Vide
+                  colonnes={7}
+                  message="Aucun compte enregistré."
+                  urlAjout={user.canEdit("accounts") ? "/accounts/create" : null}
+                />
               )}
             </tbody>
           </table>

@@ -11,7 +11,14 @@ export async function POST(req: Request) {
     const name = nomDe(form);
     if (!name) return redirigerAvecMessage("/updates/create", "Le nom est obligatoire.", "danger");
     const u = await prisma.systemUpdate.create({ data: await depuisFormulaire(form, name) });
-    await prisma.updateHistory.create({ data: { updateId: u.id, action: "creation", comment: `Mise a jour creee : ${u.name}`, performedBy: user.username } });
+    await prisma.updateHistory.create({
+      data: {
+        updateId: u.id,
+        action: "creation",
+        comment: `Mise a jour creee : ${u.name}`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage("/updates", "Mise a jour ajoutee", "success");
   });

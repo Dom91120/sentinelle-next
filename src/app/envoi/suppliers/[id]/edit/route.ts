@@ -14,7 +14,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!supplier) return pasTrouve();
     const data = depuisFormulaire(form);
     await prisma.supplier.update({ where: { id }, data });
-    await auditRecord("modification fournisseur", String(data.name ?? supplier.name), "contrats", user.username);
+    await auditRecord(
+      "modification fournisseur",
+      String(data.name ?? supplier.name),
+      "contrats",
+      user.username,
+    );
     return redirigerAvecMessage(`/suppliers/${id}`, "Fournisseur modifié", "success");
   });
 }

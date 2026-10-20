@@ -9,10 +9,20 @@ export async function POST(req: Request) {
   return traiterFormulaire(req, async (form) => {
     const user = await requireEdit("accounts");
     const data = await depuisFormulaire(form);
-    if (!data) return redirigerAvecMessage("/accounts/create", "Le service et l'identifiant sont obligatoires.", "danger");
+    if (!data)
+      return redirigerAvecMessage(
+        "/accounts/create",
+        "Le service et l'identifiant sont obligatoires.",
+        "danger",
+      );
     const a = await prisma.account.create({ data });
     await prisma.accountHistory.create({
-      data: { accountId: a.id, action: "creation", comment: `Compte créé : ${a.serviceName} (${a.username})`, performedBy: user.username },
+      data: {
+        accountId: a.id,
+        action: "creation",
+        comment: `Compte créé : ${a.serviceName} (${a.username})`,
+        performedBy: user.username,
+      },
     });
     invalidateNavCounts();
     return redirigerAvecMessage("/accounts", "Compte ajouté avec succès", "success");

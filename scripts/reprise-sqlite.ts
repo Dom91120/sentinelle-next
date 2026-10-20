@@ -24,7 +24,13 @@
  *  - tables dormantes ignorées : asset, contract_item, login_throttle.
  */
 import "dotenv/config";
-import { createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import {
+  createDecipheriv,
+  createHash,
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
+} from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
@@ -64,7 +70,9 @@ function lireEnvFlask(): Record<string, string> {
 }
 
 const envFlask = lireEnvFlask();
-const SQLITE = process.env.SENTINELLE_SQLITE ?? path.resolve(process.cwd(), "../sentinelle/instance/admin_dashboard.db");
+const SQLITE =
+  process.env.SENTINELLE_SQLITE ??
+  path.resolve(process.cwd(), "../sentinelle/instance/admin_dashboard.db");
 const SECRET_KEY = process.env.SENTINELLE_SECRET_KEY ?? envFlask.SECRET_KEY ?? "";
 
 // ── Conversion des valeurs ──
@@ -169,7 +177,9 @@ async function colonnesPg(table: string): Promise<ColInfo[]> {
 
 function colonnesSqlite(db: Database.Database, table: string): string[] {
   try {
-    return (db.prepare(`PRAGMA table_info("${table}")`).all() as { name: string }[]).map((r) => r.name);
+    return (db.prepare(`PRAGMA table_info("${table}")`).all() as { name: string }[]).map(
+      (r) => r.name,
+    );
   } catch {
     return [];
   }
@@ -228,7 +238,12 @@ async function copierUtilisateurs(db: Database.Database): Promise<void> {
       },
     });
     await prisma.authAccount.create({
-      data: { accountId: id, providerId: "credential", userId: id, password: String(u.password_hash ?? "") },
+      data: {
+        accountId: id,
+        providerId: "credential",
+        userId: id,
+        password: String(u.password_hash ?? ""),
+      },
     });
     if (aDeuxFa) {
       deuxFa += 1;
@@ -242,13 +257,25 @@ async function copierUtilisateurs(db: Database.Database): Promise<void> {
       });
     }
   }
-  console.log(`  ✓ user : ${rows.length} compte(s)${deuxFa ? `, ${deuxFa} second facteur à réenrôler` : ""}`);
+  console.log(
+    `  ✓ user : ${rows.length} compte(s)${deuxFa ? `, ${deuxFa} second facteur à réenrôler` : ""}`,
+  );
 }
 
-const SECRETS = new Set(["MAIL_PASSWORD", "O365_CLIENT_SECRET", "LDAP_BIND_PASSWORD", "SESAME_API_TOKEN", "CHATIA_API_TOKEN"]);
+const SECRETS = new Set([
+  "MAIL_PASSWORD",
+  "O365_CLIENT_SECRET",
+  "LDAP_BIND_PASSWORD",
+  "SESAME_API_TOKEN",
+  "CHATIA_API_TOKEN",
+]);
 
 async function copierConfig(db: Database.Database): Promise<void> {
-  const rows = db.prepare('SELECT key, value, is_secret FROM "app_config"').all() as { key: string; value: string | null; is_secret: number }[];
+  const rows = db.prepare('SELECT key, value, is_secret FROM "app_config"').all() as {
+    key: string;
+    value: string | null;
+    is_secret: number;
+  }[];
   await prisma.$executeRawUnsafe('DELETE FROM "app_config"');
   let dechiffres = 0;
   let echecs = 0;
@@ -261,13 +288,17 @@ async function copierConfig(db: Database.Database): Promise<void> {
         dechiffres += 1;
       } catch (e) {
         echecs += 1;
-        console.warn(`  ! ${r.key} : secret illisible (${e instanceof Error ? e.message : e}) — vidé, à ressaisir dans Préférences`);
+        console.warn(
+          `  ! ${r.key} : secret illisible (${e instanceof Error ? e.message : e}) — vidé, à ressaisir dans Préférences`,
+        );
         value = "";
       }
     }
     await prisma.appConfig.create({ data: { key: r.key, value, isSecret: secret } });
   }
-  console.log(`  ✓ app_config : ${rows.length} clé(s), ${dechiffres} secret(s) repris, ${echecs} à ressaisir`);
+  console.log(
+    `  ✓ app_config : ${rows.length} clé(s), ${dechiffres} secret(s) repris, ${echecs} à ressaisir`,
+  );
   // Jeton Office 365 (fichier o365_token.json à la racine de l'application Flask).
   const tokenPath = path.resolve(path.dirname(SQLITE), "..", "o365_token.json");
   if (existsSync(tokenPath) && SECRET_KEY) {
@@ -294,7 +325,10 @@ async function copierConfig(db: Database.Database): Promise<void> {
 
 async function main(): Promise<void> {
   if (!existsSync(SQLITE)) throw new Error(`Base SQLite introuvable : ${SQLITE}`);
-  if (!SECRET_KEY) console.warn("! SENTINELLE_SECRET_KEY absente : les secrets de configuration seront à ressaisir.");
+  if (!SECRET_KEY)
+    console.warn(
+      "! SENTINELLE_SECRET_KEY absente : les secrets de configuration seront à ressaisir.",
+    );
   console.log(`Reprise depuis ${SQLITE}`);
   const db = new Database(SQLITE, { readonly: true, fileMustExist: true });
   await prisma.$transaction(

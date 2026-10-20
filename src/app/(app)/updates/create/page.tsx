@@ -14,7 +14,14 @@ export default async function UpdateCreate() {
   return (
     <>
       <EnteteForm titre="Ajouter — Mises à jour" retour="/updates" />
-      <FormCorps update={null} {...ctx} user={page.user} csrf={page.csrf} nonce={page.nonce} retour="/updates" />
+      <FormCorps
+        update={null}
+        {...ctx}
+        user={page.user}
+        csrf={page.csrf}
+        nonce={page.nonce}
+        retour="/updates"
+      />
     </>
   );
 }

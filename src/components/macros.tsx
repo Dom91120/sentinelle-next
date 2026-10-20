@@ -4,7 +4,13 @@
 import { delai, jours, STATUS_LABELS, statusLabel } from "@/lib/libelles";
 
 /** status_badge(status) : UNE couleur, UN mot, partout. */
-export function StatusBadge({ status, fallback }: { status: string | null | undefined; fallback?: string }) {
+export function StatusBadge({
+  status,
+  fallback,
+}: {
+  status: string | null | undefined;
+  fallback?: string;
+}) {
   const cls = status && status in STATUS_LABELS ? status : "muted";
   return <span className={`badge-status badge-${cls}`}>{statusLabel(status, fallback)}</span>;
 }

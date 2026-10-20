@@ -18,7 +18,12 @@ export default async function SupplierEdit({ params }: { params: Promise<{ id: s
   return (
     <>
       <EnteteForm titre="Modifier le fournisseur" retour={retour} />
-      <FormulaireFournisseur supplier={supplier} user={page.user} csrf={page.csrf} retour={retour} />
+      <FormulaireFournisseur
+        supplier={supplier}
+        user={page.user}
+        csrf={page.csrf}
+        retour={retour}
+      />
     </>
   );
 }

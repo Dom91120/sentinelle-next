@@ -7,7 +7,11 @@ import { contexteModule } from "@/server/module";
 export const metadata = { title: "Ajouter un certificat - Sentinelle" };
 
 /** certificates/form.html (création) */
-export default async function CertificateCreate({ searchParams }: { searchParams: Promise<{ kind?: string }> }) {
+export default async function CertificateCreate({
+  searchParams,
+}: {
+  searchParams: Promise<{ kind?: string }>;
+}) {
   const page = await contexteModule("certificates");
   await requireEdit("certificates");
   const kind = kindDe((await searchParams).kind);
@@ -15,7 +19,15 @@ export default async function CertificateCreate({ searchParams }: { searchParams
   return (
     <>
       <EnteteForm titre="Ajouter un certificat" retour="/certificates" />
-      <FormCorps certificate={null} kind={kind} {...ctx} user={page.user} csrf={page.csrf} nonce={page.nonce} retour="/certificates" />
+      <FormCorps
+        certificate={null}
+        kind={kind}
+        {...ctx}
+        user={page.user}
+        csrf={page.csrf}
+        nonce={page.nonce}
+        retour="/certificates"
+      />
     </>
   );
 }

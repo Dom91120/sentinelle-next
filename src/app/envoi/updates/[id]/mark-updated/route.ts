@@ -13,11 +13,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const update = await prisma.systemUpdate.findUnique({ where: { id } });
     if (!update) return pasTrouve();
     const currentVersion = update.latestVersion ? update.latestVersion : update.currentVersion;
-    await prisma.systemUpdate.update({ where: { id }, data: { currentVersion, status: "up_to_date", lastUpdate: aujourdhui() } });
-    const note = typeof form.get("comment") === "string" ? (form.get("comment") as string).trim() : "";
+    await prisma.systemUpdate.update({
+      where: { id },
+      data: { currentVersion, status: "up_to_date", lastUpdate: aujourdhui() },
+    });
+    const note =
+      typeof form.get("comment") === "string" ? (form.get("comment") as string).trim() : "";
     let comment = `Mis a jour en version ${currentVersion || "?"}`;
     if (note) comment += ` — ${note}`;
-    await prisma.updateHistory.create({ data: { updateId: id, action: "updated", comment, performedBy: user.username } });
+    await prisma.updateHistory.create({
+      data: { updateId: id, action: "updated", comment, performedBy: user.username },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage(`/updates/${id}`, "Marque comme a jour", "success");
   });

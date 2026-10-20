@@ -6,14 +6,14 @@
  * La session elle-même est ouverte par Better Auth (`signInUsername`).
  */
 import { randomBytes } from "node:crypto";
-import { headers } from "next/headers";
 import { APIError } from "better-auth/api";
+import { headers } from "next/headers";
 import { poserMotDePasse } from "@/server/amorcage";
 import { auditRecord } from "@/server/audit";
 import { auth } from "@/server/auth";
 import { type AppSettings, getSettings } from "@/server/config-store";
 import { prisma } from "@/server/db";
-import { ldapAuthenticate, type LdapInfo } from "@/server/ldap";
+import { type LdapInfo, ldapAuthenticate } from "@/server/ldap";
 import { issueLdapToken } from "@/server/ldap-token";
 import { verifyPassword } from "@/server/password";
 import { setPending2fa } from "@/server/session-2fa";
@@ -25,7 +25,7 @@ export type Connexion =
 
 /** Ne garde `next` que s'il s'agit d'un chemin interne (pas de redirection ouverte). */
 export function safeNext(value: string | null | undefined): string | null {
-  if (value && value.startsWith("/") && !value.startsWith("//")) return value;
+  if (value?.startsWith("/") && !value.startsWith("//")) return value;
   return null;
 }
 
@@ -37,27 +37,54 @@ async function provisionLdapUser(cfg: AppSettings, username: string, info: LdapI
   let email = info?.email || `${username}@${domain}`;
   if (await prisma.user.findUnique({ where: { email } })) email = `${username}@ldap.local`;
   const u = await prisma.user.create({
-    data: { username, displayUsername: username, email, name: info?.display_name || username, role, authSource: "ldap" },
+    data: {
+      username,
+      displayUsername: username,
+      email,
+      name: info?.display_name || username,
+      role,
+      authSource: "ldap",
+    },
   });
   // Mot de passe local inutilisable : il s'authentifiera toujours via LDAP.
   await poserMotDePasse(u.id, randomBytes(24).toString("base64url"));
-  await auditRecord("creation utilisateur (LDAP)", `${username} (role ${role})`, "utilisateurs", username);
+  await auditRecord(
+    "creation utilisateur (LDAP)",
+    `${username} (role ${role})`,
+    "utilisateurs",
+    username,
+  );
   return u;
 }
 
 async function ouvrirSession(username: string, password: string): Promise<"ok" | "2fa"> {
-  const res = await auth.api.signInUsername({ body: { username, password }, headers: await headers() });
-  if (res && "twoFactorRedirect" in (res as object) && (res as { twoFactorRedirect?: boolean }).twoFactorRedirect) return "2fa";
+  const res = await auth.api.signInUsername({
+    body: { username, password },
+    headers: await headers(),
+  });
+  if (
+    res &&
+    "twoFactorRedirect" in (res as object) &&
+    (res as { twoFactorRedirect?: boolean }).twoFactorRedirect
+  )
+    return "2fa";
   return "ok";
 }
 
-export async function seConnecter(username: string, password: string, ip: string, next: string | null): Promise<Connexion> {
+export async function seConnecter(
+  username: string,
+  password: string,
+  ip: string,
+  next: string | null,
+): Promise<Connexion> {
   const cfg = await getSettings();
   const now = new Date();
   const maxAttempts = cfg.LOGIN_MAX_ATTEMPTS;
   const lockoutMin = cfg.LOGIN_LOCKOUT_MINUTES;
 
-  const throttle = await prisma.loginThrottle.findUnique({ where: { username_ip: { username, ip } } });
+  const throttle = await prisma.loginThrottle.findUnique({
+    where: { username_ip: { username, ip } },
+  });
   if (throttle?.lockedUntil && throttle.lockedUntil > now) {
     const mins = Math.floor((throttle.lockedUntil.getTime() - now.getTime()) / 60000) + 1;
     return { ok: false, message: `Trop de tentatives. Reessayez dans ${mins} minute(s).` };
@@ -67,14 +94,21 @@ export async function seConnecter(username: string, password: string, ip: string
   let authed = false;
   let ldapUsed = false;
   if (user) {
-    const cred = await prisma.authAccount.findFirst({ where: { userId: user.id, providerId: "credential" } });
+    const cred = await prisma.authAccount.findFirst({
+      where: { userId: user.id, providerId: "credential" },
+    });
     authed = Boolean(cred?.password && (await verifyPassword(cred.password, password)));
   }
   if (!authed) {
     const info = await ldapAuthenticate(cfg, username, password);
     if (info !== null && user !== null && user.authSource !== "ldap") {
       // Homonyme d'un compte LOCAL : l'AD n'en est pas l'autorité.
-      await auditRecord("refus LDAP : compte local homonyme", `identifiant: ${username}`, "securite", username);
+      await auditRecord(
+        "refus LDAP : compte local homonyme",
+        `identifiant: ${username}`,
+        "securite",
+        username,
+      );
     } else if (info !== null) {
       authed = true;
       ldapUsed = true;

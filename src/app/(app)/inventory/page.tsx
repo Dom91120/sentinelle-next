@@ -2,8 +2,17 @@ import { Icone, Lucide } from "@/components/icones";
 import { PaginationBar } from "@/components/liste";
 import { InventoryNav } from "@/components/partials";
 import { ScriptDiffere } from "@/components/scripts";
-import { CRITICALITY_COLORS, CRITICALITY_LABELS, EQUIPMENT_FAMILIES, EQUIPMENT_FAMILY_LABELS, EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS, equipmentFamily, statusRank } from "@/lib/constantes";
-import { STATUS_LABELS, dateCourte } from "@/lib/libelles";
+import {
+  CRITICALITY_COLORS,
+  CRITICALITY_LABELS,
+  EQUIPMENT_FAMILIES,
+  EQUIPMENT_FAMILY_LABELS,
+  EQUIPMENT_KIND_ICONS,
+  EQUIPMENT_KIND_LABELS,
+  equipmentFamily,
+  statusRank,
+} from "@/lib/constantes";
+import { dateCourte, STATUS_LABELS } from "@/lib/libelles";
 import { warrantyDaysLeft } from "@/lib/statuts";
 import { ENV_CHOICES, SEARCH_FIELDS } from "@/modules/inventory/server";
 import { envLabel, kindLabel } from "@/modules/inventory/vues";
@@ -186,7 +195,8 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
     const cle = (e: (typeof items)[number]): string | number => {
       if (sort === "name") return (e.name ?? "").toLowerCase();
       if (sort === "status") return statusRank(e.status);
-      if (sort === "storage") return [e.hdd1Go, e.hdd2Go, e.hdd3Go].reduce<number>((a, x) => a + (x ?? 0), 0);
+      if (sort === "storage")
+        return [e.hdd1Go, e.hdd2Go, e.hdd3Go].reduce<number>((a, x) => a + (x ?? 0), 0);
       const v = (e as unknown as Record<string, unknown>)[SORT_ATTR[sort]];
       if (NUMERIC.has(sort)) return typeof v === "number" ? v : -1;
       if (DATES.has(sort)) return v instanceof Date ? v.getTime() : Number.NEGATIVE_INFINITY;
@@ -206,11 +216,16 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
   const perPage = await resolvePerPage(params, page.user, "inventory.list");
   const [rows, p] = paginate(items, params, perPage);
   const counts: Record<string, number> = {};
-  for (const k of natures) counts[k] = await prisma.equipment.count({ where: { isActive: true, kind: k } });
+  for (const k of natures)
+    counts[k] = await prisma.equipment.count({ where: { isActive: true, kind: k } });
   const ids = rows.map((e) => e.id);
-  const logiciels = await prisma.softwareEquipment.findMany({ where: { equipmentId: { in: ids } }, include: { software: { select: { name: true } } } });
+  const logiciels = await prisma.softwareEquipment.findMany({
+    where: { equipmentId: { in: ids } },
+    include: { software: { select: { name: true } } },
+  });
   const logicielsPar = new Map<number, string[]>();
-  for (const l of logiciels) logicielsPar.set(l.equipmentId, [...(logicielsPar.get(l.equipmentId) ?? []), l.software.name]);
+  for (const l of logiciels)
+    logicielsPar.set(l.equipmentId, [...(logicielsPar.get(l.equipmentId) ?? []), l.software.name]);
 
   const { user } = page;
   const reseau = famille === "reseau";
@@ -229,7 +244,11 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
     return (
       <a href={`/inventory?${a.toString()}`} className="th-sort">
         {label}
-        {sort === key ? <Icone bi={`bi-caret-${direction === "desc" ? "down" : "up"}-fill`} taille="1em" /> : <Icone bi="bi-arrow-down-up" taille="1em" classes="th-sort-idle" />}
+        {sort === key ? (
+          <Icone bi={`bi-caret-${direction === "desc" ? "down" : "up"}-fill`} taille="1em" />
+        ) : (
+          <Icone bi="bi-arrow-down-up" taille="1em" classes="th-sort-idle" />
+        )}
       </a>
     );
   };
@@ -242,7 +261,11 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
           <h1 className="page-title">
             {EQUIPMENT_FAMILY_LABELS[famille]} <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">{reseau ? "Switches, pare-feu, routeurs et bornes WiFi" : "VM, serveurs physiques, NAS et baies de stockage"}</p>
+          <p className="page-subtitle">
+            {reseau
+              ? "Switches, pare-feu, routeurs et bornes WiFi"
+              : "VM, serveurs physiques, NAS et baies de stockage"}
+          </p>
         </div>
         {user.canEdit("inventory") ? (
           <div className="page-actions">
@@ -272,8 +295,13 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
                   Tous <span className="seg-tab-count">{totalCounts}</span>
                 </a>
                 {natures.map((val) => (
-                  <a key={val} className={`seg-tab${kind === val ? " active" : ""}`} href={lien({ famille, kind: val, q })}>
-                    {EQUIPMENT_KIND_LABELS[val]} <span className="seg-tab-count">{counts[val]}</span>
+                  <a
+                    key={val}
+                    className={`seg-tab${kind === val ? " active" : ""}`}
+                    href={lien({ famille, kind: val, q })}
+                  >
+                    {EQUIPMENT_KIND_LABELS[val]}{" "}
+                    <span className="seg-tab-count">{counts[val]}</span>
                   </a>
                 ))}
               </>
@@ -282,26 +310,57 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
           <div className="flex-grow-1 justify-content-end d-flex flex-wrap align-items-center gap-2">
             <div className="list-search">
               <Icone bi="bi-search" taille="1em" />
-              <input type="search" name="q" defaultValue={q} className="form-control" placeholder="Rechercher…" aria-label="Rechercher dans la liste" />
+              <input
+                type="search"
+                name="q"
+                defaultValue={q}
+                className="form-control"
+                placeholder="Rechercher…"
+                aria-label="Rechercher dans la liste"
+              />
             </div>
-            <button className="btn btn-outline-secondary btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#advFilter" title="Filtre avancé" aria-label="Filtre avancé">
+            <button
+              className="btn btn-outline-secondary btn-icon"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#advFilter"
+              title="Filtre avancé"
+              aria-label="Filtre avancé"
+            >
               <Icone bi="bi-funnel" taille="1em" />
               {activeFilters ? <span className="badge bg-primary"> {activeFilters}</span> : null}
             </button>
             {q || activeFilters ? (
-              <a href={lien({ famille, kind })} className="btn btn-ghost" title="Effacer la recherche">
+              <a
+                href={lien({ famille, kind })}
+                className="btn btn-ghost"
+                title="Effacer la recherche"
+              >
                 <Icone bi="bi-x-lg" taille="1em" classes="me-1" />
                 Effacer
               </a>
             ) : null}
             <div className="dropdown">
-              <button className="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+              <button
+                className="btn btn-outline-secondary dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+              >
                 <Icone bi="bi-layout-three-columns" taille="1em" classes="me-1" /> Colonnes
               </button>
-              <div className="dropdown-menu dropdown-menu-end p-2" style={{ maxHeight: 320, overflowY: "auto" }}>
+              <div
+                className="dropdown-menu dropdown-menu-end p-2"
+                style={{ maxHeight: 320, overflowY: "auto" }}
+              >
                 {COLUMNS.map(([key, label]) => (
                   <label key={key} className="dropdown-item d-flex align-items-center gap-2 mb-0">
-                    <input type="checkbox" className="form-check-input mt-0 col-toggle" value={key} /> {label}
+                    <input
+                      type="checkbox"
+                      className="form-check-input mt-0 col-toggle"
+                      value={key}
+                    />{" "}
+                    {label}
                   </label>
                 ))}
               </div>
@@ -314,7 +373,11 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
             <div className="row g-2 align-items-end">
               <div className="col-md-2">
                 <label className="form-label small mb-1">Environnement</label>
-                <select name="environment" className="form-select form-select-sm" defaultValue={f.environment}>
+                <select
+                  name="environment"
+                  className="form-select form-select-sm"
+                  defaultValue={f.environment}
+                >
                   {ENV_CHOICES.map(([v, l]) => (
                     <option key={v} value={v}>
                       {l}
@@ -324,7 +387,11 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
               </div>
               <div className="col-md-2">
                 <label className="form-label small mb-1">Criticité</label>
-                <select name="criticality" className="form-select form-select-sm" defaultValue={f.criticality}>
+                <select
+                  name="criticality"
+                  className="form-select form-select-sm"
+                  defaultValue={f.criticality}
+                >
                   <option value="">—</option>
                   {Object.keys(CRITICALITY_LABELS).map((lvl) => (
                     <option key={lvl} value={lvl}>
@@ -335,7 +402,11 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
               </div>
               <div className="col-md-2">
                 <label className="form-label small mb-1">Statut</label>
-                <select name="status" className="form-select form-select-sm" defaultValue={f.status}>
+                <select
+                  name="status"
+                  className="form-select form-select-sm"
+                  defaultValue={f.status}
+                >
                   <option value="">—</option>
                   {Object.entries(STATUS_LABELS).map(([v, l]) => (
                     <option key={v} value={v}>
@@ -346,15 +417,31 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
               </div>
               <div className="col-md-3">
                 <label className="form-label small mb-1">OS contient</label>
-                <input type="text" name="os" defaultValue={f.os} className="form-control form-control-sm" placeholder="ex: Windows" />
+                <input
+                  type="text"
+                  name="os"
+                  defaultValue={f.os}
+                  className="form-control form-control-sm"
+                  placeholder="ex: Windows"
+                />
               </div>
               <div className="col-md-3">
                 <label className="form-label small mb-1">VLAN contient</label>
-                <input type="text" name="vlan" defaultValue={f.vlan} className="form-control form-control-sm" placeholder="ex: 10, prod..." />
+                <input
+                  type="text"
+                  name="vlan"
+                  defaultValue={f.vlan}
+                  className="form-control form-control-sm"
+                  placeholder="ex: 10, prod..."
+                />
               </div>
               <div className="col-md-2">
                 <label className="form-label small mb-1">Supervision</label>
-                <select name="supervision" className="form-select form-select-sm" defaultValue={f.supervision}>
+                <select
+                  name="supervision"
+                  className="form-select form-select-sm"
+                  defaultValue={f.supervision}
+                >
                   <option value="">—</option>
                   <option value="yes">Supervisé</option>
                   <option value="no">Non supervisé</option>
@@ -362,7 +449,11 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
               </div>
               <div className="col-md-2">
                 <label className="form-label small mb-1">Garantie</label>
-                <select name="warranty" className="form-select form-select-sm" defaultValue={f.warranty}>
+                <select
+                  name="warranty"
+                  className="form-select form-select-sm"
+                  defaultValue={f.warranty}
+                >
                   <option value="">—</option>
                   <option value="expiring">Expire ≤ 90 j</option>
                   <option value="expired">Expirée</option>
@@ -370,7 +461,14 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
               </div>
               <div className="col-md-3 d-flex align-items-center pt-3">
                 <div className="form-check">
-                  <input type="checkbox" className="form-check-input" name="no_backup" value="1" id="noBackup" defaultChecked={f.no_backup === "1"} />
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    name="no_backup"
+                    value="1"
+                    id="noBackup"
+                    defaultChecked={f.no_backup === "1"}
+                  />
                   <label className="form-check-label small" htmlFor="noBackup">
                     Sans sauvegarde
                   </label>
@@ -403,7 +501,8 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
             <tbody>
               {rows.length ? (
                 rows.map((e) => {
-                  const num = (v: number | null) => (v === null || v === undefined ? "" : String(v));
+                  const num = (v: number | null) =>
+                    v === null || v === undefined ? "" : String(v);
                   const vals: Record<string, string> = {
                     kind: kindLabel(e),
                     environment: envLabel(e),
@@ -444,7 +543,10 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
                   };
                   const reasons = e.reasons;
                   return (
-                    <tr key={e.id} className={`row-${e.status}${e.environment === "decommissioned" ? " inv-decommissioned" : ""}`}>
+                    <tr
+                      key={e.id}
+                      className={`row-${e.status}${e.environment === "decommissioned" ? " inv-decommissioned" : ""}`}
+                    >
                       <td>
                         <a href={`/inventory/${e.id}`} className="fw-medium text-decoration-none">
                           {e.name}
@@ -459,12 +561,20 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
                         <td key={key} data-col={key}>
                           {key === "kind" ? (
                             <span className="text-nowrap fw-semibold">
-                              <Lucide nom={EQUIPMENT_KIND_ICONS[e.kind] ?? "box"} taille={15} classes={`me-1 kind-icon kind-icon--${e.kind}`} />
+                              <Lucide
+                                nom={EQUIPMENT_KIND_ICONS[e.kind] ?? "box"}
+                                taille={15}
+                                classes={`me-1 kind-icon kind-icon--${e.kind}`}
+                              />
                               {vals.kind}
                             </span>
                           ) : key === "criticality" ? (
                             e.criticality ? (
-                              <span className={`badge bg-${CRITICALITY_COLORS[e.criticality] ?? "secondary"}`}>{e.criticality}</span>
+                              <span
+                                className={`badge bg-${CRITICALITY_COLORS[e.criticality] ?? "secondary"}`}
+                              >
+                                {e.criticality}
+                              </span>
                             ) : (
                               "-"
                             )
@@ -474,7 +584,15 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
                         </td>
                       ))}
                       <td>
-                        <span className={`badge-status badge-${e.status}`} data-bs-toggle="tooltip" title={reasons.length ? reasons.join(" · ") : "Aucun point d’attention — équipement OK"}>
+                        <span
+                          className={`badge-status badge-${e.status}`}
+                          data-bs-toggle="tooltip"
+                          title={
+                            reasons.length
+                              ? reasons.join(" · ")
+                              : "Aucun point d’attention — équipement OK"
+                          }
+                        >
                           {STATUS_LABELS[e.status] ?? e.status}
                         </span>
                       </td>
@@ -489,7 +607,8 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
                       Aucun équipement.{" "}
                       {user.canEdit("inventory") ? (
                         <>
-                          <a href="/inventory/import">Importer votre fichier Excel</a> ou <a href={`/inventory/create?famille=${famille}`}>en ajouter un</a>.
+                          <a href="/inventory/import">Importer votre fichier Excel</a> ou{" "}
+                          <a href={`/inventory/create?famille=${famille}`}>en ajouter un</a>.
                         </>
                       ) : null}
                     </p>

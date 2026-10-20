@@ -104,7 +104,11 @@ export async function traiterFormulaire(
   } catch (e) {
     if (e && typeof e === "object" && "digest" in e) throw e; // redirect()/notFound() de Next
     console.error("[formulaire] erreur :", e);
-    return redirigerAvecMessage(referer(req, retourErreur), "Une erreur est survenue. L'action n'a pas été enregistrée.", "danger");
+    return redirigerAvecMessage(
+      referer(req, retourErreur),
+      "Une erreur est survenue. L'action n'a pas été enregistrée.",
+      "danger",
+    );
   }
 }
 

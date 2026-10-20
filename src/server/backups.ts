@@ -2,7 +2,11 @@
 import { dateCourte } from "@/lib/libelles";
 import { prisma } from "@/server/db";
 
-export const BACKUP_STATUS_LABELS: Record<string, string> = { ok: "OK", warning: "Warning", failed: "Échec" };
+export const BACKUP_STATUS_LABELS: Record<string, string> = {
+  ok: "OK",
+  warning: "Warning",
+  failed: "Échec",
+};
 
 /**
  * Crée ou met à jour le check d'un jour et trace l'action dans l'historique.
@@ -17,7 +21,9 @@ export async function recordBackupCheck(
 ): Promise<void> {
   const status = statusIn in BACKUP_STATUS_LABELS ? statusIn : "ok";
   const label = BACKUP_STATUS_LABELS[status] ?? status;
-  const existing = await prisma.backupCheck.findUnique({ where: { backupId_checkDate: { backupId, checkDate } } });
+  const existing = await prisma.backupCheck.findUnique({
+    where: { backupId_checkDate: { backupId, checkDate } },
+  });
   let note: string;
   if (existing) {
     const old = existing.status;
@@ -36,7 +42,14 @@ export async function recordBackupCheck(
         : `Re-validation du ${dateCourte(checkDate)} : ${label}`;
   } else {
     await prisma.backupCheck.create({
-      data: { backupId, checkDate, status, firstStatus: status, comment: comment || null, checkedBy: user },
+      data: {
+        backupId,
+        checkDate,
+        status,
+        firstStatus: status,
+        comment: comment || null,
+        checkedBy: user,
+      },
     });
     note = `Check du ${dateCourte(checkDate)} : ${label}`;
   }

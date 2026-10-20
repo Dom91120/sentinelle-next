@@ -10,8 +10,9 @@
  * Better Auth (table two_factor, secret chiffré) : on écrit la ligne comme le
  * plugin l'écrirait, et c'est lui qui vérifie (`/two-factor/verify-totp`).
  */
-import { generateRandomString, symmetricEncrypt } from "better-auth/crypto";
+
 import { createOTP } from "@better-auth/utils/otp";
+import { generateRandomString, symmetricEncrypt } from "better-auth/crypto";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/db";
 
@@ -24,7 +25,13 @@ export async function initTwoFactor(userId: string, username: string): Promise<E
   const encrypted = await symmetricEncrypt({ key: ctx.secretConfig, data: secret });
   const backup = await symmetricEncrypt({ key: ctx.secretConfig, data: JSON.stringify([]) });
   const existing = await prisma.twoFactor.findFirst({ where: { userId } });
-  const data = { secret: encrypted, backupCodes: backup, verified: false, failedVerificationCount: 0, lockedUntil: null };
+  const data = {
+    secret: encrypted,
+    backupCodes: backup,
+    verified: false,
+    failedVerificationCount: 0,
+    lockedUntil: null,
+  };
   if (existing) await prisma.twoFactor.update({ where: { id: existing.id }, data });
   else await prisma.twoFactor.create({ data: { ...data, userId } });
   const uri = createOTP(secret, { digits: 6, period: 30 }).url("Sentinelle", username);
@@ -33,7 +40,10 @@ export async function initTwoFactor(userId: string, username: string): Promise<E
 }
 
 /** L'enrôlement en attente de confirmation (secret posé mais non vérifié). */
-export async function pendingEnrolement(userId: string, username: string): Promise<Enrolement | null> {
+export async function pendingEnrolement(
+  userId: string,
+  username: string,
+): Promise<Enrolement | null> {
   const ctx = await auth.$context;
   const row = await prisma.twoFactor.findFirst({ where: { userId, verified: false } });
   if (!row) return null;

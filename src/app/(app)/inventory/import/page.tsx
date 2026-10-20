@@ -23,10 +23,20 @@ export default async function InventoryImport() {
             <form method="POST" encType="multipart/form-data">
               <input type="hidden" name="csrf_token" value={page.csrf} />
               <label className="form-label fw-medium">Fichier Excel (.xlsx)</label>
-              <input type="file" name="file" accept=".xlsx,.xlsm" className="form-control" required />
+              <input
+                type="file"
+                name="file"
+                accept=".xlsx,.xlsm"
+                className="form-control"
+                required
+              />
               <div className="alert alert-info py-2 small mt-3 mb-0">
                 <Icone bi="bi-info-circle" taille="1em" classes="me-1" />
-                Le classeur doit contenir un ou plusieurs onglets nommés <strong>VM</strong>, <strong>Physiques</strong> et/ou <strong>NAS</strong>. Les colonnes sont reconnues automatiquement (Nom, OS, Adresse IP, Fin de garantie, Criticité, Sauvegarde…). Les lignes sans nom et les colonnes inconnues sont ignorées. L'import <strong>ajoute</strong> les équipements (il ne remplace pas l'existant).
+                Le classeur doit contenir un ou plusieurs onglets nommés <strong>VM</strong>,{" "}
+                <strong>Physiques</strong> et/ou <strong>NAS</strong>. Les colonnes sont reconnues
+                automatiquement (Nom, OS, Adresse IP, Fin de garantie, Criticité, Sauvegarde…). Les
+                lignes sans nom et les colonnes inconnues sont ignorées. L'import{" "}
+                <strong>ajoute</strong> les équipements (il ne remplace pas l'existant).
               </div>
               <button type="submit" className="btn btn-primary mt-3">
                 <Icone bi="bi-upload" taille="1em" classes="me-1" /> Importer

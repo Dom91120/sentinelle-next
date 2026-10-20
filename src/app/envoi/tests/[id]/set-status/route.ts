@@ -15,8 +15,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const demande = form.get("status");
     const status = typeof demande === "string" && VALID_STATUS.has(demande) ? demande : "pending";
     await prisma.testTask.update({ where: { id }, data: { status } });
-    await prisma.testHistory.create({ data: { testId: id, action: "status_change", comment: `Statut changé en ${status} (Kanban)`, performedBy: user.username } });
+    await prisma.testHistory.create({
+      data: {
+        testId: id,
+        action: "status_change",
+        comment: `Statut changé en ${status} (Kanban)`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
-    return redirigerAvecMessage(referer(req, "/tests/kanban"), `Statut mis à jour : ${status}`, "success");
+    return redirigerAvecMessage(
+      referer(req, "/tests/kanban"),
+      `Statut mis à jour : ${status}`,
+      "success",
+    );
   });
 }

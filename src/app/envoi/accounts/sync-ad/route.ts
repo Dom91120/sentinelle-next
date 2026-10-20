@@ -11,6 +11,10 @@ export async function POST(req: Request) {
     const [updated, errors] = await syncPasswordExpirations(user.settings);
     if (errors.length) await flash(`Synchro AD : ${errors.slice(0, 3).join(" | ")}`, "warning");
     invalidateNavCounts();
-    return redirigerAvecMessage("/accounts", `${updated} compte(s) mis a jour depuis l'AD.`, updated ? "success" : "info");
+    return redirigerAvecMessage(
+      "/accounts",
+      `${updated} compte(s) mis a jour depuis l'AD.`,
+      updated ? "success" : "info",
+    );
   });
 }

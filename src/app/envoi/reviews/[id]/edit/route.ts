@@ -13,8 +13,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const review = await prisma.accessReview.findUnique({ where: { id } });
     if (!review) return pasTrouve();
     const application = applicationDe(form);
-    if (!application) return redirigerAvecMessage(`/reviews/${id}/edit`, "L'application est obligatoire.", "danger");
-    await prisma.accessReview.update({ where: { id }, data: await depuisFormulaire(form, application) });
+    if (!application)
+      return redirigerAvecMessage(
+        `/reviews/${id}/edit`,
+        "L'application est obligatoire.",
+        "danger",
+      );
+    await prisma.accessReview.update({
+      where: { id },
+      data: await depuisFormulaire(form, application),
+    });
     invalidateNavCounts();
     return redirigerAvecMessage(`/reviews/${id}`, "Revue modifiee", "success");
   });

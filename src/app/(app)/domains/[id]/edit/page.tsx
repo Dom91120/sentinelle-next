@@ -20,7 +20,14 @@ export default async function DomainEdit({ params }: { params: Promise<{ id: str
   return (
     <>
       <EnteteForm titre="Modifier un domaine" retour={retour} />
-      <FormCorps domain={domain} {...ctx} user={page.user} csrf={page.csrf} nonce={page.nonce} retour={retour} />
+      <FormCorps
+        domain={domain}
+        {...ctx}
+        user={page.user}
+        csrf={page.csrf}
+        nonce={page.nonce}
+        retour={retour}
+      />
     </>
   );
 }

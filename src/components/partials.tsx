@@ -2,15 +2,28 @@
  * Partials de fiche : report des alertes (_snooze_card.html), sélecteur
  * d'équipement lié (_equipment_select.html), onglets du matériel (_inventory_nav.html).
  */
-import type { AlertSnooze, Equipment } from "@/generated/prisma/client";
+
 import { Icone } from "@/components/icones";
 import { QaAddLink, QaModalEquipment } from "@/components/quick-add";
+import type { AlertSnooze, Equipment } from "@/generated/prisma/client";
 import { ENVIRONMENT_LABELS, EQUIPMENT_KIND_LABELS, permissionCategory } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import type { CurrentUser } from "@/server/guards";
 
 /** `_snooze_card.html` — le report actif est passé par la page (getActiveSnooze). */
-export function SnoozeCard({ entityType, entityId, user, snooze, csrf }: { entityType: string; entityId: number; user: CurrentUser; snooze: AlertSnooze | null; csrf: string }) {
+export function SnoozeCard({
+  entityType,
+  entityId,
+  user,
+  snooze,
+  csrf,
+}: {
+  entityType: string;
+  entityId: number;
+  user: CurrentUser;
+  snooze: AlertSnooze | null;
+  csrf: string;
+}) {
   if (!user.canEdit(permissionCategory(entityType))) return null;
   return (
     <div className="data-card fiche-alertes mb-3">
@@ -47,15 +60,35 @@ export function SnoozeCard({ entityType, entityId, user, snooze, csrf }: { entit
             <input type="hidden" name="csrf_token" value={csrf} />
             <input type="hidden" name="entity_type" value={entityType} />
             <input type="hidden" name="entity_id" value={entityId} />
-            <input type="text" name="reason" className="form-control form-control-sm mb-2" placeholder="Raison (optionnel)" />
+            <input
+              type="text"
+              name="reason"
+              className="form-control form-control-sm mb-2"
+              placeholder="Raison (optionnel)"
+            />
             <div className="d-flex gap-1">
-              <button type="submit" name="days" value="7" className="btn btn-sm btn-outline-secondary flex-fill">
+              <button
+                type="submit"
+                name="days"
+                value="7"
+                className="btn btn-sm btn-outline-secondary flex-fill"
+              >
                 7 j
               </button>
-              <button type="submit" name="days" value="30" className="btn btn-sm btn-outline-secondary flex-fill">
+              <button
+                type="submit"
+                name="days"
+                value="30"
+                className="btn btn-sm btn-outline-secondary flex-fill"
+              >
                 30 j
               </button>
-              <button type="submit" name="days" value="90" className="btn btn-sm btn-outline-secondary flex-fill">
+              <button
+                type="submit"
+                name="days"
+                value="90"
+                className="btn btn-sm btn-outline-secondary flex-fill"
+              >
                 90 j
               </button>
             </div>
@@ -67,7 +100,19 @@ export function SnoozeCard({ entityType, entityId, user, snooze, csrf }: { entit
 }
 
 /** `_equipment_select.html` */
-export function EquipmentSelect({ equipments, selectedId, compact = false, user, csrf }: { equipments: Equipment[]; selectedId?: number | null; compact?: boolean; user: CurrentUser; csrf: string }) {
+export function EquipmentSelect({
+  equipments,
+  selectedId,
+  compact = false,
+  user,
+  csrf,
+}: {
+  equipments: Equipment[];
+  selectedId?: number | null;
+  compact?: boolean;
+  user: CurrentUser;
+  csrf: string;
+}) {
   const options = equipments.map((e) => (
     <option key={e.id} value={e.id}>
       {e.name} ({EQUIPMENT_KIND_LABELS[e.kind] ?? e.kind}
@@ -80,7 +125,12 @@ export function EquipmentSelect({ equipments, selectedId, compact = false, user,
         <label className="form-label fw-medium" htmlFor="equipmentSelect">
           Équipement lié (inventaire)
         </label>
-        <select name="equipment_id" id="equipmentSelect" className="form-select" defaultValue={selectedId ?? ""}>
+        <select
+          name="equipment_id"
+          id="equipmentSelect"
+          className="form-select"
+          defaultValue={selectedId ?? ""}
+        >
           <option value="">— Aucun —</option>
           {options}
         </select>
@@ -91,13 +141,26 @@ export function EquipmentSelect({ equipments, selectedId, compact = false, user,
     <>
       <div className="d-flex justify-content-between align-items-center">
         <label className="form-label fw-medium mb-0">Équipement lié (inventaire)</label>
-        {user.canEdit("inventory") ? <QaAddLink modalId="qaModalEquipment" targetId="equipmentSelect" text="Nouvel équipement" /> : null}
+        {user.canEdit("inventory") ? (
+          <QaAddLink
+            modalId="qaModalEquipment"
+            targetId="equipmentSelect"
+            text="Nouvel équipement"
+          />
+        ) : null}
       </div>
-      <select name="equipment_id" id="equipmentSelect" className="form-select mt-1" defaultValue={selectedId ?? ""}>
+      <select
+        name="equipment_id"
+        id="equipmentSelect"
+        className="form-select mt-1"
+        defaultValue={selectedId ?? ""}
+      >
         <option value="">— Aucun —</option>
         {options}
       </select>
-      <small className="text-muted">Relie cet élément à un serveur/NAS de l'inventaire (fiche 360°).</small>
+      <small className="text-muted">
+        Relie cet élément à un serveur/NAS de l'inventaire (fiche 360°).
+      </small>
       {user.canEdit("inventory") ? <QaModalEquipment csrf={csrf} /> : null}
     </>
   );
@@ -111,7 +174,10 @@ export function InventoryNav({ active }: { active: "serveurs" | "reseau" }) {
         <Icone bi="bi-hdd-stack" taille="1em" classes="me-1" />
         Serveurs
       </a>
-      <a className={`seg-tab${active === "reseau" ? " active" : ""}`} href="/inventory?famille=reseau">
+      <a
+        className={`seg-tab${active === "reseau" ? " active" : ""}`}
+        href="/inventory?famille=reseau"
+      >
         <Icone bi="bi-router" taille="1em" classes="me-1" />
         Réseau
       </a>

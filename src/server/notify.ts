@@ -6,13 +6,27 @@ import type { AppSettings } from "@/server/config-store";
 import { prisma } from "@/server/db";
 import { journal } from "@/server/log";
 
-const HEX: Record<string, string> = { danger: "EF4444", warning: "F59E0B", info: "3B82F6", success: "10B981" };
+const HEX: Record<string, string> = {
+  danger: "EF4444",
+  warning: "F59E0B",
+  info: "3B82F6",
+  success: "10B981",
+};
 const color = (status: string) => HEX[status] ?? "4F46E5";
-const AC_COLOR: Record<string, string> = { danger: "attention", warning: "warning", info: "accent", success: "good" };
+const AC_COLOR: Record<string, string> = {
+  danger: "attention",
+  warning: "warning",
+  info: "accent",
+  success: "good",
+};
 
 export type Payload = Record<string, unknown>;
 
-async function post(url: string, payload: Payload, fetcher: typeof fetch = fetch): Promise<boolean> {
+async function post(
+  url: string,
+  payload: Payload,
+  fetcher: typeof fetch = fetch,
+): Promise<boolean> {
   try {
     const r = await fetcher(url, {
       method: "POST",
@@ -37,7 +51,12 @@ export function isLegacyTeams(webhookUrl: string | null | undefined): boolean {
   return u.includes("webhook.office.com") || u.includes("outlook.office.com");
 }
 
-export function teamsCardLegacy(subject: string, body: string, status: string, url?: string | null): Payload {
+export function teamsCardLegacy(
+  subject: string,
+  body: string,
+  status: string,
+  url?: string | null,
+): Payload {
   const card: Payload = {
     "@type": "MessageCard",
     "@context": "http://schema.org/extensions",
@@ -47,12 +66,19 @@ export function teamsCardLegacy(subject: string, body: string, status: string, u
     text: (body || "").replace(/\n/g, "\n\n"),
   };
   if (url) {
-    card.potentialAction = [{ "@type": "OpenUri", name: "Voir la fiche", targets: [{ os: "default", uri: url }] }];
+    card.potentialAction = [
+      { "@type": "OpenUri", name: "Voir la fiche", targets: [{ os: "default", uri: url }] },
+    ];
   }
   return card;
 }
 
-export function teamsCardWorkflow(subject: string, body: string, status: string, url?: string | null): Payload {
+export function teamsCardWorkflow(
+  subject: string,
+  body: string,
+  status: string,
+  url?: string | null,
+): Payload {
   const blocks: Payload[] = [
     {
       type: "TextBlock",
@@ -71,21 +97,50 @@ export function teamsCardWorkflow(subject: string, body: string, status: string,
     body: blocks,
   };
   if (url) card.actions = [{ type: "Action.OpenUrl", title: "Voir la fiche", url }];
-  return { type: "message", attachments: [{ contentType: "application/vnd.microsoft.card.adaptive", content: card }] };
+  return {
+    type: "message",
+    attachments: [{ contentType: "application/vnd.microsoft.card.adaptive", content: card }],
+  };
 }
 
-export function teamsPayload(subject: string, body: string, status: string, url?: string | null, webhookUrl?: string | null): Payload {
-  return isLegacyTeams(webhookUrl) ? teamsCardLegacy(subject, body, status, url) : teamsCardWorkflow(subject, body, status, url);
+export function teamsPayload(
+  subject: string,
+  body: string,
+  status: string,
+  url?: string | null,
+  webhookUrl?: string | null,
+): Payload {
+  return isLegacyTeams(webhookUrl)
+    ? teamsCardLegacy(subject, body, status, url)
+    : teamsCardWorkflow(subject, body, status, url);
 }
 
-export function slackPayload(subject: string, body: string, status: string, url?: string | null): Payload {
+export function slackPayload(
+  subject: string,
+  body: string,
+  status: string,
+  url?: string | null,
+): Payload {
   let text = body || "";
   if (url) text += `\n<${url}|Voir la fiche>`;
-  return { attachments: [{ color: `#${color(status)}`, title: `[Sentinelle] ${subject}`, text, mrkdwn_in: ["text"] }] };
+  return {
+    attachments: [
+      { color: `#${color(status)}`, title: `[Sentinelle] ${subject}`, text, mrkdwn_in: ["text"] },
+    ],
+  };
 }
 
-export function discordPayload(subject: string, body: string, status: string, url?: string | null): Payload {
-  const embed: Payload = { title: `[Sentinelle] ${subject}`, description: body || "", color: Number.parseInt(color(status), 16) };
+export function discordPayload(
+  subject: string,
+  body: string,
+  status: string,
+  url?: string | null,
+): Payload {
+  const embed: Payload = {
+    title: `[Sentinelle] ${subject}`,
+    description: body || "",
+    color: Number.parseInt(color(status), 16),
+  };
   if (url) embed.url = url;
   return { embeds: [embed] };
 }
@@ -133,7 +188,9 @@ export async function notifyAll(
   }
   try {
     const cats = ["all", ...(category ? [category] : [])];
-    const rows = await prisma.webhook.findMany({ where: { isActive: true, category: { in: cats } } });
+    const rows = await prisma.webhook.findMany({
+      where: { isActive: true, category: { in: cats } },
+    });
     for (const w of rows) {
       try {
         if (await sendTo(w.channel, w.url, subject, body, status, url, fetcher)) sent += 1;

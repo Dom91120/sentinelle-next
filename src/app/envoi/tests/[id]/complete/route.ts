@@ -13,16 +13,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const user = await requireEdit("tests");
     const test = await prisma.testTask.findUnique({ where: { id } });
     if (!test) return pasTrouve();
-    const texte = (k: string, defaut = "") => (typeof form.get(k) === "string" ? (form.get(k) as string) : defaut);
+    const texte = (k: string, defaut = "") =>
+      typeof form.get(k) === "string" ? (form.get(k) as string) : defaut;
     const result = texte("result");
     const comment = texte("comment");
     const outcome = texte("outcome", "success");
     const today = aujourdhui();
     await prisma.testTask.update({
       where: { id },
-      data: { lastPerformed: today, nextDue: ajouterJours(today, test.frequencyDays ?? 90), status: outcome, result },
+      data: {
+        lastPerformed: today,
+        nextDue: ajouterJours(today, test.frequencyDays ?? 90),
+        status: outcome,
+        result,
+      },
     });
-    await prisma.testHistory.create({ data: { testId: id, action: "completed", result, comment, performedBy: user.username } });
+    await prisma.testHistory.create({
+      data: { testId: id, action: "completed", result, comment, performedBy: user.username },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage(`/tests/${id}`, "Test marqué comme effectué", "success");
   });

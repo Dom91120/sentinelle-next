@@ -51,7 +51,8 @@ export function buildServer(cfg: AppSettings): Serveur {
 
 /** Teste la connexion LDAP (et le bind du compte de service si renseigné). */
 export async function testLdapConnection(cfg: AppSettings): Promise<[boolean, string]> {
-  if (!cfg.LDAP_ENABLED) return [false, "LDAP désactivé : activez-le puis enregistrez avant de tester."];
+  if (!cfg.LDAP_ENABLED)
+    return [false, "LDAP désactivé : activez-le puis enregistrez avant de tester."];
   if (!cfg.LDAP_SERVER) return [false, "Aucun serveur LDAP configuré."];
   const bindUser = cfg.LDAP_BIND_USER;
   const bindPw = cfg.LDAP_BIND_PASSWORD;
@@ -73,7 +74,10 @@ export async function testLdapConnection(cfg: AppSettings): Promise<[boolean, st
         ];
       }
       await client.bind("", "");
-      return [true, `Connexion au serveur LDAP réussie via ${proto} (aucun compte de service configuré).`];
+      return [
+        true,
+        `Connexion au serveur LDAP réussie via ${proto} (aucun compte de service configuré).`,
+      ];
     } finally {
       await client.unbind().catch(() => {});
     }
@@ -112,7 +116,12 @@ function attrs(entry: Record<string, unknown>, name: string): string[] {
 }
 
 /** Vrai si l'utilisateur appartient au groupe AD (groupes imbriqués inclus). */
-async function userInGroup(client: Client, base: string, username: string, group: string): Promise<boolean> {
+async function userInGroup(
+  client: Client,
+  base: string,
+  username: string,
+  group: string,
+): Promise<boolean> {
   const g = (group || "").trim();
   if (!g) return true;
   let groupDn = g;
@@ -181,7 +190,10 @@ export async function ldapAuthenticate(
         return null;
       }
       if (!(await userInGroup(client, base, username, requiredGroup))) {
-        journal.info("ldap", "Accès LDAP refusé : pas membre du groupe", { username, requiredGroup });
+        journal.info("ldap", "Accès LDAP refusé : pas membre du groupe", {
+          username,
+          requiredGroup,
+        });
         return null;
       }
     }
@@ -215,7 +227,11 @@ export function directorySearchAvailable(cfg: AppSettings): boolean {
 export type Personne = { display_name: string; email: string; username: string };
 
 /** Recherche des personnes dans l'AD via le compte de service. [] en repli. */
-export async function searchDirectory(cfg: AppSettings, query: string, limit = 10): Promise<Personne[]> {
+export async function searchDirectory(
+  cfg: AppSettings,
+  query: string,
+  limit = 10,
+): Promise<Personne[]> {
   const q = (query || "").trim();
   if (q.length < 2 || !directorySearchAvailable(cfg)) return [];
   const client = new Client(buildServer(cfg).options);
@@ -298,11 +314,20 @@ export async function syncPasswordExpirations(cfg: AppSettings): Promise<[number
           attributes: ["msDS-UserPasswordExpiryTimeComputed"],
         });
         if (!r.searchEntries.length) continue;
-        const raw = attr(r.searchEntries[0] as Record<string, unknown>, "msDS-UserPasswordExpiryTimeComputed");
+        const raw = attr(
+          r.searchEntries[0] as Record<string, unknown>,
+          "msDS-UserPasswordExpiryTimeComputed",
+        );
         const expiry = filetimeToDate(raw);
-        if (expiry && (!acc.nextPasswordChange || expiry.getTime() !== acc.nextPasswordChange.getTime())) {
+        if (
+          expiry &&
+          (!acc.nextPasswordChange || expiry.getTime() !== acc.nextPasswordChange.getTime())
+        ) {
           const { dateCourte } = await import("@/lib/libelles");
-          await prisma.account.update({ where: { id: acc.id }, data: { nextPasswordChange: expiry } });
+          await prisma.account.update({
+            where: { id: acc.id },
+            data: { nextPasswordChange: expiry },
+          });
           await prisma.accountHistory.create({
             data: {
               accountId: acc.id,

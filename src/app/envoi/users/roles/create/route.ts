@@ -11,8 +11,16 @@ export async function POST(req: Request) {
     const admin = await requireAdmin();
     const name = champ(form, "name").toLowerCase();
     if (!name) return redirigerAvecMessage("/users/roles", "Nom de role requis.", "danger");
-    if (await prisma.role.findUnique({ where: { name } })) return redirigerAvecMessage("/users/roles", "Ce role existe deja.", "danger");
-    await prisma.role.create({ data: { name, description: champ(form, "description"), isAdmin: false, permissions: Object.fromEntries(PERMISSION_CATEGORIES.map((c) => [c, 0])) } });
+    if (await prisma.role.findUnique({ where: { name } }))
+      return redirigerAvecMessage("/users/roles", "Ce role existe deja.", "danger");
+    await prisma.role.create({
+      data: {
+        name,
+        description: champ(form, "description"),
+        isAdmin: false,
+        permissions: Object.fromEntries(PERMISSION_CATEGORIES.map((c) => [c, 0])),
+      },
+    });
     await auditRecord("creation role", name, "roles", admin.username);
     return redirigerAvecMessage("/users/roles", `Role « ${name} » cree.`, "success");
   });

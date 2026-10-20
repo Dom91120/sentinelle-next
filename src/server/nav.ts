@@ -3,9 +3,10 @@
  * Leur calcul charge toutes les tables et évalue chaque statut : au plus une fois
  * par minute (cache process). Les éléments reportés (snooze) sont exclus.
  */
+
+import { prisma } from "@/server/db";
 import { chargerTout } from "@/server/donnees";
 import type { CurrentUser } from "@/server/guards";
-import { prisma } from "@/server/db";
 import { activeSnoozeKeys } from "@/server/snooze";
 
 const TTL_MS = 60_000;
@@ -54,7 +55,17 @@ async function calculer(): Promise<Cache> {
   return {
     at: Date.now(),
     danger: dangerCounts,
-    trash: { accounts: acc, certificates: cert, domains: dom, backups: bkp, tests: tst, reviews: rev, updates: upd, inventory: eq, contracts: ctr },
+    trash: {
+      accounts: acc,
+      certificates: cert,
+      domains: dom,
+      backups: bkp,
+      tests: tst,
+      reviews: rev,
+      updates: upd,
+      inventory: eq,
+      contracts: ctr,
+    },
   };
 }
 
@@ -73,6 +84,9 @@ export async function navCounts(user: CurrentUser): Promise<Record<string, numbe
     }
   }
   const counts: Record<string, number> = { ...cache.danger };
-  counts.trash = Object.entries(cache.trash).reduce((n, [cat, c]) => (user.canEdit(cat) ? n + c : n), 0);
+  counts.trash = Object.entries(cache.trash).reduce(
+    (n, [cat, c]) => (user.canEdit(cat) ? n + c : n),
+    0,
+  );
   return counts;
 }

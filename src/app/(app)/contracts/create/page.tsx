@@ -8,7 +8,11 @@ import { contexteModule } from "@/server/module";
 export const metadata = { title: "Ajouter un contrat - Sentinelle" };
 
 /** contracts/form.html (création ; ?software_id= coche ce logiciel dans les éléments couverts) */
-export default async function ContractCreate({ searchParams }: { searchParams: Promise<{ software_id?: string }> }) {
+export default async function ContractCreate({
+  searchParams,
+}: {
+  searchParams: Promise<{ software_id?: string }>;
+}) {
   const page = await contexteModule("contracts");
   await requireEdit("contracts");
   const sid = parseInt_((await searchParams).software_id, null);
@@ -16,7 +20,13 @@ export default async function ContractCreate({ searchParams }: { searchParams: P
   return (
     <>
       <EnteteForm titre="Ajouter un contrat" retour="/contracts" />
-      <FormulaireContrat contract={null} ctx={ctx} couverts={{ software: [], equipment: [] }} page={page} retour="/contracts" />
+      <FormulaireContrat
+        contract={null}
+        ctx={ctx}
+        couverts={{ software: [], equipment: [] }}
+        page={page}
+        retour="/contracts"
+      />
     </>
   );
 }

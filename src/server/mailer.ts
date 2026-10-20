@@ -34,7 +34,11 @@ async function loadToken(): Promise<TokenData | null> {
 }
 
 async function saveToken(accessToken: string, refreshToken: string, userEmail = ""): Promise<void> {
-  const payload = JSON.stringify({ access_token: accessToken, refresh_token: refreshToken, user_email: userEmail });
+  const payload = JSON.stringify({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    user_email: userEmail,
+  });
   await prisma.appConfig.upsert({
     where: { key: TOKEN_KEY },
     update: { value: encryptSecret(payload), isSecret: true },
@@ -80,7 +84,11 @@ export async function getO365AuthUrl(cfg: AppSettings, state: string): Promise<s
 /** Termine le flux OAuth2 : échange le code, mémorise le jeton, renvoie l'adresse de l'émetteur. */
 export async function completeO365Auth(cfg: AppSettings, code: string): Promise<string> {
   const app = await msalApp(cfg);
-  const result = await app.acquireTokenByCode({ code, scopes: SCOPES, redirectUri: cfg.O365_REDIRECT_URI });
+  const result = await app.acquireTokenByCode({
+    code,
+    scopes: SCOPES,
+    redirectUri: cfg.O365_REDIRECT_URI,
+  });
   if (!result?.accessToken) throw new Error("Erreur OAuth2 : aucun jeton reçu.");
   let userEmail = "";
   try {
@@ -107,7 +115,9 @@ export async function completeO365Auth(cfg: AppSettings, code: string): Promise<
 
 function extractRefreshToken(serializedCache: string): string {
   try {
-    const parsed = JSON.parse(serializedCache) as { RefreshToken?: Record<string, { secret?: string }> };
+    const parsed = JSON.parse(serializedCache) as {
+      RefreshToken?: Record<string, { secret?: string }>;
+    };
     const entries = Object.values(parsed.RefreshToken ?? {});
     return entries[0]?.secret ?? "";
   } catch {
@@ -120,7 +130,10 @@ async function getO365AccessToken(cfg: AppSettings): Promise<string | null> {
   if (!token?.refresh_token) return null;
   const app = await msalApp(cfg);
   try {
-    const result = await app.acquireTokenByRefreshToken({ refreshToken: token.refresh_token, scopes: ["Mail.Send"] });
+    const result = await app.acquireTokenByRefreshToken({
+      refreshToken: token.refresh_token,
+      scopes: ["Mail.Send"],
+    });
     if (result?.accessToken) {
       const cache = app.getTokenCache().serialize();
       const newRefresh = extractRefreshToken(cache) || token.refresh_token;
@@ -146,7 +159,8 @@ export async function sendEmail(
 ): Promise<boolean> {
   const cfg = cfgIn ?? (await getSettings());
   if (!cfg.MAIL_ENABLED) throw new MailDisabled();
-  if (cfg.MAIL_METHOD === "o365") return sendViaGraph(cfg, subject, recipients, body, htmlBody, attachments);
+  if (cfg.MAIL_METHOD === "o365")
+    return sendViaGraph(cfg, subject, recipients, body, htmlBody, attachments);
   return sendViaSmtp(cfg, subject, recipients, body, htmlBody, attachments);
 }
 
@@ -223,12 +237,15 @@ async function sendViaGraph(
       contentBytes: a.content.toString("base64"),
     }));
   }
-  const r = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(sender)}/sendMail`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ message }),
-    signal: AbortSignal.timeout(30_000),
-  });
+  const r = await fetch(
+    `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(sender)}/sendMail`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+      signal: AbortSignal.timeout(30_000),
+    },
+  );
   if (r.status !== 200 && r.status !== 202) {
     throw new Error(`Envoi echoue (HTTP ${r.status}): ${await r.text()}`);
   }
@@ -244,11 +261,21 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
 }
 
 /** Habille un message d'alerte en HTML (charte Sentinelle, barre de statut). */
-export function renderAlertEmail(title: string, body: string, status = "danger", url?: string | null): string {
+export function renderAlertEmail(
+  title: string,
+  body: string,
+  status = "danger",
+  url?: string | null,
+): string {
   const bar = STATUS_COLORS[status] ?? "#4f46e5";
   const bodyHtml = escapeHtml(body).replace(/\n/g, "<br>");
   const button = url

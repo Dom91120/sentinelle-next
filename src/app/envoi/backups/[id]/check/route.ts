@@ -12,7 +12,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!id) return pasTrouve();
   return traiterFormulaire(req, async (form) => {
     const user = await requireEdit("backups");
-    if (!(await prisma.backup.findUnique({ where: { id }, select: { id: true } }))) return pasTrouve();
+    if (!(await prisma.backup.findUnique({ where: { id }, select: { id: true } })))
+      return pasTrouve();
     const status = typeof form.get("status") === "string" ? (form.get("status") as string) : "ok";
     const comment = typeof form.get("comment") === "string" ? (form.get("comment") as string) : "";
     const checkDate = parseDate(form.get("check_date")) ?? aujourdhui();

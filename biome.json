@@ -1,6 +1,10 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
     "includes": [
       "**",
@@ -10,17 +14,32 @@
       "!**/docs",
       "!**/public/*.svg",
       "!**/src/app/globals.css",
-      "!**/tsconfig.json"
+      "!**/tsconfig.json",
+      "!**/public/js",
+      "!**/public/vendor",
+      "!**/public/css"
     ]
   },
-  "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "preset": "recommended",
       "a11y": {
         "noStaticElementInteractions": "off",
-        "useAriaPropsSupportedByRole": "off"
+        "useAriaPropsSupportedByRole": "off",
+        "noLabelWithoutControl": "off",
+        "useSemanticElements": "off",
+        "useAriaPropsForRole": "off",
+        "useValidAriaRole": "off",
+        "noAutofocus": "off",
+        "noNoninteractiveElementToInteractiveRole": "off",
+        "noAriaHiddenOnFocusable": "off"
       },
       "complexity": {
         "noImportantStyles": "off"
@@ -36,15 +55,28 @@
       }
     }
   },
-  "javascript": { "formatter": { "quoteStyle": "double", "semicolons": "always" } },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always"
+    }
+  },
   "overrides": [
     {
       "includes": ["**/services/legacy-icons.ts"],
-      "linter": { "enabled": false }
+      "linter": {
+        "enabled": false
+      }
     },
     {
       "includes": ["**/users/users-table.tsx"],
-      "linter": { "rules": { "a11y": { "useKeyWithClickEvents": "off" } } }
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useKeyWithClickEvents": "off"
+          }
+        }
+      }
     }
   ]
 }

@@ -13,6 +13,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ shareId
     if (!partage) return pasTrouve();
     await prisma.softwareShare.delete({ where: { id: shareId } });
     await auditRecord("suppression partage reseau", partage.path, "inventory", user.username);
-    return redirigerAvecMessage(`/inventory/logiciels/${partage.softwareId}`, "Dossier retiré", "success");
+    return redirigerAvecMessage(
+      `/inventory/logiciels/${partage.softwareId}`,
+      "Dossier retiré",
+      "success",
+    );
   });
 }

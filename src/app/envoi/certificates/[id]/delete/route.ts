@@ -13,7 +13,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!cert) return pasTrouve();
     await prisma.certificate.update({ where: { id }, data: { isActive: false } });
     await prisma.certificateHistory.create({
-      data: { certificateId: id, action: "deleted", comment: `Certificat désactivé : ${cert.serviceName} - ${cert.domain ?? "None"}`, performedBy: user.username },
+      data: {
+        certificateId: id,
+        action: "deleted",
+        comment: `Certificat désactivé : ${cert.serviceName} - ${cert.domain ?? "None"}`,
+        performedBy: user.username,
+      },
     });
     invalidateNavCounts();
     return redirigerAvecMessage("/certificates", "Certificat supprimé", "success");

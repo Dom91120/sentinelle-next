@@ -9,10 +9,21 @@ export async function POST(req: Request) {
     const user = await requireUser();
     if (form.get("action") === "disable") {
       await prisma.user.update({ where: { id: user.id }, data: { icsToken: null } });
-      return redirigerAvecMessage("/agenda", "Lien d'abonnement désactivé : les calendriers abonnés ne seront plus alimentés.", "success");
+      return redirigerAvecMessage(
+        "/agenda",
+        "Lien d'abonnement désactivé : les calendriers abonnés ne seront plus alimentés.",
+        "success",
+      );
     }
     const regen = user.icsToken !== null;
-    await prisma.user.update({ where: { id: user.id }, data: { icsToken: randomBytes(32).toString("base64url") } });
-    return redirigerAvecMessage("/agenda", `Nouveau lien d'abonnement généré.${regen ? " L'ancien lien ne fonctionne plus." : ""}`, "success");
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { icsToken: randomBytes(32).toString("base64url") },
+    });
+    return redirigerAvecMessage(
+      "/agenda",
+      `Nouveau lien d'abonnement généré.${regen ? " L'ancien lien ne fonctionne plus." : ""}`,
+      "success",
+    );
   });
 }

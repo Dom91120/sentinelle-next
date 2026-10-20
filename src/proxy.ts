@@ -47,7 +47,8 @@ export default function proxy(request: NextRequest) {
   let csrf = request.cookies.get("sentinelle_csrf")?.value;
   let csrfNeuf = false;
   if (!csrf || csrf.length < 32) {
-    csrf = generateNonce().replace(/[^A-Za-z0-9]/g, "") + generateNonce().replace(/[^A-Za-z0-9]/g, "");
+    csrf =
+      generateNonce().replace(/[^A-Za-z0-9]/g, "") + generateNonce().replace(/[^A-Za-z0-9]/g, "");
     csrfNeuf = true;
     headers.set("x-csrf-token", csrf);
   }
@@ -60,7 +61,10 @@ export default function proxy(request: NextRequest) {
 
   // Un formulaire chargé dans une liste (formulaire-inline.js, ?inline=1) se rend
   // seul, sans la page autour : /fragment/... (un gestionnaire de route) répond.
-  const estFragment = request.method === "GET" && request.nextUrl.searchParams.get("inline") === "1" && /^\/contracts\/(create|\d+\/edit)$/.test(pathname);
+  const estFragment =
+    request.method === "GET" &&
+    request.nextUrl.searchParams.get("inline") === "1" &&
+    /^\/contracts\/(create|\d+\/edit)$/.test(pathname);
 
   let response: NextResponse;
   if (estFragment) {
@@ -81,7 +85,8 @@ export default function proxy(request: NextRequest) {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
-      secure: process.env.NODE_ENV === "production" && process.env.ALLOW_INSECURE_COOKIES !== "true",
+      secure:
+        process.env.NODE_ENV === "production" && process.env.ALLOW_INSECURE_COOKIES !== "true",
     });
   }
   return response;

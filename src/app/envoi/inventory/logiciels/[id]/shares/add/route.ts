@@ -15,8 +15,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const retour = `/inventory/logiciels/${id}`;
     const chemin = champ(form, "path");
     if (!chemin) return redirigerAvecMessage(retour, "Indiquez le chemin du dossier.", "danger");
-    if (await prisma.softwareShare.findFirst({ where: { softwareId: id, path: chemin } })) return redirigerAvecMessage(retour, "Ce dossier est déjà rattaché à cette fiche.", "warning");
-    await prisma.softwareShare.create({ data: { softwareId: id, path: chemin.slice(0, 512), label: champOuNull(form, "label") } });
+    if (await prisma.softwareShare.findFirst({ where: { softwareId: id, path: chemin } }))
+      return redirigerAvecMessage(retour, "Ce dossier est déjà rattaché à cette fiche.", "warning");
+    await prisma.softwareShare.create({
+      data: { softwareId: id, path: chemin.slice(0, 512), label: champOuNull(form, "label") },
+    });
     await auditRecord("ajout partage reseau", `${sw.name} : ${chemin}`, "inventory", user.username);
     return redirigerAvecMessage(retour, "Dossier ajouté", "success");
   });

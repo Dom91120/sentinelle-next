@@ -18,7 +18,11 @@ export default async function DomainsList({ searchParams }: { searchParams: Para
   const q = String(params.q ?? "").trim();
   let domains = await chargerDomaines();
   // Domain.expiry_date.asc().nullslast(), puis par statut (tri stable).
-  domains.sort((a, b) => (a.expiryDate?.getTime() ?? Number.POSITIVE_INFINITY) - (b.expiryDate?.getTime() ?? Number.POSITIVE_INFINITY));
+  domains.sort(
+    (a, b) =>
+      (a.expiryDate?.getTime() ?? Number.POSITIVE_INFINITY) -
+      (b.expiryDate?.getTime() ?? Number.POSITIVE_INFINITY),
+  );
   domains = textSearch(domains, q, ["name", "registrar", "description"]);
   domains.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "domains.list");
@@ -31,7 +35,9 @@ export default async function DomainsList({ searchParams }: { searchParams: Para
           <h1 className="page-title">
             Domaines <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">Expiration des noms de domaine, vérifiée auprès du registre (RDAP)</p>
+          <p className="page-subtitle">
+            Expiration des noms de domaine, vérifiée auprès du registre (RDAP)
+          </p>
         </div>
         <div className="page-actions">
           <CsvToolbar csvKey="domains" canEdit={user.canEdit("domains")} csrf={csrf} />
@@ -66,7 +72,22 @@ export default async function DomainsList({ searchParams }: { searchParams: Para
                         {d.name}
                       </a>
                     </td>
-                    <td>{d.expiryDate ? <Cellule principal={dateCourte(d.expiryDate)} secondaire={<DelaiBadge days={d.expiryDate} status={d.status} passe="expiré depuis" />} /> : <span className="text-muted">à renseigner</span>}</td>
+                    <td>
+                      {d.expiryDate ? (
+                        <Cellule
+                          principal={dateCourte(d.expiryDate)}
+                          secondaire={
+                            <DelaiBadge
+                              days={d.expiryDate}
+                              status={d.status}
+                              passe="expiré depuis"
+                            />
+                          }
+                        />
+                      ) : (
+                        <span className="text-muted">à renseigner</span>
+                      )}
+                    </td>
                     <td>
                       {d.registrarSupplier ? (
                         <a href={`/suppliers/${d.registrarId}`} className="text-decoration-none">
@@ -92,7 +113,11 @@ export default async function DomainsList({ searchParams }: { searchParams: Para
                   </tr>
                 ))
               ) : (
-                <Vide colonnes={5} message="Aucun domaine." urlAjout={user.canEdit("domains") ? "/domains/create" : null} />
+                <Vide
+                  colonnes={5}
+                  message="Aucun domaine."
+                  urlAjout={user.canEdit("domains") ? "/domains/create" : null}
+                />
               )}
             </tbody>
           </table>

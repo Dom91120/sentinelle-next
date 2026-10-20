@@ -5,7 +5,7 @@
  */
 import { headers } from "next/headers";
 import { cache } from "react";
-import { type FeatureFlags, allFlagsIn } from "@/server/features";
+import { allFlagsIn, type FeatureFlags } from "@/server/features";
 import { type Flash, readFlashes } from "@/server/flash";
 import { type CurrentUser, requireUser } from "@/server/guards";
 import { csrfToken } from "@/server/http";
@@ -39,7 +39,11 @@ export const contextePage = cache(async (): Promise<Page> => {
 });
 
 /** Le nonce et le jeton CSRF d'une page sans session (connexion, 2FA). */
-export async function contexteAnonyme(): Promise<{ nonce: string | undefined; csrf: string; flashes: Flash[] }> {
+export async function contexteAnonyme(): Promise<{
+  nonce: string | undefined;
+  csrf: string;
+  flashes: Flash[];
+}> {
   const h = await headers();
   const [csrf, flashes] = await Promise.all([csrfToken(), readFlashes()]);
   return { nonce: h.get("x-nonce") ?? undefined, csrf, flashes };

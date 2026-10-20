@@ -20,7 +20,13 @@ export default async function ContractEdit({ params }: { params: Promise<{ id: s
   return (
     <>
       <EnteteForm titre="Modifier le contrat" retour={retour} />
-      <FormulaireContrat contract={contract} ctx={ctx} couverts={couverts} page={page} retour={retour} />
+      <FormulaireContrat
+        contract={contract}
+        ctx={ctx}
+        couverts={couverts}
+        page={page}
+        retour={retour}
+      />
     </>
   );
 }

@@ -14,20 +14,70 @@ export default async function ByStatus({ params }: { params: Promise<{ status: s
   const tout = await chargerTout();
   const { user } = page;
   const sources: [string, string, { id: number; status: string; nom: string }[], string][] = [
-    ["accounts", "Comptes", tout.accounts.map((o) => ({ id: o.id, status: o.status, nom: `${o.serviceName} (${o.username})` })), "accounts"],
-    ["certificates", "Certificats", tout.certificates.map((o) => ({ id: o.id, status: o.status, nom: certificateLabel(o) })), "certificates"],
-    ["domains", "Domaines", tout.domains.map((o) => ({ id: o.id, status: o.status, nom: o.name })), "domains"],
-    ["backups", "Sauvegardes", tout.backups.map((o) => ({ id: o.id, status: o.status, nom: o.serviceName })), "backups"],
-    ["tests", "Tests", tout.tests.map((o) => ({ id: o.id, status: o.status, nom: o.name })), "tests"],
-    ["reviews", "Revue de droits", tout.reviews.map((o) => ({ id: o.id, status: o.status, nom: o.application })), "reviews"],
-    ["updates", "Mises à jour", tout.updates.map((o) => ({ id: o.id, status: o.status, nom: o.name })), "updates"],
-    ["inventory", "Matériel", tout.equipments.map((o) => ({ id: o.id, status: o.status, nom: o.name })), "inventory"],
-    ["software", "Logiciels", tout.software.map((o) => ({ id: o.id, status: o.status, nom: o.name })), "inventory/logiciels"],
+    [
+      "accounts",
+      "Comptes",
+      tout.accounts.map((o) => ({
+        id: o.id,
+        status: o.status,
+        nom: `${o.serviceName} (${o.username})`,
+      })),
+      "accounts",
+    ],
+    [
+      "certificates",
+      "Certificats",
+      tout.certificates.map((o) => ({ id: o.id, status: o.status, nom: certificateLabel(o) })),
+      "certificates",
+    ],
+    [
+      "domains",
+      "Domaines",
+      tout.domains.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      "domains",
+    ],
+    [
+      "backups",
+      "Sauvegardes",
+      tout.backups.map((o) => ({ id: o.id, status: o.status, nom: o.serviceName })),
+      "backups",
+    ],
+    [
+      "tests",
+      "Tests",
+      tout.tests.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      "tests",
+    ],
+    [
+      "reviews",
+      "Revue de droits",
+      tout.reviews.map((o) => ({ id: o.id, status: o.status, nom: o.application })),
+      "reviews",
+    ],
+    [
+      "updates",
+      "Mises à jour",
+      tout.updates.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      "updates",
+    ],
+    [
+      "inventory",
+      "Matériel",
+      tout.equipments.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      "inventory",
+    ],
+    [
+      "software",
+      "Logiciels",
+      tout.software.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      "inventory/logiciels",
+    ],
   ];
   const items: { cat: string; name: string; url: string }[] = [];
   for (const [cat, lbl, rows, prefix] of sources) {
     if (!user.canView(cat)) continue;
-    for (const o of rows) if (o.status === status) items.push({ cat: lbl, name: o.nom, url: `/${prefix}/${o.id}` });
+    for (const o of rows)
+      if (o.status === status) items.push({ cat: lbl, name: o.nom, url: `/${prefix}/${o.id}` });
   }
   items.sort((a, b) => a.cat.localeCompare(b.cat));
   return (
@@ -36,7 +86,8 @@ export default async function ByStatus({ params }: { params: Promise<{ status: s
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 className="page-title">
-            <span className={`badge-status badge-${status} me-2`}>{label}</span> {items.length} élément(s)
+            <span className={`badge-status badge-${status} me-2`}>{label}</span> {items.length}{" "}
+            élément(s)
           </h1>
           <p className="page-subtitle">Vue transversale par statut</p>
         </div>

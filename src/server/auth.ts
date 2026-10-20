@@ -2,7 +2,11 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { twoFactor, username } from "better-auth/plugins";
-import { ATTRIBUTS_COOKIE, alerteCookiesNonSecurises, cookiesSecurises } from "@/server/cookie-policy";
+import {
+  ATTRIBUTS_COOKIE,
+  alerteCookiesNonSecurises,
+  cookiesSecurises,
+} from "@/server/cookie-policy";
 import { prisma } from "@/server/db";
 import { consumeLdapToken } from "@/server/ldap-token";
 import { hashPassword, LDAP_TOKEN_PREFIX, verifyPassword } from "@/server/password";
@@ -20,7 +24,8 @@ import { hashPassword, LDAP_TOKEN_PREFIX, verifyPassword } from "@/server/passwo
  * - durée de session = SESSION_LIFETIME_MINUTES (inactivité), renouvelée à l'usage.
  */
 
-const SESSION_LIFETIME_MINUTES = Number.parseInt(process.env.SESSION_LIFETIME_MINUTES ?? "480", 10) || 480;
+const SESSION_LIFETIME_MINUTES =
+  Number.parseInt(process.env.SESSION_LIFETIME_MINUTES ?? "480", 10) || 480;
 
 if (alerteCookiesNonSecurises()) {
   console.warn(

@@ -12,7 +12,12 @@ export default async function SupplierCreate() {
   return (
     <>
       <EnteteForm titre="Ajouter un fournisseur" retour="/suppliers" />
-      <FormulaireFournisseur supplier={null} user={page.user} csrf={page.csrf} retour="/suppliers" />
+      <FormulaireFournisseur
+        supplier={null}
+        user={page.user}
+        csrf={page.csrf}
+        retour="/suppliers"
+      />
     </>
   );
 }

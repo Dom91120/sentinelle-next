@@ -40,7 +40,10 @@ export async function migrateRoles(): Promise<void> {
 export async function seedRoles(): Promise<void> {
   const editorLevel = (c: string) => (c === "alerts" ? 1 : 3);
   const viewerLevel = () => 1;
-  const defaults: Record<string, { description: string; isAdmin: boolean; level: ((c: string) => number) | null }> = {
+  const defaults: Record<
+    string,
+    { description: string; isAdmin: boolean; level: ((c: string) => number) | null }
+  > = {
     admin: { description: "Acces total", isAdmin: true, level: null },
     editor: { description: "Gestion des donnees", isAdmin: false, level: editorLevel },
     viewer: { description: "Lecture seule", isAdmin: false, level: viewerLevel },
@@ -48,8 +51,12 @@ export async function seedRoles(): Promise<void> {
   for (const [name, cfg] of Object.entries(defaults)) {
     const role = await prisma.role.findUnique({ where: { name } });
     if (!role) {
-      const perms = cfg.level ? Object.fromEntries(PERMISSION_CATEGORIES.map((c) => [c, cfg.level?.(c)])) : {};
-      await prisma.role.create({ data: { name, description: cfg.description, isAdmin: cfg.isAdmin, permissions: perms } });
+      const perms = cfg.level
+        ? Object.fromEntries(PERMISSION_CATEGORIES.map((c) => [c, cfg.level?.(c)]))
+        : {};
+      await prisma.role.create({
+        data: { name, description: cfg.description, isAdmin: cfg.isAdmin, permissions: perms },
+      });
     } else if (!role.isAdmin && cfg.level) {
       const perms = { ...((role.permissions as Record<string, number> | null) ?? {}) };
       let missing = false;
@@ -59,7 +66,8 @@ export async function seedRoles(): Promise<void> {
           missing = true;
         }
       }
-      if (missing) await prisma.role.update({ where: { id: role.id }, data: { permissions: perms } });
+      if (missing)
+        await prisma.role.update({ where: { id: role.id }, data: { permissions: perms } });
     }
   }
 }
@@ -81,7 +89,11 @@ async function refParLibelle(kind: string): Promise<Map<string, number>> {
   return new Map(rows.map((r) => [r.label, r.id]));
 }
 
-async function refOuCreer(kind: string, label: string, cache: Map<string, number>): Promise<number> {
+async function refOuCreer(
+  kind: string,
+  label: string,
+  cache: Map<string, number>,
+): Promise<number> {
   const existant = cache.get(label);
   if (existant) return existant;
   const r = await prisma.referential.create({ data: { kind, label, position: cache.size } });
@@ -104,22 +116,32 @@ export async function migrateContractKinds(): Promise<void> {
 
 /** Ancien usage / support d'un certificat → usage_id / support_id. */
 export async function migrateCertificateLists(): Promise<void> {
-  const usages = await prisma.certificate.findMany({ where: { usageId: null, certUsageCode: { not: null } } });
+  const usages = await prisma.certificate.findMany({
+    where: { usageId: null, certUsageCode: { not: null } },
+  });
   if (usages.length) {
     const cache = await refParLibelle("cert_usage");
     for (const c of usages) {
       const libelle = CERT_USAGE_LABELS[c.certUsageCode ?? ""];
       if (!libelle) continue;
-      await prisma.certificate.update({ where: { id: c.id }, data: { usageId: await refOuCreer("cert_usage", libelle, cache) } });
+      await prisma.certificate.update({
+        where: { id: c.id },
+        data: { usageId: await refOuCreer("cert_usage", libelle, cache) },
+      });
     }
   }
-  const supports = await prisma.certificate.findMany({ where: { supportId: null, supportCode: { not: null } } });
+  const supports = await prisma.certificate.findMany({
+    where: { supportId: null, supportCode: { not: null } },
+  });
   if (supports.length) {
     const cache = await refParLibelle("cert_support");
     for (const c of supports) {
       const libelle = CERT_SUPPORT_LABELS[c.supportCode ?? ""];
       if (!libelle) continue;
-      await prisma.certificate.update({ where: { id: c.id }, data: { supportId: await refOuCreer("cert_support", libelle, cache) } });
+      await prisma.certificate.update({
+        where: { id: c.id },
+        data: { supportId: await refOuCreer("cert_support", libelle, cache) },
+      });
     }
   }
 }
@@ -128,7 +150,8 @@ export async function migrateCertificateLists(): Promise<void> {
 export async function migrateReferentialScopes(): Promise<void> {
   for (const [kind, portees] of Object.entries(REFERENTIAL_SEED_SCOPES)) {
     for (const r of await prisma.referential.findMany({ where: { kind, scope: null } })) {
-      if (r.label in portees) await prisma.referential.update({ where: { id: r.id }, data: { scope: portees[r.label] } });
+      if (r.label in portees)
+        await prisma.referential.update({ where: { id: r.id }, data: { scope: portees[r.label] } });
     }
   }
 }
@@ -141,8 +164,13 @@ export async function migrateData(): Promise<void> {
   await prisma.$executeRaw`UPDATE certificate SET validity='valide' WHERE validity IS NULL OR validity=''`;
   await prisma.$executeRaw`DELETE FROM app_config WHERE key IN ('SOFTINVENTORY_URL', 'SOFTINVENTORY_KEY', 'INVENTORY_API_ENABLED', 'INVENTORY_API_TOKEN')`;
   // Certificats TLS sans lien : rattachés au domaine enregistré dont ils relèvent.
-  const domaines = await prisma.domain.findMany({ where: { isActive: true }, select: { id: true, name: true } });
-  for (const c of await prisma.certificate.findMany({ where: { kind: "tls", domainId: null, domain: { not: null } } })) {
+  const domaines = await prisma.domain.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true },
+  });
+  for (const c of await prisma.certificate.findMany({
+    where: { kind: "tls", domainId: null, domain: { not: null } },
+  })) {
     const d = domainForHost(c.domain, domaines);
     if (d) await prisma.certificate.update({ where: { id: c.id }, data: { domainId: d.id } });
   }
@@ -188,7 +216,10 @@ export async function poserMotDePasse(userId: string, password: string): Promise
   const hash = await hashPassword(password);
   const cred = await prisma.authAccount.findFirst({ where: { userId, providerId: "credential" } });
   if (cred) await prisma.authAccount.update({ where: { id: cred.id }, data: { password: hash } });
-  else await prisma.authAccount.create({ data: { accountId: userId, providerId: "credential", userId, password: hash } });
+  else
+    await prisma.authAccount.create({
+      data: { accountId: userId, providerId: "credential", userId, password: hash },
+    });
 }
 
 /** Le compte « admin » : créé avec un mot de passe aléatoire, ou réinitialisé s'il vaut encore « admin ». */
@@ -211,8 +242,10 @@ export async function seedDefaultUser(opts: { annoncer?: boolean } = {}): Promis
     if (opts.annoncer !== false) annoncer(password, true);
     return password;
   }
-  const cred = await prisma.authAccount.findFirst({ where: { userId: admin.id, providerId: "credential" } });
-  if (!cred || !cred.password || (await verifyPassword(cred.password, "admin"))) {
+  const cred = await prisma.authAccount.findFirst({
+    where: { userId: admin.id, providerId: "credential" },
+  });
+  if (!cred?.password || (await verifyPassword(cred.password, "admin"))) {
     const password = nouveau();
     await poserMotDePasse(admin.id, password);
     if (opts.annoncer !== false) annoncer(password, false);

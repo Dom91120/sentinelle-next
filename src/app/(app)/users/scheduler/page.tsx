@@ -27,7 +27,14 @@ export default async function Scheduler() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 className="page-title">Tâches planifiées</h1>
-          <p className="page-subtitle">Planificateur : {running ? <span className="text-success">actif</span> : <span className="text-danger">arrêté</span>}</p>
+          <p className="page-subtitle">
+            Planificateur :{" "}
+            {running ? (
+              <span className="text-success">actif</span>
+            ) : (
+              <span className="text-danger">arrêté</span>
+            )}
+          </p>
         </div>
         <a href="/users" className="btn btn-outline-secondary">
           <Icone bi="bi-people" taille="1em" classes="me-1" /> Utilisateurs
@@ -90,7 +97,13 @@ export default async function Scheduler() {
                     <td>
                       <code>{r.jobId}</code>
                     </td>
-                    <td>{r.status === "error" ? <span className="badge-status badge-danger">Erreur</span> : <span className="badge-status badge-success">OK</span>}</td>
+                    <td>
+                      {r.status === "error" ? (
+                        <span className="badge-status badge-danger">Erreur</span>
+                      ) : (
+                        <span className="badge-status badge-success">OK</span>
+                      )}
+                    </td>
                     <td className="text-muted">{r.message || "-"}</td>
                   </tr>
                 ))

@@ -5,10 +5,27 @@
  */
 import { Icone, Lucide } from "@/components/icones";
 
-export function Rubrique({ titre, bi, couleur, onglet, droite, colonnes = 3, children }: { titre: string; bi: string; couleur: string; onglet?: string; droite?: React.ReactNode; colonnes?: number; children: React.ReactNode }) {
+export function Rubrique({
+  titre,
+  bi,
+  couleur,
+  onglet,
+  droite,
+  colonnes = 3,
+  children,
+}: {
+  titre: string;
+  bi: string;
+  couleur: string;
+  onglet?: string;
+  droite?: React.ReactNode;
+  colonnes?: number;
+  children: React.ReactNode;
+}) {
   let icone: React.ReactNode;
   if (onglet) icone = <Icone bi={bi} taille="1em" classes={`ico-onglet ico-onglet--${onglet}`} />;
-  else if (bi.startsWith("bi-")) icone = <Icone bi={bi} taille={14} classes={`ico ico-${couleur}`} />;
+  else if (bi.startsWith("bi-"))
+    icone = <Icone bi={bi} taille={14} classes={`ico ico-${couleur}`} />;
   else icone = <Lucide nom={bi} taille={14} classes={`ico ico-${couleur}`} />;
   return (
     <>
@@ -20,7 +37,10 @@ export function Rubrique({ titre, bi, couleur, onglet, droite, colonnes = 3, chi
         {droite ? <div className="d-flex gap-1">{droite}</div> : null}
       </div>
       <div className="p-3">
-        <div className={`lu-grille${colonnes === 3 || colonnes === 4 ? ` lu-grille--${colonnes}` : ""}`} data-manques>
+        <div
+          className={`lu-grille${colonnes === 3 || colonnes === 4 ? ` lu-grille--${colonnes}` : ""}`}
+          data-manques
+        >
           {children}
         </div>
       </div>
@@ -37,10 +57,28 @@ function vide(v: unknown): boolean {
 }
 
 /** `lu(label, valeur, large, titre, pleine, facultatif, texte)` */
-export function Lu({ label, valeur, large = false, titre, pleine = false, facultatif = false, texte = false }: { label: string; valeur: React.ReactNode; large?: boolean; titre?: string; pleine?: boolean; facultatif?: boolean; texte?: boolean }) {
+export function Lu({
+  label,
+  valeur,
+  large = false,
+  titre,
+  pleine = false,
+  facultatif = false,
+  texte = false,
+}: {
+  label: string;
+  valeur: React.ReactNode;
+  large?: boolean;
+  titre?: string;
+  pleine?: boolean;
+  facultatif?: boolean;
+  texte?: boolean;
+}) {
   if (vide(valeur)) return facultatif ? null : <span hidden data-manque={label} />;
   return (
-    <div className={`lu${large ? " lu--large" : ""}${pleine ? " lu--pleine" : ""}${texte ? " lu--texte" : ""}`}>
+    <div
+      className={`lu${large ? " lu--large" : ""}${pleine ? " lu--pleine" : ""}${texte ? " lu--texte" : ""}`}
+    >
       <span className="lu-label" title={titre}>
         {label}
       </span>
@@ -50,7 +88,21 @@ export function Lu({ label, valeur, large = false, titre, pleine = false, facult
 }
 
 /** `lu_bloc(label)` : même chose quand la valeur est du balisage. `children` null/false = vide. */
-export function LuBloc({ label, children, large = false, titre, pleine = false, facultatif = false }: { label: string; children: React.ReactNode; large?: boolean; titre?: string; pleine?: boolean; facultatif?: boolean }) {
+export function LuBloc({
+  label,
+  children,
+  large = false,
+  titre,
+  pleine = false,
+  facultatif = false,
+}: {
+  label: string;
+  children: React.ReactNode;
+  large?: boolean;
+  titre?: string;
+  pleine?: boolean;
+  facultatif?: boolean;
+}) {
   if (vide(children)) return facultatif ? null : <span hidden data-manque={label} />;
   return (
     <div className={`lu${large ? " lu--large" : ""}${pleine ? " lu--pleine" : ""}`}>
@@ -73,7 +125,19 @@ export function euros(m: number | null | undefined): string {
 }
 
 /** Un élément lié, en pastille. */
-export function Pastille({ url, nomIcone, nom, teinte, titre }: { url: string; nomIcone: string; nom: React.ReactNode; teinte: string; titre?: string }) {
+export function Pastille({
+  url,
+  nomIcone,
+  nom,
+  teinte,
+  titre,
+}: {
+  url: string;
+  nomIcone: string;
+  nom: React.ReactNode;
+  teinte: string;
+  titre?: string;
+}) {
   return (
     <a href={url} className="pastille-lien" title={titre}>
       <Lucide nom={nomIcone} taille={14} classes={`kind-icon--${teinte}`} />

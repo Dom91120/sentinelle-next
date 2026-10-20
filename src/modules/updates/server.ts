@@ -29,32 +29,58 @@ export type Asset = { name: string; assetType: "application" | "system" };
 /** Suggestions pour le champ « nom » : logiciels métiers (application) et équipements (système). */
 export async function activeAssets(): Promise<Asset[]> {
   const [apps, systems] = await Promise.all([
-    prisma.software.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { name: true } }),
-    prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { name: true } }),
+    prisma.software.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: { name: true },
+    }),
+    prisma.equipment.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: { name: true },
+    }),
   ]);
-  return [...apps.map((s) => ({ name: s.name, assetType: "application" as const })), ...systems.map((e) => ({ name: e.name, assetType: "system" as const }))];
+  return [
+    ...apps.map((s) => ({ name: s.name, assetType: "application" as const })),
+    ...systems.map((e) => ({ name: e.name, assetType: "system" as const })),
+  ];
 }
 
 export async function formContext() {
-  const [assets, equipments] = await Promise.all([activeAssets(), prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" } })]);
+  const [assets, equipments] = await Promise.all([
+    activeAssets(),
+    prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+  ]);
   return { assets, equipments };
 }
 
 export type FormContext = Awaited<ReturnType<typeof formContext>>;
 
 /** (software_id, equipment_id) : l'équipement choisi prime ; sinon le nom cherche sa fiche quand UNE fiche active le porte. */
-export async function cible(name: string, equipmentForm: FormDataEntryValue | null): Promise<[number | null, number | null]> {
+export async function cible(
+  name: string,
+  equipmentForm: FormDataEntryValue | null,
+): Promise<[number | null, number | null]> {
   const nom = (name ?? "").trim();
-  const logiciels = nom ? await prisma.software.findMany({ where: { isActive: true, name: { equals: nom, mode: "insensitive" } }, select: { id: true } }) : [];
+  const logiciels = nom
+    ? await prisma.software.findMany({
+        where: { isActive: true, name: { equals: nom, mode: "insensitive" } },
+        select: { id: true },
+      })
+    : [];
   const softwareId = logiciels.length === 1 ? logiciels[0].id : null;
   let equipmentId: number | null = null;
-  const demande = typeof equipmentForm === "string" ? Number.parseInt(equipmentForm, 10) : Number.NaN;
+  const demande =
+    typeof equipmentForm === "string" ? Number.parseInt(equipmentForm, 10) : Number.NaN;
   if (Number.isInteger(demande) && demande > 0) {
     const e = await prisma.equipment.findUnique({ where: { id: demande }, select: { id: true } });
     equipmentId = e ? demande : null;
   }
   if (equipmentId === null && nom) {
-    const equipements = await prisma.equipment.findMany({ where: { isActive: true, name: { equals: nom, mode: "insensitive" } }, select: { id: true } });
+    const equipements = await prisma.equipment.findMany({
+      where: { isActive: true, name: { equals: nom, mode: "insensitive" } },
+      select: { id: true },
+    });
     equipmentId = equipements.length === 1 ? equipements[0].id : null;
   }
   return [softwareId, equipmentId];

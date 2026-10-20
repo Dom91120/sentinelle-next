@@ -14,8 +14,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const domain = await prisma.domain.findUnique({ where: { id } });
     if (!domain) return pasTrouve();
     const name = champ(form, "name");
-    if (!name) return redirigerAvecMessage(`/domains/${id}/edit`, "Le nom de domaine est obligatoire.", "danger");
-    await prisma.domain.update({ where: { id }, data: { name, ...(await depuisFormulaire(form)) } });
+    if (!name)
+      return redirigerAvecMessage(
+        `/domains/${id}/edit`,
+        "Le nom de domaine est obligatoire.",
+        "danger",
+      );
+    await prisma.domain.update({
+      where: { id },
+      data: { name, ...(await depuisFormulaire(form)) },
+    });
     await rattacherCertificats(id);
     invalidateNavCounts();
     return redirigerAvecMessage(`/domains/${id}`, "Domaine modifie avec succes", "success");

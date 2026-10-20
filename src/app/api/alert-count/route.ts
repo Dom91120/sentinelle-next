@@ -1,5 +1,5 @@
-import { reponseApi, requireUserApi } from "@/server/guards";
 import { chargerTout } from "@/server/donnees";
+import { reponseApi, requireUserApi } from "@/server/guards";
 import { json } from "@/server/http";
 import { activeSnoozeKeys } from "@/server/snooze";
 
@@ -8,7 +8,8 @@ export async function GET() {
   return reponseApi(async () => {
     const user = await requireUserApi();
     const [tout, snoozed] = await Promise.all([chargerTout(), activeSnoozeKeys()]);
-    const cnt = (items: { id: number; status: string }[], etype: string) => items.filter((i) => !snoozed.has(`${etype}:${i.id}`) && i.status === "danger").length;
+    const cnt = (items: { id: number; status: string }[], etype: string) =>
+      items.filter((i) => !snoozed.has(`${etype}:${i.id}`) && i.status === "danger").length;
     const cats: Record<string, number> = {};
     if (user.canView("accounts")) cats.accounts = cnt(tout.accounts, "account");
     if (user.canView("certificates")) cats.certificates = cnt(tout.certificates, "certificate");

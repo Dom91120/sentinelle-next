@@ -13,7 +13,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const cert = await prisma.certificate.findUnique({ where: { id }, include: { service: true } });
     if (!cert) return pasTrouve();
     const resultat = await depuisFormulaire(cert.kind || "tls", form, cert);
-    if ("erreur" in resultat) return redirigerAvecMessage(`/certificates/${id}/edit`, resultat.erreur, "danger");
+    if ("erreur" in resultat)
+      return redirigerAvecMessage(`/certificates/${id}/edit`, resultat.erreur, "danger");
     await prisma.certificate.update({ where: { id }, data: resultat.data });
     invalidateNavCounts();
     return redirigerAvecMessage(`/certificates/${id}`, "Certificat modifié avec succès", "success");

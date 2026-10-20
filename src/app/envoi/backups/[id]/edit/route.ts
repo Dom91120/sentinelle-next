@@ -13,8 +13,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const backup = await prisma.backup.findUnique({ where: { id } });
     if (!backup) return pasTrouve();
     const nom = serviceName(form);
-    if (!nom) return redirigerAvecMessage(`/backups/${id}/edit`, "Le nom du service est obligatoire.", "danger");
-    await prisma.backup.update({ where: { id }, data: { serviceName: nom, ...(await depuisFormulaire(form)) } });
+    if (!nom)
+      return redirigerAvecMessage(
+        `/backups/${id}/edit`,
+        "Le nom du service est obligatoire.",
+        "danger",
+      );
+    await prisma.backup.update({
+      where: { id },
+      data: { serviceName: nom, ...(await depuisFormulaire(form)) },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage(`/backups/${id}`, "Backup modifie avec succes", "success");
   });

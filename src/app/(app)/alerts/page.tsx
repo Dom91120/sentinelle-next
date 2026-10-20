@@ -40,7 +40,10 @@ export default async function AlertsList() {
                     <td>
                       {alert.entityType ? (
                         <>
-                          <span className="badge bg-light text-dark border">{alert.entityType}</span> {alert.entityName ?? ""}
+                          <span className="badge bg-light text-dark border">
+                            {alert.entityType}
+                          </span>{" "}
+                          {alert.entityName ?? ""}
                         </>
                       ) : (
                         "-"

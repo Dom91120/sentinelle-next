@@ -10,7 +10,10 @@ export default async function UserEdit({ params }: { params: Promise<{ id: strin
   const page = await contextePage();
   await requireAdmin();
   const { id } = await params;
-  const [user, roles] = await Promise.all([prisma.user.findUnique({ where: { id } }), prisma.role.findMany({ orderBy: { id: "asc" } })]);
+  const [user, roles] = await Promise.all([
+    prisma.user.findUnique({ where: { id } }),
+    prisma.role.findMany({ orderBy: { id: "asc" } }),
+  ]);
   if (!user) notFound();
   return <FormulaireUtilisateur user={user} roles={roles} csrf={page.csrf} nonce={page.nonce} />;
 }

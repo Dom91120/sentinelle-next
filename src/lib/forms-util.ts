@@ -21,7 +21,11 @@ export function parseDate(value: unknown): Date | null {
 }
 
 /** Parse un entier. Renvoie `def` si vide/non numérique ; borne à `minimum` si fourni. */
-export function parseInt_(value: unknown, def: number | null = null, minimum?: number): number | null {
+export function parseInt_(
+  value: unknown,
+  def: number | null = null,
+  minimum?: number,
+): number | null {
   const s = String(value ?? "").trim();
   if (!/^[+-]?\d+$/.test(s)) return def;
   const n = Number.parseInt(s, 10);

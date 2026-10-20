@@ -12,7 +12,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const domain = await prisma.domain.findUnique({ where: { id } });
     if (!domain) return pasTrouve();
     await prisma.domain.update({ where: { id }, data: { isActive: false } });
-    await prisma.domainHistory.create({ data: { domainId: id, action: "deleted", comment: `Domaine desactive : ${domain.name}`, performedBy: user.username } });
+    await prisma.domainHistory.create({
+      data: {
+        domainId: id,
+        action: "deleted",
+        comment: `Domaine desactive : ${domain.name}`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage("/domains", "Domaine supprime", "success");
   });

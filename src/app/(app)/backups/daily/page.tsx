@@ -50,7 +50,10 @@ export default async function BackupsDaily() {
                     return (
                       <tr key={backup.id}>
                         <td>
-                          <a href={`/backups/${backup.id}`} className="fw-medium text-decoration-none">
+                          <a
+                            href={`/backups/${backup.id}`}
+                            className="fw-medium text-decoration-none"
+                          >
                             {backup.serviceName}
                           </a>
                           {backup.location ? (
@@ -61,11 +64,19 @@ export default async function BackupsDaily() {
                           ) : null}
                         </td>
                         <td>
-                          <small>{BACKUP_TYPE_LABELS_PLAIN[backup.backupType ?? ""] ?? backup.backupType ?? "-"}</small>
+                          <small>
+                            {BACKUP_TYPE_LABELS_PLAIN[backup.backupType ?? ""] ??
+                              backup.backupType ??
+                              "-"}
+                          </small>
                         </td>
                         <td>{backup.expectedTime || "-"}</td>
                         <td>
-                          <select name={`status_${backup.id}`} className="form-select form-select-sm" defaultValue={existing?.status ?? ""}>
+                          <select
+                            name={`status_${backup.id}`}
+                            className="form-select form-select-sm"
+                            defaultValue={existing?.status ?? ""}
+                          >
                             <option value="">-- Non verifie --</option>
                             <option value="ok">OK</option>
                             <option value="warning">Warning</option>
@@ -73,7 +84,13 @@ export default async function BackupsDaily() {
                           </select>
                         </td>
                         <td>
-                          <input type="text" name={`comment_${backup.id}`} className="form-control form-control-sm" defaultValue={existing?.comment ?? ""} placeholder="Commentaire si probleme..." />
+                          <input
+                            type="text"
+                            name={`comment_${backup.id}`}
+                            className="form-control form-control-sm"
+                            defaultValue={existing?.comment ?? ""}
+                            placeholder="Commentaire si probleme..."
+                          />
                         </td>
                       </tr>
                     );

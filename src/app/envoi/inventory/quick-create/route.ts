@@ -9,7 +9,8 @@ import { invalidateNavCounts } from "@/server/nav";
 /** POST /inventory/quick-create : création rapide (AJAX) d'un équipement minimal depuis un autre formulaire. */
 export async function POST(req: Request) {
   const form = await lireFormulaire(req);
-  if (!(await verifierCsrf(req, form))) return json({ ok: false, error: "Jeton CSRF invalide." }, 400);
+  if (!(await verifierCsrf(req, form)))
+    return json({ ok: false, error: "Jeton CSRF invalide." }, 400);
   const f = form ?? new FormData();
   return reponseApi(async () => {
     const user = await requireEditApi("inventory");
@@ -19,10 +20,21 @@ export async function POST(req: Request) {
     const kind = kindDemande in EQUIPMENT_KIND_LABELS ? kindDemande : "vm";
     const systeme = champ(f, "os") || champ(f, "os_family");
     const eq = await prisma.equipment.create({
-      data: { name, kind, os: systeme.slice(0, 128) || null, location: champ(f, "location") || null, observations: champ(f, "observations") || null },
+      data: {
+        name,
+        kind,
+        os: systeme.slice(0, 128) || null,
+        location: champ(f, "location") || null,
+        observations: champ(f, "observations") || null,
+      },
     });
     const label = EQUIPMENT_KIND_LABELS[eq.kind] ?? eq.kind;
-    await auditRecord("creation inventaire", `${eq.name} (${label}, ajout rapide)`, "inventory", user.username);
+    await auditRecord(
+      "creation inventaire",
+      `${eq.name} (${label}, ajout rapide)`,
+      "inventory",
+      user.username,
+    );
     invalidateNavCounts();
     return json({ ok: true, id: eq.id, name: eq.name, label: `${eq.name} (${label})` });
   });

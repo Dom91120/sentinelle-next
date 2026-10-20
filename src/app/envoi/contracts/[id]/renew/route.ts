@@ -14,7 +14,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const contract = await prisma.contract.findUnique({ where: { id } });
     if (!contract) return pasTrouve();
     const newEnd = parseDate(form.get("new_end_date"));
-    if (!newEnd) return redirigerAvecMessage(`/contracts/${id}`, "Indiquez la nouvelle date d'échéance.", "danger");
+    if (!newEnd)
+      return redirigerAvecMessage(
+        `/contracts/${id}`,
+        "Indiquez la nouvelle date d'échéance.",
+        "danger",
+      );
     const oldEnd = contract.endDate;
     await prisma.contract.update({ where: { id }, data: { endDate: newEnd } });
     const comment = champ(form, "comment");
@@ -27,6 +32,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       },
     });
     invalidateNavCounts();
-    return redirigerAvecMessage(`/contracts/${id}`, `Contrat renouvelé jusqu'au ${dateCourte(newEnd)}`, "success");
+    return redirigerAvecMessage(
+      `/contracts/${id}`,
+      `Contrat renouvelé jusqu'au ${dateCourte(newEnd)}`,
+      "success",
+    );
   });
 }

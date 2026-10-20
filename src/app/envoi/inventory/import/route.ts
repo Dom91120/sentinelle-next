@@ -9,14 +9,32 @@ export async function POST(req: Request) {
   return traiterFormulaire(req, async (form) => {
     const user = await requireEdit("inventory");
     const file = form.get("file");
-    if (!(file instanceof File) || !/\.(xlsx|xlsm)$/i.test(file.name)) return redirigerAvecMessage("/inventory/import", "Veuillez fournir un fichier Excel (.xlsx).", "danger");
+    if (!(file instanceof File) || !/\.(xlsx|xlsm)$/i.test(file.name))
+      return redirigerAvecMessage(
+        "/inventory/import",
+        "Veuillez fournir un fichier Excel (.xlsx).",
+        "danger",
+      );
     try {
       const [created, report] = await importWorkbook(Buffer.from(await file.arrayBuffer()));
-      await auditRecord("import inventaire", `${created} equipement(s)`, "inventory", user.username);
+      await auditRecord(
+        "import inventaire",
+        `${created} equipement(s)`,
+        "inventory",
+        user.username,
+      );
       invalidateNavCounts();
-      return redirigerAvecMessage("/inventory", `${created} équipement(s) importé(s). ${report}`, "success");
+      return redirigerAvecMessage(
+        "/inventory",
+        `${created} équipement(s) importé(s). ${report}`,
+        "success",
+      );
     } catch (e) {
-      return redirigerAvecMessage("/inventory/import", `Échec de l'import : ${e instanceof Error ? e.message : String(e)}`, "danger");
+      return redirigerAvecMessage(
+        "/inventory/import",
+        `Échec de l'import : ${e instanceof Error ? e.message : String(e)}`,
+        "danger",
+      );
     }
   });
 }

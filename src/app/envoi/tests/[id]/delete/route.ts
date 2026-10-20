@@ -12,7 +12,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const test = await prisma.testTask.findUnique({ where: { id } });
     if (!test) return pasTrouve();
     await prisma.testTask.update({ where: { id }, data: { isActive: false } });
-    await prisma.testHistory.create({ data: { testId: id, action: "deleted", comment: `Test désactivé : ${test.name}`, performedBy: user.username } });
+    await prisma.testHistory.create({
+      data: {
+        testId: id,
+        action: "deleted",
+        comment: `Test désactivé : ${test.name}`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage("/tests", "Test supprimé", "success");
   });

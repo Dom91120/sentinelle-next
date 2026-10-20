@@ -17,7 +17,11 @@ function signer(payload: string): string {
   return hmacSign("pending-2fa", payload);
 }
 
-export async function setPending2fa(uid: string, ldap: boolean, next: string | null): Promise<void> {
+export async function setPending2fa(
+  uid: string,
+  ldap: boolean,
+  next: string | null,
+): Promise<void> {
   const data: Pending2fa = { uid, ldap, next, exp: Date.now() + TTL_S * 1000 };
   const payload = Buffer.from(JSON.stringify(data)).toString("base64url");
   (await cookies()).set(COOKIE, `${payload}.${signer(payload)}`, {

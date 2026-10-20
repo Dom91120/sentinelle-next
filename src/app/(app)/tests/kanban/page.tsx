@@ -25,7 +25,10 @@ export default async function TestsKanban() {
   const page = await contexteModule("tests");
   const { user, csrf } = page;
   const seuils = seuilsDe(user.settings);
-  const tests = (await prisma.testTask.findMany({ where: { isActive: true } })).map((t) => ({ ...t, statut: testComputedStatus(t, seuils) }));
+  const tests = (await prisma.testTask.findMany({ where: { isActive: true } })).map((t) => ({
+    ...t,
+    statut: testComputedStatus(t, seuils),
+  }));
   const items: Record<string, typeof tests> = { pending: [], success: [], failed: [] };
   for (const t of tests) {
     const status = t.status || "pending";
@@ -59,7 +62,9 @@ export default async function TestsKanban() {
               <div className="kanban-col-header d-flex align-items-center gap-2 mb-3">
                 <Icone bi={col.icon} taille="1em" classes={`text-${col.color}`} />
                 <span className="fw-semibold">{col.label}</span>
-                <span className={`badge bg-${col.color} rounded-pill ms-auto`}>{items[key].length}</span>
+                <span className={`badge bg-${col.color} rounded-pill ms-auto`}>
+                  {items[key].length}
+                </span>
               </div>
               <div className="kanban-cards d-flex flex-column gap-2" id={`col-${key}`}>
                 {items[key].length ? (
@@ -68,7 +73,10 @@ export default async function TestsKanban() {
                     return (
                       <div className="kanban-card data-card p-3" data-id={test.id} key={test.id}>
                         <div className="d-flex justify-content-between align-items-start mb-1">
-                          <a href={`/tests/${test.id}`} className="fw-medium text-decoration-none text-truncate me-2">
+                          <a
+                            href={`/tests/${test.id}`}
+                            className="fw-medium text-decoration-none text-truncate me-2"
+                          >
                             {test.name}
                           </a>
                           <StatusBadge status={test.statut} />
@@ -80,7 +88,11 @@ export default async function TestsKanban() {
                           </small>
                         ) : null}
                         {days !== null ? (
-                          <small className={days < 0 ? "text-danger" : days <= 7 ? "text-warning" : "text-muted"}>
+                          <small
+                            className={
+                              days < 0 ? "text-danger" : days <= 7 ? "text-warning" : "text-muted"
+                            }
+                          >
                             <Icone bi="bi-calendar" taille="1em" classes="me-1" />
                             {delai(days)}
                           </small>
@@ -88,10 +100,19 @@ export default async function TestsKanban() {
                         {user.canEdit("tests") ? (
                           <div className="mt-2 d-flex gap-1 kanban-actions">
                             {ACTIONS.filter(([s]) => s !== key).map(([s, label]) => (
-                              <form method="POST" action={`/tests/${test.id}/set-status`} className="d-inline" key={s}>
+                              <form
+                                method="POST"
+                                action={`/tests/${test.id}/set-status`}
+                                className="d-inline"
+                                key={s}
+                              >
                                 <input type="hidden" name="csrf_token" value={csrf} />
                                 <input type="hidden" name="status" value={s} />
-                                <button type="submit" className={`btn btn-xs btn-outline-${s === "success" ? "success" : s === "failed" ? "danger" : "secondary"}`} title={label}>
+                                <button
+                                  type="submit"
+                                  className={`btn btn-xs btn-outline-${s === "success" ? "success" : s === "failed" ? "danger" : "secondary"}`}
+                                  title={label}
+                                >
                                   {label}
                                 </button>
                               </form>

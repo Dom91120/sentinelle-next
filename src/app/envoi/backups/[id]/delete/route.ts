@@ -12,7 +12,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const backup = await prisma.backup.findUnique({ where: { id } });
     if (!backup) return pasTrouve();
     await prisma.backup.update({ where: { id }, data: { isActive: false } });
-    await prisma.backupHistory.create({ data: { backupId: id, action: "deleted", comment: `Backup desactive : ${backup.serviceName}`, performedBy: user.username } });
+    await prisma.backupHistory.create({
+      data: {
+        backupId: id,
+        action: "deleted",
+        comment: `Backup desactive : ${backup.serviceName}`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage("/backups", "Backup supprime", "success");
   });

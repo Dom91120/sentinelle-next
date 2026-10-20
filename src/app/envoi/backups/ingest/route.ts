@@ -17,7 +17,11 @@ function memeJeton(a: string, b: string): boolean {
  */
 export async function POST(req: Request) {
   const token = (await getSettings()).BACKUP_INGEST_TOKEN;
-  if (!token) return json({ ok: false, error: "Ingestion desactivee (BACKUP_INGEST_TOKEN non defini)." }, 503);
+  if (!token)
+    return json(
+      { ok: false, error: "Ingestion desactivee (BACKUP_INGEST_TOKEN non defini)." },
+      503,
+    );
   const url = new URL(req.url);
   const provided = req.headers.get("x-sentinelle-token") || url.searchParams.get("token") || "";
   if (!memeJeton(provided, token)) return json({ ok: false, error: "Jeton invalide." }, 403);

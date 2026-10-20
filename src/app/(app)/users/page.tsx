@@ -12,7 +12,10 @@ export const metadata = { title: "Utilisateurs - Sentinelle" };
 export default async function UsersList() {
   const page = await contextePage();
   await requireAdmin();
-  const users = await prisma.user.findMany({ orderBy: { createdAt: "desc" }, include: { twofactor: { select: { verified: true } } } });
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { twofactor: { select: { verified: true } } },
+  });
   const { user: moi, csrf } = page;
   return (
     <>
@@ -59,7 +62,11 @@ export default async function UsersList() {
                     </td>
                     <td>{u.email}</td>
                     <td>
-                      <span className={`badge bg-${u.role === "admin" ? "danger" : u.role === "editor" ? "warning" : "secondary"}`}>{roleLabel(u.role)}</span>
+                      <span
+                        className={`badge bg-${u.role === "admin" ? "danger" : u.role === "editor" ? "warning" : "secondary"}`}
+                      >
+                        {roleLabel(u.role)}
+                      </span>
                     </td>
                     <td>
                       {u.authSource === "ldap" ? (
@@ -90,13 +97,24 @@ export default async function UsersList() {
                     <td>{dateCourte(u.createdAt)}</td>
                     <td className="col-actions">
                       <Actions>
-                        <a href={`/users/${u.id}/edit`} className="btn btn-sm btn-outline-secondary btn-icon" title="Modifier" aria-label="Modifier">
+                        <a
+                          href={`/users/${u.id}/edit`}
+                          className="btn btn-sm btn-outline-secondary btn-icon"
+                          title="Modifier"
+                          aria-label="Modifier"
+                        >
                           <Icone bi="bi-pencil" taille="1em" />
                         </a>
                         {has2fa ? (
                           <form method="POST" action={`/users/${u.id}/reset-2fa`}>
                             <input type="hidden" name="csrf_token" value={csrf} />
-                            <button type="submit" className="btn btn-sm btn-outline-warning" title="Réinitialiser la 2FA" aria-label="Réinitialiser la 2FA" data-confirm={`Désactiver la 2FA de ${u.username} ? Il devra la reconfigurer.`}>
+                            <button
+                              type="submit"
+                              className="btn btn-sm btn-outline-warning"
+                              title="Réinitialiser la 2FA"
+                              aria-label="Réinitialiser la 2FA"
+                              data-confirm={`Désactiver la 2FA de ${u.username} ? Il devra la reconfigurer.`}
+                            >
                               <Icone bi="bi-shield-x" taille="1em" />
                             </button>
                           </form>
@@ -104,7 +122,13 @@ export default async function UsersList() {
                         {u.username !== "admin" && u.id !== moi.id ? (
                           <form method="POST" action={`/users/${u.id}/delete`}>
                             <input type="hidden" name="csrf_token" value={csrf} />
-                            <button type="submit" className="btn btn-sm btn-outline-danger btn-icon" title="Supprimer" aria-label="Supprimer" data-confirm="Supprimer cet utilisateur ?">
+                            <button
+                              type="submit"
+                              className="btn btn-sm btn-outline-danger btn-icon"
+                              title="Supprimer"
+                              aria-label="Supprimer"
+                              data-confirm="Supprimer cet utilisateur ?"
+                            >
                               <Icone bi="bi-trash" taille="1em" />
                             </button>
                           </form>

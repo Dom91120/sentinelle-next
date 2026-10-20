@@ -13,9 +13,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!domain) return pasTrouve();
     const res = await scanDomain(domain, user.username);
     const retour = `/domains/${id}`;
-    if (res.error) return redirigerAvecMessage(retour, `Scan CT impossible : ${res.error}`, "danger");
-    if (res.baseline) return redirigerAvecMessage(retour, `Ligne de base CT etablie : ${res.baseline} certificat(s) enregistre(s) (pas d'alerte sur l'historique).`, "info");
-    if (res.new.length) return redirigerAvecMessage(retour, `${res.new.length} nouveau(x) certificat(s) detecte(s) dans les journaux CT — a verifier.`, "warning");
-    return redirigerAvecMessage(retour, "Aucun nouveau certificat dans les journaux CT.", "success");
+    if (res.error)
+      return redirigerAvecMessage(retour, `Scan CT impossible : ${res.error}`, "danger");
+    if (res.baseline)
+      return redirigerAvecMessage(
+        retour,
+        `Ligne de base CT etablie : ${res.baseline} certificat(s) enregistre(s) (pas d'alerte sur l'historique).`,
+        "info",
+      );
+    if (res.new.length)
+      return redirigerAvecMessage(
+        retour,
+        `${res.new.length} nouveau(x) certificat(s) detecte(s) dans les journaux CT — a verifier.`,
+        "warning",
+      );
+    return redirigerAvecMessage(
+      retour,
+      "Aucun nouveau certificat dans les journaux CT.",
+      "success",
+    );
   });
 }

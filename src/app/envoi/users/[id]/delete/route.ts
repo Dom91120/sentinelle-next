@@ -11,9 +11,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const admin = await requireAdmin();
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return pasTrouve();
-    if (user.username === "admin") return redirigerAvecMessage("/users", "Impossible de supprimer l'administrateur principal", "danger");
-    if (user.id === admin.id) return redirigerAvecMessage("/users", "Vous ne pouvez pas supprimer votre propre compte", "danger");
-    if ((await adminRoleNames()).has(user.role) && (await adminUserCount()) <= 1) return redirigerAvecMessage("/users", "Impossible de supprimer le dernier administrateur.", "danger");
+    if (user.username === "admin")
+      return redirigerAvecMessage(
+        "/users",
+        "Impossible de supprimer l'administrateur principal",
+        "danger",
+      );
+    if (user.id === admin.id)
+      return redirigerAvecMessage(
+        "/users",
+        "Vous ne pouvez pas supprimer votre propre compte",
+        "danger",
+      );
+    if ((await adminRoleNames()).has(user.role) && (await adminUserCount()) <= 1)
+      return redirigerAvecMessage(
+        "/users",
+        "Impossible de supprimer le dernier administrateur.",
+        "danger",
+      );
     await prisma.user.delete({ where: { id } });
     await auditRecord("suppression utilisateur", user.username, "utilisateurs", admin.username);
     return redirigerAvecMessage("/users", `Utilisateur ${user.username} supprime`, "success");

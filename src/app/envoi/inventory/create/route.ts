@@ -11,9 +11,15 @@ export async function POST(req: Request) {
   return traiterFormulaire(req, async (form) => {
     const user = await requireEdit("inventory");
     const data = depuisFormulaire(form);
-    if (!data.name) return redirigerAvecMessage("/inventory/create", "Le nom est obligatoire.", "danger");
+    if (!data.name)
+      return redirigerAvecMessage("/inventory/create", "Le nom est obligatoire.", "danger");
     const eq = await prisma.equipment.create({ data });
-    await auditRecord("creation inventaire", `${eq.name} (${EQUIPMENT_KIND_LABELS[eq.kind] ?? eq.kind})`, "inventory", user.username);
+    await auditRecord(
+      "creation inventaire",
+      `${eq.name} (${EQUIPMENT_KIND_LABELS[eq.kind] ?? eq.kind})`,
+      "inventory",
+      user.username,
+    );
     invalidateNavCounts();
     return redirigerAvecMessage(`/inventory/${eq.id}`, "Équipement ajouté", "success");
   });

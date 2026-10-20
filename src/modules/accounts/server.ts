@@ -16,14 +16,22 @@ export async function formContext() {
 }
 
 /** Les rattachements choisis, vérifiés : un identifiant qui ne désigne pas une fiche active ne se pose pas. */
-export async function liens(form: FormData): Promise<{ softwareId: number | null; equipmentId: number | null; supplierId: number | null }> {
+export async function liens(
+  form: FormData,
+): Promise<{ softwareId: number | null; equipmentId: number | null; supplierId: number | null }> {
   const sw = idOuNull(form, "software_id");
   const eq = idOuNull(form, "equipment_id");
   const sp = idOuNull(form, "supplier_id");
   const [s, e, p] = await Promise.all([
-    sw ? prisma.software.findFirst({ where: { id: sw, isActive: true }, select: { id: true } }) : null,
-    eq ? prisma.equipment.findFirst({ where: { id: eq, isActive: true }, select: { id: true } }) : null,
-    sp ? prisma.supplier.findFirst({ where: { id: sp, isActive: true }, select: { id: true } }) : null,
+    sw
+      ? prisma.software.findFirst({ where: { id: sw, isActive: true }, select: { id: true } })
+      : null,
+    eq
+      ? prisma.equipment.findFirst({ where: { id: eq, isActive: true }, select: { id: true } })
+      : null,
+    sp
+      ? prisma.supplier.findFirst({ where: { id: sp, isActive: true }, select: { id: true } })
+      : null,
   ]);
   return { softwareId: s?.id ?? null, equipmentId: e?.id ?? null, supplierId: p?.id ?? null };
 }
@@ -35,7 +43,9 @@ function ajouterJours(d: Date, n: number): Date {
 }
 
 /** Les champs d'un compte depuis le formulaire (création et modification). */
-export async function depuisFormulaire(form: FormData): Promise<Prisma.AccountUncheckedCreateInput | null> {
+export async function depuisFormulaire(
+  form: FormData,
+): Promise<Prisma.AccountUncheckedCreateInput | null> {
   const serviceName = String(form.get("service_name") ?? "").trim();
   const username = String(form.get("username") ?? "").trim();
   if (!serviceName || !username) return null;

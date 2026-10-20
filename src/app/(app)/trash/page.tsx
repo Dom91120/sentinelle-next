@@ -21,7 +21,11 @@ export default async function Trash() {
           {groups.some((g) => g.canPurge) ? (
             <form method="POST" action="/trash/purge">
               <input type="hidden" name="csrf_token" value={csrf} />
-              <button type="submit" className="btn btn-outline-danger" data-confirm="Vider la corbeille ? Cette suppression est définitive.">
+              <button
+                type="submit"
+                className="btn btn-outline-danger"
+                data-confirm="Vider la corbeille ? Cette suppression est définitive."
+              >
                 <Icone bi="bi-trash3" taille="1em" classes="me-1" /> Vider la corbeille
               </button>
             </form>
@@ -62,7 +66,8 @@ export default async function Trash() {
                           <input type="hidden" name="entity_type" value={g.etype} />
                           <input type="hidden" name="entity_id" value={it.id} />
                           <button type="submit" className="btn btn-sm btn-outline-success">
-                            <Icone bi="bi-arrow-counterclockwise" taille="1em" classes="me-1" /> Restaurer
+                            <Icone bi="bi-arrow-counterclockwise" taille="1em" classes="me-1" />{" "}
+                            Restaurer
                           </button>
                         </form>
                         {g.canPurge ? (
@@ -70,7 +75,13 @@ export default async function Trash() {
                             <input type="hidden" name="csrf_token" value={csrf} />
                             <input type="hidden" name="entity_type" value={g.etype} />
                             <input type="hidden" name="entity_id" value={it.id} />
-                            <button type="submit" className="btn btn-sm btn-outline-danger" title="Supprimer définitivement" aria-label="Supprimer définitivement" data-confirm="Supprimer définitivement cet élément ?">
+                            <button
+                              type="submit"
+                              className="btn btn-sm btn-outline-danger"
+                              title="Supprimer définitivement"
+                              aria-label="Supprimer définitivement"
+                              data-confirm="Supprimer définitivement cet élément ?"
+                            >
                               <Icone bi="bi-trash" taille="1em" />
                             </button>
                           </form>

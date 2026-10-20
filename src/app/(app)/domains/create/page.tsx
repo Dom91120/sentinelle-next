@@ -14,7 +14,14 @@ export default async function DomainCreate() {
   return (
     <>
       <EnteteForm titre="Ajouter un domaine" retour="/domains" />
-      <FormCorps domain={null} {...ctx} user={page.user} csrf={page.csrf} nonce={page.nonce} retour="/domains" />
+      <FormCorps
+        domain={null}
+        {...ctx}
+        user={page.user}
+        csrf={page.csrf}
+        nonce={page.nonce}
+        retour="/domains"
+      />
     </>
   );
 }

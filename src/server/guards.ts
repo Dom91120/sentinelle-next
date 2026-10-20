@@ -9,8 +9,8 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
-import { PERMISSION_CATEGORIES, type PermissionCategory } from "@/lib/constantes";
 import type { Role as RoleRow, User as UserRow } from "@/generated/prisma/client";
+import { PERMISSION_CATEGORIES, type PermissionCategory } from "@/lib/constantes";
 import { auth } from "@/server/auth";
 import { type AppSettings, getSettings } from "@/server/config-store";
 import { prisma } from "@/server/db";
@@ -25,7 +25,8 @@ type SessionResult = Awaited<ReturnType<typeof auth.api.getSession>>;
 async function readSession(): Promise<SessionResult> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
-  const lifetimeMs = (Number.parseInt(process.env.SESSION_LIFETIME_MINUTES ?? "480", 10) || 480) * 60_000;
+  const lifetimeMs =
+    (Number.parseInt(process.env.SESSION_LIFETIME_MINUTES ?? "480", 10) || 480) * 60_000;
   const lastSeen = session.session.updatedAt.getTime();
   if (Date.now() - lastSeen > lifetimeMs) {
     await prisma.session.deleteMany({ where: { id: session.session.id } });
@@ -33,7 +34,10 @@ async function readSession(): Promise<SessionResult> {
   }
   if (Date.now() - lastSeen >= TOUCH_THROTTLE_MS) {
     try {
-      await prisma.session.update({ where: { id: session.session.id }, data: { updatedAt: new Date() } });
+      await prisma.session.update({
+        where: { id: session.session.id },
+        data: { updatedAt: new Date() },
+      });
     } catch (e) {
       console.error("[guards] horodatage d'activité échoué :", e);
     }
@@ -69,7 +73,11 @@ export type CurrentUser = {
 
 const ROLE_FALLBACK_ADMIN = "admin";
 
-export function buildCurrentUser(row: UserRow, roleObj: RoleRow | null, settings: AppSettings): CurrentUser {
+export function buildCurrentUser(
+  row: UserRow,
+  roleObj: RoleRow | null,
+  settings: AppSettings,
+): CurrentUser {
   const isAdmin = roleObj ? Boolean(roleObj.isAdmin) : row.role === ROLE_FALLBACK_ADMIN;
   const permLevel = (category: string): number => {
     if (!categoryEnabledIn(settings, category)) return 0;
@@ -106,7 +114,8 @@ export function buildCurrentUser(row: UserRow, roleObj: RoleRow | null, settings
     totpLockedUntil: row.totpLockedUntil,
     settings,
     permLevel,
-    canView: (category) => (category === undefined || category === null ? true : permLevel(category) >= 1),
+    canView: (category) =>
+      category === undefined || category === null ? true : permLevel(category) >= 1,
     canEdit,
     canDelete: (category) => permLevel(category) >= 3,
   };
@@ -114,7 +123,10 @@ export function buildCurrentUser(row: UserRow, roleObj: RoleRow | null, settings
 
 /** Charge un utilisateur et son rôle en CurrentUser (hors requête : tâches, tests). */
 export async function loadUser(userId: string): Promise<CurrentUser | null> {
-  const [row, settings] = await Promise.all([prisma.user.findUnique({ where: { id: userId } }), getSettings()]);
+  const [row, settings] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId } }),
+    getSettings(),
+  ]);
   if (!row) return null;
   const roleObj = row.role ? await prisma.role.findUnique({ where: { name: row.role } }) : null;
   return buildCurrentUser(row, roleObj, settings);
@@ -143,7 +155,9 @@ export async function requireUser(): Promise<CurrentUser> {
   return user;
 }
 
-async function deny(message = "Vous n'avez pas les droits pour effectuer cette action."): Promise<never> {
+async function deny(
+  message = "Vous n'avez pas les droits pour effectuer cette action.",
+): Promise<never> {
   await flash(message, "danger");
   redirect("/");
 }
@@ -156,7 +170,9 @@ export async function requireView(category: PermissionCategory | string): Promis
 }
 
 /** `@require_edit` : exige le droit d'écriture sur la catégorie (ou n'importe laquelle si absente). */
-export async function requireEdit(category?: PermissionCategory | string | null): Promise<CurrentUser> {
+export async function requireEdit(
+  category?: PermissionCategory | string | null,
+): Promise<CurrentUser> {
   const user = await requireUser();
   if (!user.canEdit(category ?? null)) await deny();
   return user;

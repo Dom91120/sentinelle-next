@@ -12,11 +12,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ linkId:
   return traiterFormulaire(req, async (form) => {
     const user = await requireEdit("software");
     await requireFeature("links");
-    const lien = await prisma.softwareLink.findUnique({ where: { id: linkId }, include: { source: true, target: true } });
+    const lien = await prisma.softwareLink.findUnique({
+      where: { id: linkId },
+      include: { source: true, target: true },
+    });
     if (!lien) return pasTrouve();
     const retour = parseInt_(form.get("from_id"), null) || lien.sourceId;
-    await prisma.softwareLink.update({ where: { id: linkId }, data: { description: champOuNull(form, "description") } });
-    await auditRecord("modification interconnexion", `${lien.source.name} -> ${lien.target.name}`, "inventory", user.username);
-    return redirigerAvecMessage(`/inventory/logiciels/${retour}#liaisons`, "Flux modifié", "success");
+    await prisma.softwareLink.update({
+      where: { id: linkId },
+      data: { description: champOuNull(form, "description") },
+    });
+    await auditRecord(
+      "modification interconnexion",
+      `${lien.source.name} -> ${lien.target.name}`,
+      "inventory",
+      user.username,
+    );
+    return redirigerAvecMessage(
+      `/inventory/logiciels/${retour}#liaisons`,
+      "Flux modifié",
+      "success",
+    );
   });
 }

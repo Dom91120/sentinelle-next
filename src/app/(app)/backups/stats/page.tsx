@@ -111,11 +111,15 @@ export default async function BackupsStats() {
               <div className="d-flex gap-3 align-items-center">
                 <div className="text-center">
                   <small className="text-muted d-block">Taux 30j</small>
-                  <span className={`fw-bold ${taux(item.rate30)}`}>{item.rate30 !== null ? `${item.rate30}%` : "-"}</span>
+                  <span className={`fw-bold ${taux(item.rate30)}`}>
+                    {item.rate30 !== null ? `${item.rate30}%` : "-"}
+                  </span>
                 </div>
                 <div className="text-center">
                   <small className="text-muted d-block">Taux 7j</small>
-                  <span className={`fw-bold ${taux(item.rate7)}`}>{item.rate7 !== null ? `${item.rate7}%` : "-"}</span>
+                  <span className={`fw-bold ${taux(item.rate7)}`}>
+                    {item.rate7 !== null ? `${item.rate7}%` : "-"}
+                  </span>
                 </div>
                 <div className="text-center">
                   <small className="text-muted d-block">Serie en cours</small>
@@ -126,8 +130,15 @@ export default async function BackupsStats() {
             <div className="p-3">
               <div className="d-flex gap-1 flex-wrap">
                 {item.calendar.map((day) => (
-                  <div className="text-center" style={{ width: 28 }} key={day.date} title={`${day.dateDisplay}${day.recovered ? " - incident corrige (repasse OK)" : ""}${day.comment ? ` - ${day.comment}` : ""}`}>
-                    <div className={`heat-cell heat-${day.status && ["ok", "failed", "warning"].includes(day.status) ? day.status : "empty"}${day.recovered ? " heat-recovered" : ""}`} />
+                  <div
+                    className="text-center"
+                    style={{ width: 28 }}
+                    key={day.date}
+                    title={`${day.dateDisplay}${day.recovered ? " - incident corrige (repasse OK)" : ""}${day.comment ? ` - ${day.comment}` : ""}`}
+                  >
+                    <div
+                      className={`heat-cell heat-${day.status && ["ok", "failed", "warning"].includes(day.status) ? day.status : "empty"}${day.recovered ? " heat-recovered" : ""}`}
+                    />
                     <small className="text-muted" style={{ fontSize: "0.55rem" }}>
                       {day.dateDisplay}
                     </small>

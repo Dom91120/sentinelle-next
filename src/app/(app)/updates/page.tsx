@@ -17,8 +17,16 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
   const page = await contexteModule("updates");
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
-  let updates = (await prisma.systemUpdate.findMany({ where: { isActive: true }, orderBy: { name: "asc" } })).map((u) => ({ ...u, couleur: updateStatusColor(u) }));
-  updates = textSearch(updates, q, ["name", "currentVersion", "latestVersion", "updatedBy", "description"]);
+  let updates = (
+    await prisma.systemUpdate.findMany({ where: { isActive: true }, orderBy: { name: "asc" } })
+  ).map((u) => ({ ...u, couleur: updateStatusColor(u) }));
+  updates = textSearch(updates, q, [
+    "name",
+    "currentVersion",
+    "latestVersion",
+    "updatedBy",
+    "description",
+  ]);
   updates.sort((a, b) => statusRank(a.couleur) - statusRank(b.couleur));
   const perPage = await resolvePerPage(params, page.user, "updates.list");
   const [rows, p] = paginate(updates, params, perPage);
@@ -30,7 +38,9 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
           <h1 className="page-title">
             Mises à jour <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">Versions des applications et systèmes suivis, et ce qui attend une mise à jour</p>
+          <p className="page-subtitle">
+            Versions des applications et systèmes suivis, et ce qui attend une mise à jour
+          </p>
         </div>
         <div className="page-actions">
           <CsvToolbar csvKey="updates" canEdit={user.canEdit("updates")} csrf={csrf} />
@@ -64,7 +74,9 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
                       <a href={`/updates/${u.id}`} className="fw-medium text-decoration-none">
                         {u.name}
                       </a>
-                      <small className="d-block text-muted">{TYPE_LABELS[u.systemType ?? ""] ?? u.systemType}</small>
+                      <small className="d-block text-muted">
+                        {TYPE_LABELS[u.systemType ?? ""] ?? u.systemType}
+                      </small>
                     </td>
                     <td>
                       <code>{u.currentVersion || "—"}</code>
@@ -74,12 +86,18 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
                     </td>
                     <td>{u.lastUpdate ? dateCourte(u.lastUpdate) : "—"}</td>
                     <td>
-                      <span className={`badge-status badge-${u.couleur}`}>{STATUS_LABELS[u.status ?? ""] ?? u.status}</span>
+                      <span className={`badge-status badge-${u.couleur}`}>
+                        {STATUS_LABELS[u.status ?? ""] ?? u.status}
+                      </span>
                     </td>
                   </tr>
                 ))
               ) : (
-                <Vide colonnes={6} message="Aucune application ni système suivi." urlAjout={user.canEdit("updates") ? "/updates/create" : null} />
+                <Vide
+                  colonnes={6}
+                  message="Aucune application ni système suivi."
+                  urlAjout={user.canEdit("updates") ? "/updates/create" : null}
+                />
               )}
             </tbody>
           </table>

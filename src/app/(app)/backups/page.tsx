@@ -31,7 +31,9 @@ export default async function BackupsList({ searchParams }: { searchParams: Para
           <h1 className="page-title">
             Sauvegardes <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">Les sauvegardes à vérifier chaque jour, et leur taux de réussite</p>
+          <p className="page-subtitle">
+            Les sauvegardes à vérifier chaque jour, et leur taux de réussite
+          </p>
         </div>
         <div className="page-actions">
           {peutEditer ? (
@@ -45,7 +47,11 @@ export default async function BackupsList({ searchParams }: { searchParams: Para
           {user.settings.BACKUP_INBOX_DIR && peutEditer ? (
             <form method="POST" action="/backups/scan-inbox" className="d-inline">
               <input type="hidden" name="csrf_token" value={csrf} />
-              <button type="submit" className="btn btn-outline-secondary" title="Lire les mails de sauvegarde du répertoire">
+              <button
+                type="submit"
+                className="btn btn-outline-secondary"
+                title="Lire les mails de sauvegarde du répertoire"
+              >
                 <Icone bi="bi-envelope-arrow-down" taille="1em" classes="me-1" /> Scanner la boîte
               </button>
             </form>
@@ -82,10 +88,15 @@ export default async function BackupsList({ searchParams }: { searchParams: Para
                   return (
                     <tr key={backup.id} className={`row-${backup.status}`}>
                       <td>
-                        <a href={`/backups/${backup.id}`} className="fw-medium text-decoration-none">
+                        <a
+                          href={`/backups/${backup.id}`}
+                          className="fw-medium text-decoration-none"
+                        >
                           {backup.serviceName}
                         </a>
-                        <small className="d-block text-muted">{BACKUP_TYPE_LABELS[backup.backupType ?? ""] ?? backup.backupType ?? ""}</small>
+                        <small className="d-block text-muted">
+                          {BACKUP_TYPE_LABELS[backup.backupType ?? ""] ?? backup.backupType ?? ""}
+                        </small>
                       </td>
                       <td>
                         {tc ? (
@@ -110,10 +121,21 @@ export default async function BackupsList({ searchParams }: { searchParams: Para
                         )}
                       </td>
                       <td>
-                        <Cellule principal={FREQ_LABELS[backup.frequency ?? ""] ?? backup.frequency ?? "—"} secondaire={backup.expectedTime ? `à ${backup.expectedTime}` : ""} />
+                        <Cellule
+                          principal={FREQ_LABELS[backup.frequency ?? ""] ?? backup.frequency ?? "—"}
+                          secondaire={backup.expectedTime ? `à ${backup.expectedTime}` : ""}
+                        />
                       </td>
                       <td>
-                        {rate !== null ? <span className={`fw-bold ${rate >= 95 ? "text-success" : rate >= 80 ? "text-warning" : "text-danger"}`}>{rate} %</span> : <span className="text-muted">—</span>}
+                        {rate !== null ? (
+                          <span
+                            className={`fw-bold ${rate >= 95 ? "text-success" : rate >= 80 ? "text-warning" : "text-danger"}`}
+                          >
+                            {rate} %
+                          </span>
+                        ) : (
+                          <span className="text-muted">—</span>
+                        )}
                       </td>
                       <td>
                         <small>{backup.location || "—"}</small>
@@ -125,7 +147,11 @@ export default async function BackupsList({ searchParams }: { searchParams: Para
                   );
                 })
               ) : (
-                <Vide colonnes={6} message="Aucune sauvegarde." urlAjout={peutEditer ? "/backups/create" : null} />
+                <Vide
+                  colonnes={6}
+                  message="Aucune sauvegarde."
+                  urlAjout={peutEditer ? "/backups/create" : null}
+                />
               )}
             </tbody>
           </table>

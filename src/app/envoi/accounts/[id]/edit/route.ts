@@ -13,7 +13,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const existant = await prisma.account.findUnique({ where: { id } });
     if (!existant) return pasTrouve();
     const data = await depuisFormulaire(form);
-    if (!data) return redirigerAvecMessage(`/accounts/${id}/edit`, "Le service et l'identifiant sont obligatoires.", "danger");
+    if (!data)
+      return redirigerAvecMessage(
+        `/accounts/${id}/edit`,
+        "Le service et l'identifiant sont obligatoires.",
+        "danger",
+      );
     await prisma.account.update({ where: { id }, data });
     invalidateNavCounts();
     return redirigerAvecMessage(`/accounts/${id}`, "Compte modifié avec succès", "success");

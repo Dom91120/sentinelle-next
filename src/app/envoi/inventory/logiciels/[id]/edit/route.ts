@@ -15,10 +15,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const item = await prisma.software.findUnique({ where: { id } });
     if (!item) return pasTrouve();
     const data = depuisFormulaire(form, enabledIn(user.settings, "gdpr"));
-    if (!data.name) return redirigerAvecMessage(`/inventory/logiciels/${id}/edit`, "Le nom du logiciel est obligatoire.", "danger");
+    if (!data.name)
+      return redirigerAvecMessage(
+        `/inventory/logiciels/${id}/edit`,
+        "Le nom du logiciel est obligatoire.",
+        "danger",
+      );
     await prisma.software.update({ where: { id }, data });
     // Les revues de droits affichent le nom du logiciel : elles le suivent.
-    await prisma.accessReview.updateMany({ where: { softwareId: id }, data: { application: data.name as string } });
+    await prisma.accessReview.updateMany({
+      where: { softwareId: id },
+      data: { application: data.name as string },
+    });
     await poserRattachements(id, form);
     await auditRecord("modification logiciel", data.name as string, "inventory", user.username);
     invalidateNavCounts();

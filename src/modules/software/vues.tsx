@@ -1,20 +1,53 @@
 /** Les gabarits des logiciels (port de software/_form_corps.html, _form_corps_ancien.html, _synthese.html, _contacts.html, _flux.html, _partages.html). */
-import type { Contract, Equipment, Referential, Software, SoftwareLink, SoftwareShare, Supplier, UserService } from "@/generated/prisma/client";
+
 import { PiedForm, Section } from "@/components/formulaire";
 import { Icone, Lucide } from "@/components/icones";
 import { QaAddLink, QaButton } from "@/components/quick-add";
 import { ScriptDiffere } from "@/components/scripts";
 import { Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
-import { AUTH_MODE_LABELS, DATA_LOCATION_LABELS, ENVIRONMENT_LABELS, EQUIPMENT_KIND_LABELS, HOSTING_LABELS, LIFECYCLE_LABELS, SOURCE_TYPE_LABELS } from "@/lib/constantes";
+import type {
+  Contract,
+  Equipment,
+  Referential,
+  Software,
+  SoftwareLink,
+  SoftwareShare,
+  Supplier,
+  UserService,
+} from "@/generated/prisma/client";
+import {
+  AUTH_MODE_LABELS,
+  DATA_LOCATION_LABELS,
+  ENVIRONMENT_LABELS,
+  EQUIPMENT_KIND_LABELS,
+  HOSTING_LABELS,
+  LIFECYCLE_LABELS,
+  SOURCE_TYPE_LABELS,
+} from "@/lib/constantes";
 import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
 import { couleurIcone } from "@/lib/navigation";
 import { softwareOverLicence } from "@/lib/statuts";
-import { authModeLabel, criticalityLabel, gdprLocationLabel, hostingLabel, lifecycleLabel, sourceTypeLabel } from "@/modules/software/server";
+import {
+  authModeLabel,
+  criticalityLabel,
+  gdprLocationLabel,
+  hostingLabel,
+  lifecycleLabel,
+  sourceTypeLabel,
+} from "@/modules/software/server";
 import type { CurrentUser } from "@/server/guards";
 
-export const FLUX_ICONE: Record<string, string> = { sortant: "arrow-right", entrant: "arrow-left", double: "arrow-right-left" };
-export const FLUX_TITRE: Record<string, string> = { sortant: "Flux sortant vers", entrant: "Flux entrant depuis", double: "Flux à double sens avec" };
+export const FLUX_ICONE: Record<string, string> = {
+  sortant: "arrow-right",
+  entrant: "arrow-left",
+  double: "arrow-right-left",
+};
+export const FLUX_TITRE: Record<string, string> = {
+  sortant: "Flux sortant vers",
+  entrant: "Flux entrant depuis",
+  double: "Flux à double sens avec",
+};
 
 export type Flux = { lien: SoftwareLink; sens: "sortant" | "entrant" | "double"; autre: Software };
 
@@ -31,11 +64,38 @@ type FormCommun = {
   gdpr: boolean;
 };
 
-export type FormProps = FormCommun & { nonce?: string; itemContractIds?: number[]; itemEquipmentIds?: number[]; itemServiceIds?: number[] };
+export type FormProps = FormCommun & {
+  nonce?: string;
+  itemContractIds?: number[];
+  itemEquipmentIds?: number[];
+  itemServiceIds?: number[];
+};
 
-function Sel({ name, labels, current, blank, id, petit = true, disabled }: { name: string; labels: Record<string, string>; current: string | null | undefined; blank?: string; id?: string; petit?: boolean; disabled?: boolean }) {
+function Sel({
+  name,
+  labels,
+  current,
+  blank,
+  id,
+  petit = true,
+  disabled,
+}: {
+  name: string;
+  labels: Record<string, string>;
+  current: string | null | undefined;
+  blank?: string;
+  id?: string;
+  petit?: boolean;
+  disabled?: boolean;
+}) {
   return (
-    <select name={name} id={id} className={petit ? "form-select form-select-sm" : "form-select"} defaultValue={current ?? ""} disabled={disabled}>
+    <select
+      name={name}
+      id={id}
+      className={petit ? "form-select form-select-sm" : "form-select"}
+      defaultValue={current ?? ""}
+      disabled={disabled}
+    >
       {blank ? <option value="">{blank}</option> : null}
       {Object.entries(labels).map(([value, label]) => (
         <option key={value} value={value}>
@@ -47,12 +107,30 @@ function Sel({ name, labels, current, blank, id, petit = true, disabled }: { nam
 }
 
 /** Une rubrique de la carte : son en-tête (barre d'accent, titre) et son corps. */
-function Carte({ titre, bi, couleur, onglet, children }: { titre: string; bi: string; couleur: string; onglet?: string; children: React.ReactNode }) {
+function Carte({
+  titre,
+  bi,
+  couleur,
+  onglet,
+  children,
+}: {
+  titre: string;
+  bi: string;
+  couleur: string;
+  onglet?: string;
+  children: React.ReactNode;
+}) {
   return (
     <>
       <div className="card-header-custom">
         <h6 className={`fw-bold fiche-titre fiche-titre--${couleur} mb-0`}>
-          {onglet ? <Icone bi={bi} taille="1em" classes={`ico-onglet ico-onglet--${onglet}`} /> : bi.startsWith("bi-") ? <Icone bi={bi} taille={14} classes={`ico ico-${couleur}`} /> : <Lucide nom={bi} taille={14} classes={`ico ico-${couleur}`} />}
+          {onglet ? (
+            <Icone bi={bi} taille="1em" classes={`ico-onglet ico-onglet--${onglet}`} />
+          ) : bi.startsWith("bi-") ? (
+            <Icone bi={bi} taille={14} classes={`ico ico-${couleur}`} />
+          ) : (
+            <Lucide nom={bi} taille={14} classes={`ico ico-${couleur}`} />
+          )}
           {titre}
         </h6>
       </div>
@@ -64,18 +142,48 @@ function Carte({ titre, bi, couleur, onglet, children }: { titre: string; bi: st
 function Nature({ item }: { item: Software | null }) {
   return (
     <div className="d-flex flex-wrap align-items-center gap-2">
-      <input type="checkbox" className="btn-check" name="is_docker" id="isDocker" defaultChecked={Boolean(item?.isDocker)} />
-      <label className="btn btn-outline-primary btn-sm" htmlFor="isDocker" title="Conteneurisé (Docker) — cumulable avec tout hébergement">
+      <input
+        type="checkbox"
+        className="btn-check"
+        name="is_docker"
+        id="isDocker"
+        defaultChecked={Boolean(item?.isDocker)}
+      />
+      <label
+        className="btn btn-outline-primary btn-sm"
+        htmlFor="isDocker"
+        title="Conteneurisé (Docker) — cumulable avec tout hébergement"
+      >
         <i className="icon-docker me-1" />
         Docker
       </label>
-      <input type="checkbox" className="btn-check" name="internal_dev" id="internalDev" defaultChecked={Boolean(item?.internalDev)} />
-      <label className="btn btn-outline-primary btn-sm" htmlFor="internalDev" title="Fait et maintenu par la DSI : ni éditeur, ni support, ni contrat">
+      <input
+        type="checkbox"
+        className="btn-check"
+        name="internal_dev"
+        id="internalDev"
+        defaultChecked={Boolean(item?.internalDev)}
+      />
+      <label
+        className="btn btn-outline-primary btn-sm"
+        htmlFor="internalDev"
+        title="Fait et maintenu par la DSI : ni éditeur, ni support, ni contrat"
+      >
         <Icone bi="bi-code-slash" taille="1em" classes="me-1" />
         Développement interne
       </label>
-      <input type="checkbox" className="btn-check" name="no_server" id="noServer" defaultChecked={Boolean(item?.noServer)} />
-      <label className="btn btn-outline-primary btn-sm" htmlFor="noServer" title="Ne s’installe sur aucune machine du parc : SaaS, ou postes des agents">
+      <input
+        type="checkbox"
+        className="btn-check"
+        name="no_server"
+        id="noServer"
+        defaultChecked={Boolean(item?.noServer)}
+      />
+      <label
+        className="btn btn-outline-primary btn-sm"
+        htmlFor="noServer"
+        title="Ne s’installe sur aucune machine du parc : SaaS, ou postes des agents"
+      >
         <Icone bi="bi-slash-circle" taille="1em" classes="me-1" />
         Aucun serveur
       </label>
@@ -88,7 +196,13 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
   const v = (s: string | null | undefined) => s ?? "";
   return (
     <div className="form-seul">
-      <form method="POST" id="form-principal" className="formulaire logiciel-saisie" data-edition-visible action={item ? `/inventory/logiciels/${item.id}/edit` : "/inventory/logiciels/create"}>
+      <form
+        method="POST"
+        id="form-principal"
+        className="formulaire logiciel-saisie"
+        data-edition-visible
+        action={item ? `/inventory/logiciels/${item.id}/edit` : "/inventory/logiciels/create"}
+      >
         <input type="hidden" name="csrf_token" value={csrf} />
 
         <div className="data-card mb-3">
@@ -98,20 +212,39 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 <label className="form-label small mb-1" htmlFor="swNom">
                   Nom du logiciel <span className="text-danger">*</span>
                 </label>
-                <input type="text" name="name" id="swNom" className="form-control form-control-sm" required defaultValue={item?.name ?? ""} placeholder="ex : GLPI, Office 365…" />
+                <input
+                  type="text"
+                  name="name"
+                  id="swNom"
+                  className="form-control form-control-sm"
+                  required
+                  defaultValue={item?.name ?? ""}
+                  placeholder="ex : GLPI, Office 365…"
+                />
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swVersion">
                   Version
                 </label>
-                <input type="text" name="version" id="swVersion" className="form-control form-control-sm" defaultValue={v(item?.version)} />
+                <input
+                  type="text"
+                  name="version"
+                  id="swVersion"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.version)}
+                />
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swSupplier">
                   Éditeur
                 </label>
                 <div className="d-flex align-items-center gap-1">
-                  <select name="supplier_id" id="swSupplier" className="form-select form-select-sm min-w-0 flex-grow-1" defaultValue={item?.supplierId ?? ""}>
+                  <select
+                    name="supplier_id"
+                    id="swSupplier"
+                    className="form-select form-select-sm min-w-0 flex-grow-1"
+                    defaultValue={item?.supplierId ?? ""}
+                  >
                     <option value="">— aucun —</option>
                     {suppliers.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -119,14 +252,27 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                       </option>
                     ))}
                   </select>
-                  {user.canEdit("suppliers") ? <QaButton modalId="qaModalSupplier" targetId="swSupplier" title="Ajouter un éditeur" /> : null}
+                  {user.canEdit("suppliers") ? (
+                    <QaButton
+                      modalId="qaModalSupplier"
+                      targetId="swSupplier"
+                      title="Ajouter un éditeur"
+                    />
+                  ) : null}
                 </div>
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swUrl">
                   URL application
                 </label>
-                <input type="url" name="url" id="swUrl" className="form-control form-control-sm" defaultValue={v(item?.url)} placeholder="https://…" />
+                <input
+                  type="url"
+                  name="url"
+                  id="swUrl"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.url)}
+                  placeholder="https://…"
+                />
               </div>
             </div>
 
@@ -135,13 +281,23 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 <label className="form-label small mb-1" htmlFor="swStatut">
                   Statut
                 </label>
-                <Sel name="lifecycle" labels={LIFECYCLE_LABELS} current={item ? item.lifecycle : "production"} id="swStatut" />
+                <Sel
+                  name="lifecycle"
+                  labels={LIFECYCLE_LABELS}
+                  current={item ? item.lifecycle : "production"}
+                  id="swStatut"
+                />
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swCriticite">
                   Criticité
                 </label>
-                <select name="criticality" id="swCriticite" className="form-select form-select-sm" defaultValue={item?.criticality ?? ""}>
+                <select
+                  name="criticality"
+                  id="swCriticite"
+                  className="form-select form-select-sm"
+                  defaultValue={item?.criticality ?? ""}
+                >
                   {[
                     ["", "—"],
                     ["1", "Faible"],
@@ -159,25 +315,58 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 <label className="form-label small mb-1" htmlFor="swUtilisateurs">
                   Utilisateurs
                 </label>
-                <input type="number" min={0} name="users_count" id="swUtilisateurs" className="form-control form-control-sm" defaultValue={item?.usersCount ?? ""} />
+                <input
+                  type="number"
+                  min={0}
+                  name="users_count"
+                  id="swUtilisateurs"
+                  className="form-control form-control-sm"
+                  defaultValue={item?.usersCount ?? ""}
+                />
               </div>
               <div>
-                <label className="form-label small mb-1" htmlFor="swMax" title="Plafond contractuel : au-delà, dépassement de licence">
+                <label
+                  className="form-label small mb-1"
+                  htmlFor="swMax"
+                  title="Plafond contractuel : au-delà, dépassement de licence"
+                >
                   Max
                 </label>
-                <input type="number" min={0} name="users_max" id="swMax" className="form-control form-control-sm" defaultValue={item?.usersMax ?? ""} />
+                <input
+                  type="number"
+                  min={0}
+                  name="users_max"
+                  id="swMax"
+                  className="form-control form-control-sm"
+                  defaultValue={item?.usersMax ?? ""}
+                />
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swRefMetier">
                   Référent métier
                 </label>
-                <input type="text" name="responsible" id="swRefMetier" className="form-control form-control-sm" defaultValue={v(item?.responsible)} data-ad-search="" data-ad-email="responsible_email" placeholder="Rechercher dans l'annuaire…" />
+                <input
+                  type="text"
+                  name="responsible"
+                  id="swRefMetier"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.responsible)}
+                  data-ad-search=""
+                  data-ad-email="responsible_email"
+                  placeholder="Rechercher dans l'annuaire…"
+                />
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swMailMetier">
                   Courriel métier
                 </label>
-                <input type="email" name="responsible_email" id="swMailMetier" className="form-control form-control-sm" defaultValue={v(item?.responsibleEmail)} />
+                <input
+                  type="email"
+                  name="responsible_email"
+                  id="swMailMetier"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.responsibleEmail)}
+                />
               </div>
             </div>
 
@@ -185,7 +374,14 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
               <label className="form-label small mb-1" htmlFor="swDescriptif">
                 Descriptif
               </label>
-              <textarea name="description" id="swDescriptif" className="form-control form-control-sm" rows={4} placeholder="Périmètre fonctionnel, dépendances, particularités…" defaultValue={v(item?.description)} />
+              <textarea
+                name="description"
+                id="swDescriptif"
+                className="form-control form-control-sm"
+                rows={4}
+                placeholder="Périmètre fonctionnel, dépendances, particularités…"
+                defaultValue={v(item?.description)}
+              />
             </div>
           </Carte>
 
@@ -195,13 +391,23 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 <label className="form-label small mb-1" htmlFor="swHebergement">
                   Hébergement
                 </label>
-                <Sel name="hosting" labels={HOSTING_LABELS} current={item ? item.hosting : "on_premise"} id="swHebergement" />
+                <Sel
+                  name="hosting"
+                  labels={HOSTING_LABELS}
+                  current={item ? item.hosting : "on_premise"}
+                  id="swHebergement"
+                />
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swTechno">
                   Technologie
                 </label>
-                <select name="technology_id" id="swTechno" className="form-select form-select-sm" defaultValue={item?.technologyId ?? ""}>
+                <select
+                  name="technology_id"
+                  id="swTechno"
+                  className="form-select form-select-sm"
+                  defaultValue={item?.technologyId ?? ""}
+                >
                   <option value="">— non renseignée —</option>
                   {technologies.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -214,7 +420,12 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 <label className="form-label small mb-1" htmlFor="swSource">
                   Type licence
                 </label>
-                <Sel name="source_type" labels={SOURCE_TYPE_LABELS} current={item ? item.sourceType : "proprietaire"} id="swSource" />
+                <Sel
+                  name="source_type"
+                  labels={SOURCE_TYPE_LABELS}
+                  current={item ? item.sourceType : "proprietaire"}
+                  id="swSource"
+                />
               </div>
 
               <div className="d-flex align-items-end gap-3">
@@ -222,26 +433,57 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                   <label className="form-label small mb-1" htmlFor="swAuth">
                     Authentification
                   </label>
-                  <Sel name="auth_mode" labels={AUTH_MODE_LABELS} current={item?.authMode ?? null} blank="— inconnue —" id="swAuth" />
+                  <Sel
+                    name="auth_mode"
+                    labels={AUTH_MODE_LABELS}
+                    current={item?.authMode ?? null}
+                    blank="— inconnue —"
+                    id="swAuth"
+                  />
                 </div>
                 <div className="text-center">
-                  <label className="form-label small mb-1 d-block" htmlFor="authStrong" title="Double authentification">
+                  <label
+                    className="form-label small mb-1 d-block"
+                    htmlFor="authStrong"
+                    title="Double authentification"
+                  >
                     2FA
                   </label>
-                  <input type="checkbox" className="form-check-input case-2fa" name="auth_strong" id="authStrong" defaultChecked={Boolean(item?.authStrong)} />
+                  <input
+                    type="checkbox"
+                    className="form-check-input case-2fa"
+                    name="auth_strong"
+                    id="authStrong"
+                    defaultChecked={Boolean(item?.authStrong)}
+                  />
                 </div>
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swMiseEnService">
                   Mise en service
                 </label>
-                <input type="date" name="service_date" id="swMiseEnService" className="form-control form-control-sm" defaultValue={item?.serviceDate ? isoDate(item.serviceDate) : ""} />
+                <input
+                  type="date"
+                  name="service_date"
+                  id="swMiseEnService"
+                  className="form-control form-control-sm"
+                  defaultValue={item?.serviceDate ? isoDate(item.serviceDate) : ""}
+                />
               </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swRefTech">
                   Référent technique
                 </label>
-                <input type="text" name="tech_responsible" id="swRefTech" className="form-control form-control-sm" defaultValue={v(item?.techResponsible)} data-ad-search="" data-ad-email="tech_responsible_email" placeholder="Rechercher dans l'annuaire…" />
+                <input
+                  type="text"
+                  name="tech_responsible"
+                  id="swRefTech"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.techResponsible)}
+                  data-ad-search=""
+                  data-ad-email="tech_responsible_email"
+                  placeholder="Rechercher dans l'annuaire…"
+                />
               </div>
 
               <div className="grille-large">
@@ -252,7 +494,13 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 <label className="form-label small mb-1" htmlFor="swMailTech">
                   Courriel technique
                 </label>
-                <input type="email" name="tech_responsible_email" id="swMailTech" className="form-control form-control-sm" defaultValue={v(item?.techResponsibleEmail)} />
+                <input
+                  type="email"
+                  name="tech_responsible_email"
+                  id="swMailTech"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.techResponsibleEmail)}
+                />
               </div>
             </div>
           </Carte>
@@ -262,7 +510,13 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
               <div className="grille grille-rgpd">
                 <div className="d-flex align-items-end">
                   <div className="form-check mb-1">
-                    <input type="checkbox" className="form-check-input" name="gdpr_personal_data" id="gdprPd" defaultChecked={Boolean(item?.gdprPersonalData)} />
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      name="gdpr_personal_data"
+                      id="gdprPd"
+                      defaultChecked={Boolean(item?.gdprPersonalData)}
+                    />
                     <label className="form-check-label small" htmlFor="gdprPd">
                       Traite des données personnelles
                     </label>
@@ -272,37 +526,83 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                   <label className="form-label small mb-1" htmlFor="swRgpdCategories">
                     Catégories de données
                   </label>
-                  <input type="text" name="gdpr_categories" id="swRgpdCategories" className="form-control form-control-sm" defaultValue={v(item?.gdprCategories)} placeholder="état civil, coordonnées, santé, NIR…" />
+                  <input
+                    type="text"
+                    name="gdpr_categories"
+                    id="swRgpdCategories"
+                    className="form-control form-control-sm"
+                    defaultValue={v(item?.gdprCategories)}
+                    placeholder="état civil, coordonnées, santé, NIR…"
+                  />
                 </div>
                 <div>
                   <label className="form-label small mb-1" htmlFor="swRgpdRegistre">
                     Réf. registre
                   </label>
-                  <input type="text" name="gdpr_registry_ref" id="swRgpdRegistre" className="form-control form-control-sm" defaultValue={v(item?.gdprRegistryRef)} placeholder="n° du traitement" />
+                  <input
+                    type="text"
+                    name="gdpr_registry_ref"
+                    id="swRgpdRegistre"
+                    className="form-control form-control-sm"
+                    defaultValue={v(item?.gdprRegistryRef)}
+                    placeholder="n° du traitement"
+                  />
                 </div>
                 <div>
                   <label className="form-label small mb-1" htmlFor="swRgpdLieu">
                     Localisation des données
                   </label>
-                  <Sel name="gdpr_location" labels={DATA_LOCATION_LABELS} current={item ? item.gdprLocation : "inconnue"} id="swRgpdLieu" />
+                  <Sel
+                    name="gdpr_location"
+                    labels={DATA_LOCATION_LABELS}
+                    current={item ? item.gdprLocation : "inconnue"}
+                    id="swRgpdLieu"
+                  />
                 </div>
               </div>
             </Carte>
           ) : null}
         </div>
 
-        <PiedForm retour={retour} libelle={item ? "Enregistrer" : "Ajouter"} supprimer={item && user.canDelete("software") ? `/inventory/logiciels/${item.id}/delete` : null} confirmation="Supprimer ce logiciel ?" />
+        <PiedForm
+          retour={retour}
+          libelle={item ? "Enregistrer" : "Ajouter"}
+          supprimer={
+            item && user.canDelete("software") ? `/inventory/logiciels/${item.id}/delete` : null
+          }
+          confirmation="Supprimer ce logiciel ?"
+        />
       </form>
     </div>
   );
 }
 
 /** software/_form_corps_ancien.html : les neuf rubriques numérotées (SOFTWARE_FORM_LEGACY). */
-export function FormCorpsAncien({ item, suppliers, contracts, equipments, technologies, userServices, user, csrf, retour, gdpr, itemContractIds = [], itemEquipmentIds = [], itemServiceIds = [] }: FormProps) {
+export function FormCorpsAncien({
+  item,
+  suppliers,
+  contracts,
+  equipments,
+  technologies,
+  userServices,
+  user,
+  csrf,
+  retour,
+  gdpr,
+  itemContractIds = [],
+  itemEquipmentIds = [],
+  itemServiceIds = [],
+}: FormProps) {
   const v = (s: string | null | undefined) => s ?? "";
   const curHost = item ? item.hosting : "on_premise";
   return (
-    <form method="POST" id="form-principal" className="formulaire" data-edition-visible action={item ? `/inventory/logiciels/${item.id}/edit` : "/inventory/logiciels/create"}>
+    <form
+      method="POST"
+      id="form-principal"
+      className="formulaire"
+      data-edition-visible
+      action={item ? `/inventory/logiciels/${item.id}/edit` : "/inventory/logiciels/create"}
+    >
       <input type="hidden" name="csrf_token" value={csrf} />
       <input type="hidden" name="contract_ids" value="" />
       <input type="hidden" name="user_service_ids" value="" />
@@ -312,19 +612,41 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
         <div className="row g-3 mb-3">
           <div className="col-md-5">
             <label className="form-label fw-medium">Nom du logiciel *</label>
-            <input type="text" name="name" className="form-control" required defaultValue={item?.name ?? ""} placeholder="ex: GLPI, Berger-Levrault, Office 365..." />
+            <input
+              type="text"
+              name="name"
+              className="form-control"
+              required
+              defaultValue={item?.name ?? ""}
+              placeholder="ex: GLPI, Berger-Levrault, Office 365..."
+            />
           </div>
           <div className="col-md-2">
             <label className="form-label fw-medium">Version</label>
-            <input type="text" name="version" className="form-control" defaultValue={v(item?.version)} />
+            <input
+              type="text"
+              name="version"
+              className="form-control"
+              defaultValue={v(item?.version)}
+            />
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">Cycle de vie</label>
-            <Sel name="lifecycle" labels={LIFECYCLE_LABELS} current={item ? item.lifecycle : "production"} petit={false} />
+            <Sel
+              name="lifecycle"
+              labels={LIFECYCLE_LABELS}
+              current={item ? item.lifecycle : "production"}
+              petit={false}
+            />
           </div>
           <div className="col-md-2">
             <label className="form-label fw-medium">Mise en service</label>
-            <input type="date" name="service_date" className="form-control" defaultValue={item?.serviceDate ? isoDate(item.serviceDate) : ""} />
+            <input
+              type="date"
+              name="service_date"
+              className="form-control"
+              defaultValue={item?.serviceDate ? isoDate(item.serviceDate) : ""}
+            />
           </div>
         </div>
       </Section>
@@ -334,18 +656,51 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           <div className="col-md-4">
             <label className="form-label fw-medium d-block">Hébergement</label>
             <div className="btn-group w-100" role="group" aria-label="Hébergement">
-              <input type="radio" className="btn-check" name="hosting" id="hostOnprem" value="on_premise" defaultChecked={curHost === "on_premise"} />
-              <label className="btn btn-outline-secondary btn-sm" htmlFor="hostOnprem" title="Installé sur le parc (serveurs internes)">
+              <input
+                type="radio"
+                className="btn-check"
+                name="hosting"
+                id="hostOnprem"
+                value="on_premise"
+                defaultChecked={curHost === "on_premise"}
+              />
+              <label
+                className="btn btn-outline-secondary btn-sm"
+                htmlFor="hostOnprem"
+                title="Installé sur le parc (serveurs internes)"
+              >
                 <Icone bi="bi-hdd-network" taille="1em" classes="me-1" />
                 On premise
               </label>
-              <input type="radio" className="btn-check" name="hosting" id="hostSaas" value="saas" defaultChecked={curHost === "saas"} />
-              <label className="btn btn-outline-secondary btn-sm" htmlFor="hostSaas" title="Hébergé hors parc (Cloud éditeur)">
+              <input
+                type="radio"
+                className="btn-check"
+                name="hosting"
+                id="hostSaas"
+                value="saas"
+                defaultChecked={curHost === "saas"}
+              />
+              <label
+                className="btn btn-outline-secondary btn-sm"
+                htmlFor="hostSaas"
+                title="Hébergé hors parc (Cloud éditeur)"
+              >
                 <Icone bi="bi-cloud" taille="1em" classes="me-1" />
                 SaaS
               </label>
-              <input type="radio" className="btn-check" name="hosting" id="hostHybride" value="hybride" defaultChecked={curHost === "hybride"} />
-              <label className="btn btn-outline-secondary btn-sm" htmlFor="hostHybride" title="Une part chez nous, une part chez l’éditeur">
+              <input
+                type="radio"
+                className="btn-check"
+                name="hosting"
+                id="hostHybride"
+                value="hybride"
+                defaultChecked={curHost === "hybride"}
+              />
+              <label
+                className="btn btn-outline-secondary btn-sm"
+                htmlFor="hostHybride"
+                title="Une part chez nous, une part chez l’éditeur"
+              >
                 <Icone bi="bi-diagram-2" taille="1em" classes="me-1" />
                 Hybride
               </label>
@@ -354,7 +709,10 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           <div className="col-md-8">
             <label className="form-label fw-medium d-block">Nature</label>
             <Nature item={item} />
-            <div className="form-text">« Aucun serveur » distingue un logiciel qui n'en a pas besoin d'une fiche dont le serveur reste à saisir.</div>
+            <div className="form-text">
+              « Aucun serveur » distingue un logiciel qui n'en a pas besoin d'une fiche dont le
+              serveur reste à saisir.
+            </div>
           </div>
         </div>
       </Section>
@@ -363,7 +721,11 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
         <div className="row g-3 mb-3">
           <div className="col-md-3">
             <label className="form-label fw-medium">Criticité</label>
-            <select name="criticality" className="form-select" defaultValue={item?.criticality ?? ""}>
+            <select
+              name="criticality"
+              className="form-select"
+              defaultValue={item?.criticality ?? ""}
+            >
               {[
                 ["", "—"],
                 ["1", "1 - Faible"],
@@ -379,7 +741,11 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">Technologie</label>
-            <select name="technology_id" className="form-select" defaultValue={item?.technologyId ?? ""}>
+            <select
+              name="technology_id"
+              className="form-select"
+              defaultValue={item?.technologyId ?? ""}
+            >
               <option value="">— Non renseignée —</option>
               {technologies.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -390,11 +756,22 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">Type de source</label>
-            <Sel name="source_type" labels={SOURCE_TYPE_LABELS} current={item ? item.sourceType : "proprietaire"} petit={false} />
+            <Sel
+              name="source_type"
+              labels={SOURCE_TYPE_LABELS}
+              current={item ? item.sourceType : "proprietaire"}
+              petit={false}
+            />
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">URL / accès</label>
-            <input type="url" name="url" className="form-control" defaultValue={v(item?.url)} placeholder="https://..." />
+            <input
+              type="url"
+              name="url"
+              className="form-control"
+              defaultValue={v(item?.url)}
+              placeholder="https://..."
+            />
           </div>
         </div>
       </Section>
@@ -403,11 +780,23 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
         <div className="row g-3 mb-3">
           <div className="col-md-4">
             <label className="form-label fw-medium">Authentification</label>
-            <Sel name="auth_mode" labels={AUTH_MODE_LABELS} current={item?.authMode ?? null} blank="— Non renseignée —" petit={false} />
+            <Sel
+              name="auth_mode"
+              labels={AUTH_MODE_LABELS}
+              current={item?.authMode ?? null}
+              blank="— Non renseignée —"
+              petit={false}
+            />
           </div>
           <div className="col-md-3 d-flex align-items-end">
             <div className="form-check mb-2">
-              <input type="checkbox" className="form-check-input" name="auth_strong" id="authStrong" defaultChecked={Boolean(item?.authStrong)} />
+              <input
+                type="checkbox"
+                className="form-check-input"
+                name="auth_strong"
+                id="authStrong"
+                defaultChecked={Boolean(item?.authStrong)}
+              />
               <label className="form-check-label" htmlFor="authStrong">
                 Double authentification (2FA)
               </label>
@@ -415,12 +804,28 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           </div>
           <div className="col-md-2">
             <label className="form-label fw-medium">Utilisateurs</label>
-            <input type="number" min={0} name="users_count" className="form-control" defaultValue={item?.usersCount ?? ""} placeholder="non compté" />
+            <input
+              type="number"
+              min={0}
+              name="users_count"
+              className="form-control"
+              defaultValue={item?.usersCount ?? ""}
+              placeholder="non compté"
+            />
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">Plafond contractuel</label>
-            <input type="number" min={0} name="users_max" className="form-control" defaultValue={item?.usersMax ?? ""} placeholder="illimité" />
-            <div className="form-text">Comparé au nombre d'utilisateurs : signale un dépassement de licence.</div>
+            <input
+              type="number"
+              min={0}
+              name="users_max"
+              className="form-control"
+              defaultValue={item?.usersMax ?? ""}
+              placeholder="illimité"
+            />
+            <div className="form-text">
+              Comparé au nombre d'utilisateurs : signale un dépassement de licence.
+            </div>
           </div>
         </div>
       </Section>
@@ -430,7 +835,12 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           <div className="col-md-4">
             <label className="form-label fw-medium">Éditeur / fournisseur</label>
             <div className="input-group">
-              <select name="supplier_id" id="swSupplier" className="form-select" defaultValue={item?.supplierId ?? ""}>
+              <select
+                name="supplier_id"
+                id="swSupplier"
+                className="form-select"
+                defaultValue={item?.supplierId ?? ""}
+              >
                 <option value="">— Sélectionner —</option>
                 {suppliers.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -438,7 +848,13 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
                   </option>
                 ))}
               </select>
-              {user.canEdit("suppliers") ? <QaButton modalId="qaModalSupplier" targetId="swSupplier" title="Ajouter un fournisseur" /> : null}
+              {user.canEdit("suppliers") ? (
+                <QaButton
+                  modalId="qaModalSupplier"
+                  targetId="swSupplier"
+                  title="Ajouter un fournisseur"
+                />
+              ) : null}
             </div>
             <div className="form-text">
               Annuaire <a href="/suppliers">Fournisseurs</a> — c'est là que vivent les contacts.
@@ -447,9 +863,18 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           <div className="col-md-4">
             <div className="d-flex justify-content-between align-items-center mb-1">
               <label className="form-label fw-medium mb-0">Contrats / marchés</label>
-              {user.canEdit("contracts") ? <QaAddLink modalId="qaModalContract" targetId="swContract" text="Nouveau marché" /> : null}
+              {user.canEdit("contracts") ? (
+                <QaAddLink modalId="qaModalContract" targetId="swContract" text="Nouveau marché" />
+              ) : null}
             </div>
-            <select name="contract_ids" id="swContract" className="form-select" multiple size={4} defaultValue={itemContractIds.map(String)}>
+            <select
+              name="contract_ids"
+              id="swContract"
+              className="form-select"
+              multiple
+              size={4}
+              defaultValue={itemContractIds.map(String)}
+            >
               {contracts.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -457,12 +882,23 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
                 </option>
               ))}
             </select>
-            <div className="form-text">Un marché peut en couvrir plusieurs (UGAP, marché commun) : Ctrl/Cmd pour en choisir plusieurs.</div>
+            <div className="form-text">
+              Un marché peut en couvrir plusieurs (UGAP, marché commun) : Ctrl/Cmd pour en choisir
+              plusieurs.
+            </div>
           </div>
           <div className="col-md-4">
             <label className="form-label fw-medium">Mention « sans contrat »</label>
-            <input type="text" name="no_contract_note" className="form-control" defaultValue={v(item?.noContractNote)} placeholder="ex: contrat géré par le CCAS" />
-            <div className="form-text">Affichée à la place de « aucun contrat » quand le marché est porté ailleurs.</div>
+            <input
+              type="text"
+              name="no_contract_note"
+              className="form-control"
+              defaultValue={v(item?.noContractNote)}
+              placeholder="ex: contrat géré par le CCAS"
+            />
+            <div className="form-text">
+              Affichée à la place de « aucun contrat » quand le marché est porté ailleurs.
+            </div>
           </div>
         </div>
       </Section>
@@ -471,33 +907,72 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
         <div className="row g-3 mb-1">
           <div className="col-md-3">
             <label className="form-label fw-medium">Référent métier</label>
-            <input type="text" name="responsible" className="form-control" defaultValue={v(item?.responsible)} data-ad-search="" data-ad-email="responsible_email" placeholder="Rechercher dans l'annuaire (AD)..." />
+            <input
+              type="text"
+              name="responsible"
+              className="form-control"
+              defaultValue={v(item?.responsible)}
+              data-ad-search=""
+              data-ad-email="responsible_email"
+              placeholder="Rechercher dans l'annuaire (AD)..."
+            />
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">Email métier</label>
-            <input type="email" name="responsible_email" className="form-control" defaultValue={v(item?.responsibleEmail)} placeholder="responsable@collectivite.fr" />
+            <input
+              type="email"
+              name="responsible_email"
+              className="form-control"
+              defaultValue={v(item?.responsibleEmail)}
+              placeholder="responsable@collectivite.fr"
+            />
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">Référent technique</label>
-            <input type="text" name="tech_responsible" className="form-control" defaultValue={v(item?.techResponsible)} data-ad-search="" data-ad-email="tech_responsible_email" placeholder="Rechercher dans l'annuaire (AD)..." />
+            <input
+              type="text"
+              name="tech_responsible"
+              className="form-control"
+              defaultValue={v(item?.techResponsible)}
+              data-ad-search=""
+              data-ad-email="tech_responsible_email"
+              placeholder="Rechercher dans l'annuaire (AD)..."
+            />
           </div>
           <div className="col-md-3">
             <label className="form-label fw-medium">Email technique</label>
-            <input type="email" name="tech_responsible_email" className="form-control" defaultValue={v(item?.techResponsibleEmail)} />
+            <input
+              type="email"
+              name="tech_responsible_email"
+              className="form-control"
+              defaultValue={v(item?.techResponsibleEmail)}
+            />
           </div>
         </div>
-        <div className="form-text mb-3">Écrire au métier pour une revue de droits, au technique pour un incident d'exploitation : les deux adresses évitent de manquer la cible.</div>
+        <div className="form-text mb-3">
+          Écrire au métier pour une revue de droits, au technique pour un incident d'exploitation :
+          les deux adresses évitent de manquer la cible.
+        </div>
 
         <div className="mb-3">
           <label className="form-label fw-medium mb-1">Services utilisateurs</label>
-          <select name="user_service_ids" className="form-select" multiple size={5} defaultValue={itemServiceIds.map(String)}>
+          <select
+            name="user_service_ids"
+            className="form-select"
+            multiple
+            size={5}
+            defaultValue={itemServiceIds.map(String)}
+          >
             {userServices.map((sv) => (
               <option key={sv.id} value={sv.id}>
                 {sv.name}
               </option>
             ))}
           </select>
-          <div className="form-text">Les directions qui s'en servent. La liste se gère dans {user.isAdmin ? <a href="/referentials">Référentiels</a> : "les Référentiels (admin)"}.</div>
+          <div className="form-text">
+            Les directions qui s'en servent. La liste se gère dans{" "}
+            {user.isAdmin ? <a href="/referentials">Référentiels</a> : "les Référentiels (admin)"}.
+          </div>
         </div>
       </Section>
 
@@ -505,9 +980,18 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
         <div className="mb-3">
           <div className="d-flex justify-content-between align-items-center mb-1">
             <label className="form-label fw-medium mb-0">Serveur(s) d'installation</label>
-            {user.canEdit("inventory") ? <QaAddLink modalId="qaModalEquipment" targetId="swEquipment" text="Nouveau serveur" /> : null}
+            {user.canEdit("inventory") ? (
+              <QaAddLink modalId="qaModalEquipment" targetId="swEquipment" text="Nouveau serveur" />
+            ) : null}
           </div>
-          <select name="equipment_ids" id="swEquipment" className="form-select" multiple size={6} defaultValue={itemEquipmentIds.map(String)}>
+          <select
+            name="equipment_ids"
+            id="swEquipment"
+            className="form-select"
+            multiple
+            size={6}
+            defaultValue={itemEquipmentIds.map(String)}
+          >
             {equipments.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.name} ({EQUIPMENT_KIND_LABELS[e.kind] ?? e.kind}
@@ -515,7 +999,10 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
               </option>
             ))}
           </select>
-          <div className="form-text">Ctrl/Cmd (ou Maj) pour sélectionner plusieurs. Cochez « Aucun serveur » plus haut si le logiciel n'en utilise pas.</div>
+          <div className="form-text">
+            Ctrl/Cmd (ou Maj) pour sélectionner plusieurs. Cochez « Aucun serveur » plus haut si le
+            logiciel n'en utilise pas.
+          </div>
         </div>
       </Section>
 
@@ -524,7 +1011,13 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
           <div className="row g-3">
             <div className="col-md-3 d-flex align-items-center">
               <div className="form-check">
-                <input type="checkbox" className="form-check-input" name="gdpr_personal_data" id="gdprPd" defaultChecked={Boolean(item?.gdprPersonalData)} />
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  name="gdpr_personal_data"
+                  id="gdprPd"
+                  defaultChecked={Boolean(item?.gdprPersonalData)}
+                />
                 <label className="form-check-label" htmlFor="gdprPd">
                   Traite des données personnelles
                 </label>
@@ -532,15 +1025,32 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
             </div>
             <div className="col-md-4">
               <label className="form-label fw-medium">Catégories de données</label>
-              <input type="text" name="gdpr_categories" className="form-control" defaultValue={v(item?.gdprCategories)} placeholder="état civil, coordonnées, santé, NIR..." />
+              <input
+                type="text"
+                name="gdpr_categories"
+                className="form-control"
+                defaultValue={v(item?.gdprCategories)}
+                placeholder="état civil, coordonnées, santé, NIR..."
+              />
             </div>
             <div className="col-md-2">
               <label className="form-label fw-medium">Réf. registre</label>
-              <input type="text" name="gdpr_registry_ref" className="form-control" defaultValue={v(item?.gdprRegistryRef)} placeholder="n° du traitement" />
+              <input
+                type="text"
+                name="gdpr_registry_ref"
+                className="form-control"
+                defaultValue={v(item?.gdprRegistryRef)}
+                placeholder="n° du traitement"
+              />
             </div>
             <div className="col-md-3">
               <label className="form-label fw-medium">Localisation des données</label>
-              <Sel name="gdpr_location" labels={DATA_LOCATION_LABELS} current={item ? item.gdprLocation : "inconnue"} petit={false} />
+              <Sel
+                name="gdpr_location"
+                labels={DATA_LOCATION_LABELS}
+                current={item ? item.gdprLocation : "inconnue"}
+                petit={false}
+              />
             </div>
           </div>
         </Section>
@@ -549,28 +1059,56 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
       <Section titre="Description" icone="bi-journal-text" couleur="slate">
         <div className="mb-3">
           <label className="form-label fw-medium">Description / Notes</label>
-          <textarea name="description" className="form-control" rows={3} placeholder="Périmètre fonctionnel, dépendances, particularités..." defaultValue={v(item?.description)} />
+          <textarea
+            name="description"
+            className="form-control"
+            rows={3}
+            placeholder="Périmètre fonctionnel, dépendances, particularités..."
+            defaultValue={v(item?.description)}
+          />
         </div>
       </Section>
 
-      <PiedForm retour={retour} libelle={item ? "Enregistrer" : "Ajouter"} supprimer={item && user.canDelete("software") ? `/inventory/logiciels/${item.id}/delete` : null} confirmation="Supprimer ce logiciel ?" />
+      <PiedForm
+        retour={retour}
+        libelle={item ? "Enregistrer" : "Ajouter"}
+        supprimer={
+          item && user.canDelete("software") ? `/inventory/logiciels/${item.id}/delete` : null
+        }
+        confirmation="Supprimer ce logiciel ?"
+      />
     </form>
   );
 }
 
-export type LogicielComplet = Software & { supplier: Supplier | null; technology: Referential | null };
+export type LogicielComplet = Software & {
+  supplier: Supplier | null;
+  technology: Referential | null;
+};
 
 /** software/_synthese.html */
 export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean }) {
   const sup = item.supplier;
   const over = softwareOverLicence(item);
-  const lifecycleBadge = ({ production: "success", fin_de_vie: "warning", evaluation: "info" } as Record<string, string>)[item.lifecycle] ?? "muted";
+  const lifecycleBadge =
+    (
+      { production: "success", fin_de_vie: "warning", evaluation: "info" } as Record<string, string>
+    )[item.lifecycle] ?? "muted";
   return (
-    <div className="data-card mb-3 synthese synthese--cases" style={{ "--lu-intitule": "80px" } as React.CSSProperties}>
+    <div
+      className="data-card mb-3 synthese synthese--cases"
+      style={{ "--lu-intitule": "80px" } as React.CSSProperties}
+    >
       <Rubrique titre="Identité" bi="info" couleur="indigo">
         <Rangee>
           <Lu label="Version" valeur={item.version} />
-          <LuBloc label="Éditeur">{item.internalDev ? "Développement interne" : sup ? <a href={`/suppliers/${item.supplierId}`}>{sup.name}</a> : null}</LuBloc>
+          <LuBloc label="Éditeur">
+            {item.internalDev ? (
+              "Développement interne"
+            ) : sup ? (
+              <a href={`/suppliers/${item.supplierId}`}>{sup.name}</a>
+            ) : null}
+          </LuBloc>
           <LuBloc label="URL" titre="URL de l'application">
             {item.url ? (
               <a href={item.url} target="_blank" rel="noopener" className="text-truncate d-block">
@@ -584,12 +1122,19 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
             <span className={`badge-status badge-${lifecycleBadge}`}>{lifecycleLabel(item)}</span>
           </LuBloc>
           <Lu label="Criticité" valeur={criticalityLabel(item)} />
-          <LuBloc label="Utilisateurs" titre="Plafond contractuel : au-delà, dépassement de licence">
+          <LuBloc
+            label="Utilisateurs"
+            titre="Plafond contractuel : au-delà, dépassement de licence"
+          >
             {item.usersCount !== null ? (
               <>
                 {item.usersCount}
                 {item.usersMax ? ` / ${item.usersMax}` : ""}
-                {over ? <span className="badge bg-warning-subtle text-warning-emphasis ms-1">dépassement</span> : null}
+                {over ? (
+                  <span className="badge bg-warning-subtle text-warning-emphasis ms-1">
+                    dépassement
+                  </span>
+                ) : null}
               </>
             ) : item.usersMax ? (
               `max ${item.usersMax}`
@@ -617,10 +1162,20 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
         </Rangee>
         <Rangee>
           <LuBloc label="Authentif." titre="Authentification">
-            {authModeLabel(item) ? authModeLabel(item) : <span className="badge-status badge-warning">Non renseignée</span>}
-            {item.authStrong ? <span className="badge bg-success-subtle text-success ms-1">2FA</span> : null}
+            {authModeLabel(item) ? (
+              authModeLabel(item)
+            ) : (
+              <span className="badge-status badge-warning">Non renseignée</span>
+            )}
+            {item.authStrong ? (
+              <span className="badge bg-success-subtle text-success ms-1">2FA</span>
+            ) : null}
           </LuBloc>
-          <Lu label="Mise en serv." valeur={item.serviceDate ? dateCourte(item.serviceDate) : null} titre="Mise en service" />
+          <Lu
+            label="Mise en serv."
+            valeur={item.serviceDate ? dateCourte(item.serviceDate) : null}
+            titre="Mise en service"
+          />
           <Lu label="Réf. technique" valeur={item.techResponsible} titre="Référent technique" />
         </Rangee>
         <Rangee>
@@ -657,7 +1212,12 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
       {gdpr ? (
         <Rubrique titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
           <Rangee>
-            <Lu label="RGPD" valeur={item.gdprPersonalData ? "Traitées" : "Aucune donnée personnelle"} pleine={!item.gdprPersonalData} titre="Données personnelles" />
+            <Lu
+              label="RGPD"
+              valeur={item.gdprPersonalData ? "Traitées" : "Aucune donnée personnelle"}
+              pleine={!item.gdprPersonalData}
+              titre="Données personnelles"
+            />
             {item.gdprPersonalData ? (
               <>
                 <Lu label="Catégorie" valeur={item.gdprCategories} />
@@ -688,11 +1248,22 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
 
 function Tel({ numero }: { numero: string }) {
   const chiffres = numero.replace(/[ .]/g, "");
-  const paires = chiffres.length === 10 && /^\d+$/.test(chiffres) ? chiffres.match(/.{2}/g)?.join(" ") : numero;
+  const paires =
+    chiffres.length === 10 && /^\d+$/.test(chiffres) ? chiffres.match(/.{2}/g)?.join(" ") : numero;
   return <a href={`tel:${chiffres}`}>{paires}</a>;
 }
 
-function Ligne({ label, icone, large = false, children }: { label: string; icone: string; large?: boolean; children: React.ReactNode }) {
+function Ligne({
+  label,
+  icone,
+  large = false,
+  children,
+}: {
+  label: string;
+  icone: string;
+  large?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div className={`contact-ligne${large ? " contact-ligne--large" : ""}`}>
       <span className="contact-ico">
@@ -711,11 +1282,30 @@ const Mail = ({ a }: { a: string | null }) => (a ? <a href={`mailto:${a}`}>{a}</
 const Telephone = ({ n }: { n: string | null }) => (n ? <Tel numero={n} /> : <Vide />);
 
 export function supplierHasContacts(s: Supplier): boolean {
-  return [s.commercialContact, s.commercialPhone, s.commercialEmail, s.commercialContact2, s.commercialPhone2, s.commercialEmail2, s.adminContact, s.adminPhone, s.adminEmail, s.dpoContact, s.dpoPhone, s.dpoEmail].some(Boolean);
+  return [
+    s.commercialContact,
+    s.commercialPhone,
+    s.commercialEmail,
+    s.commercialContact2,
+    s.commercialPhone2,
+    s.commercialEmail2,
+    s.adminContact,
+    s.adminPhone,
+    s.adminEmail,
+    s.dpoContact,
+    s.dpoPhone,
+    s.dpoEmail,
+  ].some(Boolean);
 }
 
 export function Contacts({ sup }: { sup: Supplier | null }) {
-  if (!sup) return <div className="contact-aucun">Aucun éditeur n'est rattaché à ce logiciel. Renseignez-le dans l'onglet « Détails » pour retrouver ici ses contacts.</div>;
+  if (!sup)
+    return (
+      <div className="contact-aucun">
+        Aucun éditeur n'est rattaché à ce logiciel. Renseignez-le dans l'onglet « Détails » pour
+        retrouver ici ses contacts.
+      </div>
+    );
   const telSupport = sup.supportPhone || sup.phone;
   const mailSupport = sup.supportEmail || sup.email;
   const horaires = [sup.hours, sup.hours2].filter(Boolean).join(" · ");
@@ -729,8 +1319,17 @@ export function Contacts({ sup }: { sup: Supplier | null }) {
         </h6>
       </div>
       <div className="p-3">
-        {!(sup.supportUrl || telSupport || mailSupport || sup.customerRef || horaires || supplierHasContacts(sup)) ? (
-          <div className="contact-aucun">Aucun contact n'est renseigné sur la fiche de « {sup.name} ».</div>
+        {!(
+          sup.supportUrl ||
+          telSupport ||
+          mailSupport ||
+          sup.customerRef ||
+          horaires ||
+          supplierHasContacts(sup)
+        ) ? (
+          <div className="contact-aucun">
+            Aucun contact n'est renseigné sur la fiche de « {sup.name} ».
+          </div>
         ) : (
           <dl className="contacts-grille mb-0">
             <Ligne label="Portail de support" icone="life-buoy">
@@ -829,7 +1428,21 @@ const CHOIX_SENS: [string, string, string][] = [
   ["double", "double", "Double sens"],
 ];
 
-export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Software; flux: Flux[]; autres: Software[]; user: CurrentUser; csrf: string; nonce?: string }) {
+export function FluxCarte({
+  item,
+  flux,
+  autres,
+  user,
+  csrf,
+  nonce,
+}: {
+  item: Software;
+  flux: Flux[];
+  autres: Software[];
+  user: CurrentUser;
+  csrf: string;
+  nonce?: string;
+}) {
   const peutEditer = user.canEdit("software");
   const peutSupprimer = user.canDelete("software");
   return (
@@ -848,15 +1461,28 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                 <div className="d-flex align-items-center justify-content-between gap-3">
                   <span className="d-flex align-items-center gap-2 min-w-0">
                     <Lucide nom={FLUX_ICONE[sens]} taille={16} classes="flux-sens flex-shrink-0" />
-                    <a href={`/inventory/logiciels/${autre.id}`} className="fw-medium text-decoration-none" title={`${FLUX_TITRE[sens]} ${autre.name}`}>
+                    <a
+                      href={`/inventory/logiciels/${autre.id}`}
+                      className="fw-medium text-decoration-none"
+                      title={`${FLUX_TITRE[sens]} ${autre.name}`}
+                    >
                       {autre.name}
                     </a>
-                    {lien.description ? <span className="flux-desc text-truncate">— {lien.description}</span> : null}
+                    {lien.description ? (
+                      <span className="flux-desc text-truncate">— {lien.description}</span>
+                    ) : null}
                   </span>
                   {peutEditer || peutSupprimer ? (
                     <span className="d-flex align-items-center gap-1 flex-shrink-0">
                       {peutEditer ? (
-                        <button type="button" className="btn btn-sm btn-ghost btn-icone" data-bs-toggle="collapse" data-bs-target={`#fluxEdit${lien.id}`} title="Modifier la description du flux" aria-label="Modifier la description du flux">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-ghost btn-icone"
+                          data-bs-toggle="collapse"
+                          data-bs-target={`#fluxEdit${lien.id}`}
+                          title="Modifier la description du flux"
+                          aria-label="Modifier la description du flux"
+                        >
                           <Lucide nom="pencil" taille={16} />
                         </button>
                       ) : null}
@@ -864,7 +1490,13 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                         <form method="POST" action={`/inventory/logiciels/links/${lien.id}/delete`}>
                           <input type="hidden" name="csrf_token" value={csrf} />
                           <input type="hidden" name="from_id" value={item.id} />
-                          <button type="submit" className="btn btn-sm btn-ghost btn-icone btn-ghost-danger" title="Supprimer l'interconnexion" aria-label="Supprimer l'interconnexion" data-confirm={`Supprimer ce flux avec « ${autre.name} » ?`}>
+                          <button
+                            type="submit"
+                            className="btn btn-sm btn-ghost btn-icone btn-ghost-danger"
+                            title="Supprimer l'interconnexion"
+                            aria-label="Supprimer l'interconnexion"
+                            data-confirm={`Supprimer ce flux avec « ${autre.name} » ?`}
+                          >
                             <Lucide nom="trash-2" taille={16} />
                           </button>
                         </form>
@@ -874,10 +1506,21 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                 </div>
                 {peutEditer ? (
                   <div className="collapse" id={`fluxEdit${lien.id}`}>
-                    <form method="POST" action={`/inventory/logiciels/links/${lien.id}/edit`} className="d-flex flex-wrap align-items-center gap-2 p-2 mt-1 rounded border bg-body-tertiary">
+                    <form
+                      method="POST"
+                      action={`/inventory/logiciels/links/${lien.id}/edit`}
+                      className="d-flex flex-wrap align-items-center gap-2 p-2 mt-1 rounded border bg-body-tertiary"
+                    >
                       <input type="hidden" name="csrf_token" value={csrf} />
                       <input type="hidden" name="from_id" value={item.id} />
-                      <input type="text" name="description" className="form-control form-control-sm flex-grow-1" style={{ maxWidth: "32rem" }} defaultValue={lien.description ?? ""} placeholder="Description du flux (ex : export paie mensuel)" />
+                      <input
+                        type="text"
+                        name="description"
+                        className="form-control form-control-sm flex-grow-1"
+                        style={{ maxWidth: "32rem" }}
+                        defaultValue={lien.description ?? ""}
+                        placeholder="Description du flux (ex : export paie mensuel)"
+                      />
                       <button type="submit" className="btn btn-sm btn-primary">
                         Enregistrer
                       </button>
@@ -892,11 +1535,22 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
         )}
         {peutEditer && autres.length ? (
           <>
-            <form method="POST" action={`/inventory/logiciels/${item.id}/links/add`} className="d-flex flex-wrap align-items-center gap-2">
+            <form
+              method="POST"
+              action={`/inventory/logiciels/${item.id}/links/add`}
+              className="d-flex flex-wrap align-items-center gap-2"
+            >
               <input type="hidden" name="csrf_token" value={csrf} />
               <div className="dropdown flux-sens-choix">
                 <input type="hidden" name="sens" value="vers" />
-                <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Sens du flux : Vers" aria-label="Sens du flux : Vers">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary dropdown-toggle"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  title="Sens du flux : Vers"
+                  aria-label="Sens du flux : Vers"
+                >
                   <span className="js-sens-icone">
                     <Lucide nom={FLUX_ICONE.sortant} taille={14} />
                   </span>
@@ -904,7 +1558,12 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                 <ul className="dropdown-menu">
                   {CHOIX_SENS.map(([valeur, sens, libelle], i) => (
                     <li key={valeur}>
-                      <button type="button" className={`dropdown-item d-flex align-items-center gap-2${i === 0 ? " active" : ""}`} data-sens={valeur} data-libelle={libelle}>
+                      <button
+                        type="button"
+                        className={`dropdown-item d-flex align-items-center gap-2${i === 0 ? " active" : ""}`}
+                        data-sens={valeur}
+                        data-libelle={libelle}
+                      >
                         <Lucide nom={FLUX_ICONE[sens]} taille={14} />
                         {libelle}
                       </button>
@@ -912,7 +1571,13 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                   ))}
                 </ul>
               </div>
-              <select name="other_id" className="form-select form-select-sm w-auto" aria-label="Logiciel" required defaultValue="">
+              <select
+                name="other_id"
+                className="form-select form-select-sm w-auto"
+                aria-label="Logiciel"
+                required
+                defaultValue=""
+              >
                 <option value="">Logiciel…</option>
                 {autres.map((sw) => (
                   <option key={sw.id} value={sw.id}>
@@ -920,7 +1585,13 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                   </option>
                 ))}
               </select>
-              <input type="text" name="description" className="form-control form-control-sm" style={{ maxWidth: "20rem" }} placeholder="Description du flux (ex : export paie mensuel)" />
+              <input
+                type="text"
+                name="description"
+                className="form-control form-control-sm"
+                style={{ maxWidth: "20rem" }}
+                placeholder="Description du flux (ex : export paie mensuel)"
+              />
               <button type="submit" className="btn btn-sm btn-outline-secondary">
                 <Lucide nom="plus" taille={14} classes="me-1" />
                 Ajouter
@@ -951,18 +1622,41 @@ const PARTAGES_JS = `(function () {
     });
 })();`;
 
-export function Partages({ item, partages, user, csrf, nonce }: { item: Software; partages: SoftwareShare[]; user: CurrentUser; csrf: string; nonce?: string }) {
+export function Partages({
+  item,
+  partages,
+  user,
+  csrf,
+  nonce,
+}: {
+  item: Software;
+  partages: SoftwareShare[];
+  user: CurrentUser;
+  csrf: string;
+  nonce?: string;
+}) {
   const peutEditer = user.canEdit("software");
   const peutSupprimer = user.canDelete("software");
   return (
     <div className="data-card mb-3">
       <div className="card-header-custom d-flex justify-content-between align-items-center">
         <h6 className="fw-bold fiche-titre fiche-titre--slate mb-0">
-          <Icone bi="bi-folder2-open" taille={14} classes={`ico ico-${couleurIcone("bi-folder2-open")}`} />
+          <Icone
+            bi="bi-folder2-open"
+            taille={14}
+            classes={`ico ico-${couleurIcone("bi-folder2-open")}`}
+          />
           Dossiers <span className="badge bg-secondary ms-1">{partages.length}</span>
         </h6>
         {peutEditer ? (
-          <button className="btn btn-sm btn-ghost btn-icone" type="button" data-bs-toggle="collapse" data-bs-target="#nouveauPartage" title="Ajouter un dossier" aria-label="Ajouter un dossier">
+          <button
+            className="btn btn-sm btn-ghost btn-icone"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#nouveauPartage"
+            title="Ajouter un dossier"
+            aria-label="Ajouter un dossier"
+          >
             <Lucide nom="plus" taille={16} />
           </button>
         ) : null}
@@ -970,27 +1664,57 @@ export function Partages({ item, partages, user, csrf, nonce }: { item: Software
 
       {peutEditer ? (
         <div className="collapse" id="nouveauPartage">
-          <form method="POST" action={`/inventory/logiciels/${item.id}/shares/add`} className="p-3 border-bottom bg-body-tertiary">
+          <form
+            method="POST"
+            action={`/inventory/logiciels/${item.id}/shares/add`}
+            className="p-3 border-bottom bg-body-tertiary"
+          >
             <input type="hidden" name="csrf_token" value={csrf} />
             <div className="row g-2 align-items-end">
               <div className="col-md-3">
                 <label className="form-label fw-medium small mb-1">Libellé</label>
-                <input type="text" name="label" className="form-control form-control-sm" placeholder="Installeurs, Documentation…" />
+                <input
+                  type="text"
+                  name="label"
+                  className="form-control form-control-sm"
+                  placeholder="Installeurs, Documentation…"
+                />
               </div>
               <div className="col">
                 <label className="form-label fw-medium small mb-1">Chemin *</label>
-                <input type="text" name="path" className="form-control form-control-sm" required placeholder="Z:\Applications\..." />
+                <input
+                  type="text"
+                  name="path"
+                  className="form-control form-control-sm"
+                  required
+                  placeholder="Z:\Applications\..."
+                />
               </div>
               <div className="col-auto d-flex gap-1">
-                <button type="submit" className="btn btn-sm btn-ghost btn-icone btn-valider" title="Enregistrer" aria-label="Enregistrer">
+                <button
+                  type="submit"
+                  className="btn btn-sm btn-ghost btn-icone btn-valider"
+                  title="Enregistrer"
+                  aria-label="Enregistrer"
+                >
                   <Lucide nom="check" taille={16} />
                 </button>
-                <button type="button" className="btn btn-sm btn-ghost btn-icone btn-annuler" title="Annuler" aria-label="Annuler" data-bs-toggle="collapse" data-bs-target="#nouveauPartage">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-ghost btn-icone btn-annuler"
+                  title="Annuler"
+                  aria-label="Annuler"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#nouveauPartage"
+                >
                   <Lucide nom="x" taille={16} />
                 </button>
               </div>
             </div>
-            <div className="form-text mt-2">Les installeurs, les outils, les notes de version — tout ce qui est trop lourd ou trop vivant pour une pièce jointe, qui ne reçoit que des actes figés.</div>
+            <div className="form-text mt-2">
+              Les installeurs, les outils, les notes de version — tout ce qui est trop lourd ou trop
+              vivant pour une pièce jointe, qui ne reçoit que des actes figés.
+            </div>
           </form>
         </div>
       ) : null}
@@ -999,23 +1723,42 @@ export function Partages({ item, partages, user, csrf, nonce }: { item: Software
         {partages.length ? (
           <ul className="list-unstyled mb-0 dossiers-liste">
             {partages.map((p, i) => (
-              <li key={p.id} className={`d-flex align-items-start gap-2 py-2${i === 0 ? "" : " border-top"}`}>
+              <li
+                key={p.id}
+                className={`d-flex align-items-start gap-2 py-2${i === 0 ? "" : " border-top"}`}
+              >
                 <Lucide nom="folder-open" taille={16} classes="doc-ico flex-shrink-0" />
                 <div className="min-w-0 flex-grow-1">
                   <div className="d-flex align-items-center gap-2 min-w-0">
                     <code className="dossier-chemin js-chemin">{p.path}</code>
-                    <button type="button" className="doc-dl js-copier flex-shrink-0" title={`Copier ${p.path}`} aria-label={`Copier le chemin ${p.path}`}>
+                    <button
+                      type="button"
+                      className="doc-dl js-copier flex-shrink-0"
+                      title={`Copier ${p.path}`}
+                      aria-label={`Copier le chemin ${p.path}`}
+                    >
                       <Lucide nom="copy" taille={14} />
                     </button>
                   </div>
                   <div className="doc-sous">
-                    {p.label ? `${p.label} · ` : ""}À coller dans la barre d'adresse de l'Explorateur.
+                    {p.label ? `${p.label} · ` : ""}À coller dans la barre d'adresse de
+                    l'Explorateur.
                   </div>
                 </div>
                 {peutSupprimer ? (
-                  <form method="POST" action={`/inventory/logiciels/shares/${p.id}/delete`} className="flex-shrink-0">
+                  <form
+                    method="POST"
+                    action={`/inventory/logiciels/shares/${p.id}/delete`}
+                    className="flex-shrink-0"
+                  >
                     <input type="hidden" name="csrf_token" value={csrf} />
-                    <button type="submit" className="btn btn-sm btn-ghost btn-icone btn-ghost-danger" title="Retirer le dossier" aria-label="Retirer le dossier" data-confirm="Retirer ce dossier ?">
+                    <button
+                      type="submit"
+                      className="btn btn-sm btn-ghost btn-icone btn-ghost-danger"
+                      title="Retirer le dossier"
+                      aria-label="Retirer le dossier"
+                      data-confirm="Retirer ce dossier ?"
+                    >
                       <Lucide nom="trash-2" taille={16} />
                     </button>
                   </form>

@@ -21,7 +21,10 @@ export async function GET(req: Request) {
   }
   const [, items] = await agendaItems(user);
   const base = (user.settings.APP_BASE_URL ?? "").replace(/\/+$/, "");
-  const headers: Record<string, string> = { "Content-Type": "text/calendar; charset=utf-8", "Cache-Control": "no-cache" };
+  const headers: Record<string, string> = {
+    "Content-Type": "text/calendar; charset=utf-8",
+    "Cache-Control": "no-cache",
+  };
   if (!token) headers["Content-Disposition"] = 'attachment; filename="sentinelle-agenda.ics"';
   return new Response(construireIcs(items, base), { headers });
 }

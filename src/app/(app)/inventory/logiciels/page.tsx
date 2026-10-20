@@ -1,7 +1,13 @@
 import { Icone } from "@/components/icones";
 import { Barre, PaginationBar } from "@/components/liste";
 import { statusRank } from "@/lib/constantes";
-import { criticalityColor, criticalityLabel, lifecycleColor, lifecycleLabel, SEARCH_FIELDS } from "@/modules/software/server";
+import {
+  criticalityColor,
+  criticalityLabel,
+  lifecycleColor,
+  lifecycleLabel,
+  SEARCH_FIELDS,
+} from "@/modules/software/server";
 import { prisma } from "@/server/db";
 import { chargerLogiciels } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
@@ -24,7 +30,9 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
     saas: (s) => s.hosting === "saas" || s.hosting === "hybride",
     onprem: (s) => s.hosting === "on_premise" || s.hosting === "hybride",
   };
-  const counts = Object.fromEntries(Object.entries(match).map(([k, fn]) => [k, tous.filter(fn).length]));
+  const counts = Object.fromEntries(
+    Object.entries(match).map(([k, fn]) => [k, tous.filter(fn).length]),
+  );
   let items = host in match ? tous.filter(match[host]) : tous;
   items = textSearch(items, q, SEARCH_FIELDS as (keyof (typeof items)[number])[]);
   items.sort((a, b) => statusRank(a.status) - statusRank(b.status));
@@ -32,12 +40,18 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
   const [rows, p] = paginate(items, params, perPage);
   const ids = rows.map((s) => s.id);
   const [technos, services] = await Promise.all([
-    prisma.referential.findMany({ where: { id: { in: rows.map((s) => s.technologyId).filter((x): x is number => x !== null) } } }),
-    prisma.softwareService.findMany({ where: { softwareId: { in: ids } }, include: { userService: { select: { name: true } } } }),
+    prisma.referential.findMany({
+      where: { id: { in: rows.map((s) => s.technologyId).filter((x): x is number => x !== null) } },
+    }),
+    prisma.softwareService.findMany({
+      where: { softwareId: { in: ids } },
+      include: { userService: { select: { name: true } } },
+    }),
   ]);
   const technoPar = new Map(technos.map((t) => [t.id, t.label]));
   const servicesPar = new Map<number, string[]>();
-  for (const l of services) servicesPar.set(l.softwareId, [...(servicesPar.get(l.softwareId) ?? []), l.userService.name]);
+  for (const l of services)
+    servicesPar.set(l.softwareId, [...(servicesPar.get(l.softwareId) ?? []), l.userService.name]);
   const { user } = page;
   const qs = q ? `&q=${encodeURIComponent(q)}` : "";
   const tabs: [string, string, number][] = [
@@ -53,7 +67,9 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
           <h1 className="page-title">
             Logiciels <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">Applications métiers, hébergement, éditeur et mises à jour — {p.total} logiciel(s)</p>
+          <p className="page-subtitle">
+            Applications métiers, hébergement, éditeur et mises à jour — {p.total} logiciel(s)
+          </p>
         </div>
         <div className="page-actions">
           {user.canEdit("software") ? (
@@ -72,7 +88,11 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
         segments={
           <div className="seg-tabs">
             {tabs.map(([val, lbl, cnt]) => (
-              <a key={val} className={`seg-tab${host === val ? " active" : ""}`} href={`/inventory/logiciels?host=${val}${qs}`}>
+              <a
+                key={val}
+                className={`seg-tab${host === val ? " active" : ""}`}
+                href={`/inventory/logiciels?host=${val}${qs}`}
+              >
                 {val === "docker" ? <i className="icon-docker me-1" /> : null}
                 {lbl} <span className="seg-tab-count">{cnt}</span>
               </a>
@@ -112,17 +132,37 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
                     <tr key={s.id}>
                       <td>
                         <span className="d-flex align-items-center gap-1">
-                          <a href={`/inventory/logiciels/${s.id}`} className="fw-medium text-decoration-none text-truncate" style={{ minWidth: 0 }} title={s.name}>
+                          <a
+                            href={`/inventory/logiciels/${s.id}`}
+                            className="fw-medium text-decoration-none text-truncate"
+                            style={{ minWidth: 0 }}
+                            title={s.name}
+                          >
                             {s.name}
                           </a>
                           {s.url ? (
-                            <a href={s.url} target="_blank" rel="noreferrer noopener" className="text-faint flex-shrink-0" title={`Ouvrir ${s.url}`} aria-label="Ouvrir le site du logiciel">
+                            <a
+                              href={s.url}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="text-faint flex-shrink-0"
+                              title={`Ouvrir ${s.url}`}
+                              aria-label="Ouvrir le site du logiciel"
+                            >
                               <Icone bi="bi-box-arrow-up-right" taille="1em" />
                             </a>
                           ) : null}
-                          {s.isDocker ? <i className="icon-docker flex-shrink-0" title="Conteneurisé (Docker)" aria-label="Conteneurisé (Docker)" /> : null}
+                          {s.isDocker ? (
+                            <i
+                              className="icon-docker flex-shrink-0"
+                              title="Conteneurisé (Docker)"
+                              aria-label="Conteneurisé (Docker)"
+                            />
+                          ) : null}
                         </span>
-                        {techno ? <small className="d-block text-truncate text-faint">{techno}</small> : null}
+                        {techno ? (
+                          <small className="d-block text-truncate text-faint">{techno}</small>
+                        ) : null}
                       </td>
                       <td className="text-truncate">
                         {s.internalDev ? (
@@ -130,19 +170,47 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
                             Développement interne
                           </span>
                         ) : s.supplier ? (
-                          <a href={`/suppliers/${s.supplierId}`} className="text-decoration-none" title={s.supplier.name}>
+                          <a
+                            href={`/suppliers/${s.supplierId}`}
+                            className="text-decoration-none"
+                            title={s.supplier.name}
+                          >
                             {s.supplier.name}
                           </a>
                         ) : (
                           <span className="text-muted">—</span>
                         )}
                       </td>
-                      <td className="cell-services text-muted">{(servicesPar.get(s.id) ?? []).join(" · ") || "—"}</td>
-                      <td className="text-center pe-0">{s.criticality ? <span className={`badge-status ${cc === "secondary" ? "badge-muted" : `badge-${cc}`}`}>{criticalityLabel(s).split(" - ").pop()}</span> : <span className="text-faint">—</span>}</td>
-                      <td className="text-center pe-0">
-                        <span className={`badge-status ${lc === "secondary" ? "badge-muted" : `badge-${lc}`}`}>{lifecycleLabel(s)}</span>
+                      <td className="cell-services text-muted">
+                        {(servicesPar.get(s.id) ?? []).join(" · ") || "—"}
                       </td>
-                      <td className="text-center pe-0">{s.hosting === "saas" ? <span className="badge-status badge-info">SaaS</span> : s.hosting === "hybride" ? <span className="badge-status badge-warning">Hybride</span> : <span className="badge-status badge-accent">On premise</span>}</td>
+                      <td className="text-center pe-0">
+                        {s.criticality ? (
+                          <span
+                            className={`badge-status ${cc === "secondary" ? "badge-muted" : `badge-${cc}`}`}
+                          >
+                            {criticalityLabel(s).split(" - ").pop()}
+                          </span>
+                        ) : (
+                          <span className="text-faint">—</span>
+                        )}
+                      </td>
+                      <td className="text-center pe-0">
+                        <span
+                          className={`badge-status ${lc === "secondary" ? "badge-muted" : `badge-${lc}`}`}
+                        >
+                          {lifecycleLabel(s)}
+                        </span>
+                      </td>
+                      <td className="text-center pe-0">
+                        {s.hosting === "saas" ? (
+                          <span className="badge-status badge-info">SaaS</span>
+                        ) : s.hosting === "hybride" ? (
+                          <span className="badge-status badge-warning">Hybride</span>
+                        ) : (
+                          <span className="badge-status badge-accent">On premise</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })
@@ -153,7 +221,10 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
                     <p className="mt-2 mb-0">
                       Aucun logiciel.{" "}
                       {user.canEdit("software") ? (
-                        <a href="/inventory/logiciels/create" className="btn btn-sm btn-primary mt-1">
+                        <a
+                          href="/inventory/logiciels/create"
+                          className="btn btn-sm btn-primary mt-1"
+                        >
                           <Icone bi="bi-plus-lg" taille="1em" classes="me-1" /> Ajouter le premier
                         </a>
                       ) : null}

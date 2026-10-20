@@ -14,7 +14,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const item = await prisma.equipment.findUnique({ where: { id } });
     if (!item) return pasTrouve();
     const data = depuisFormulaire(form);
-    if (!data.name) return redirigerAvecMessage(`/inventory/${id}/edit`, "Le nom est obligatoire.", "danger");
+    if (!data.name)
+      return redirigerAvecMessage(`/inventory/${id}/edit`, "Le nom est obligatoire.", "danger");
     await prisma.equipment.update({ where: { id }, data });
     await auditRecord("modification inventaire", data.name, "inventory", user.username);
     invalidateNavCounts();

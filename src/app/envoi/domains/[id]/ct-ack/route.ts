@@ -16,9 +16,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
     if (n) {
       await prisma.domainHistory.create({
-        data: { domainId: id, action: "ct_acknowledged", comment: `${n} certificat(s) CT marque(s) comme verifie(s).`, performedBy: user.username },
+        data: {
+          domainId: id,
+          action: "ct_acknowledged",
+          comment: `${n} certificat(s) CT marque(s) comme verifie(s).`,
+          performedBy: user.username,
+        },
       });
     }
-    return redirigerAvecMessage(`/domains/${id}`, `${n} certificat(s) marque(s) comme verifie(s).`, "success");
+    return redirigerAvecMessage(
+      `/domains/${id}`,
+      `${n} certificat(s) marque(s) comme verifie(s).`,
+      "success",
+    );
   });
 }

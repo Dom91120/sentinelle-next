@@ -295,7 +295,8 @@ export function cast(key: string, raw: string | null | undefined): unknown {
       .map((x) => x.trim())
       .filter(Boolean)
       .map(Number);
-    if (parts.length === 3 && parts.every((n) => Number.isInteger(n))) return parts as unknown as Triplet;
+    if (parts.length === 3 && parts.every((n) => Number.isInteger(n)))
+      return parts as unknown as Triplet;
     return null;
   }
   if (CSV_KEYS.has(key)) {
@@ -353,7 +354,9 @@ export function invalidateSettings(): void {
 }
 
 /** Persiste un dict {CLÉ: valeur-chaîne} en base (chiffre les secrets). */
-export async function saveSettings(updates: Record<string, string | null | undefined>): Promise<void> {
+export async function saveSettings(
+  updates: Record<string, string | null | undefined>,
+): Promise<void> {
   const ops = Object.entries(updates).map(([key, val]) => {
     const v = val === null || val === undefined ? "" : String(val);
     const secret = SECRET_KEYS.has(key);

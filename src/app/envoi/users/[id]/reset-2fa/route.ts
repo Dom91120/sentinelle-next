@@ -9,11 +9,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   return traiterFormulaire(req, async () => {
     const admin = await requireAdmin();
-    const user = await prisma.user.findUnique({ where: { id }, include: { twofactor: { select: { verified: true } } } });
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { twofactor: { select: { verified: true } } },
+    });
     if (!user) return pasTrouve();
-    if (!(user.twoFactorEnabled && user.twofactor.some((t) => t.verified))) return redirigerAvecMessage("/users", `La 2FA n'est pas active pour ${user.username}.`, "info");
+    if (!(user.twoFactorEnabled && user.twofactor.some((t) => t.verified)))
+      return redirigerAvecMessage(
+        "/users",
+        `La 2FA n'est pas active pour ${user.username}.`,
+        "info",
+      );
     await resetTwoFactor(id);
     await auditRecord("reinitialisation 2FA", user.username, "utilisateurs", admin.username);
-    return redirigerAvecMessage("/users", `2FA desactivee pour ${user.username}. Il pourra la reactiver depuis son profil.`, "success");
+    return redirigerAvecMessage(
+      "/users",
+      `2FA desactivee pour ${user.username}. Il pourra la reactiver depuis son profil.`,
+      "success",
+    );
   });
 }

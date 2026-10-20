@@ -12,7 +12,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const review = await prisma.accessReview.findUnique({ where: { id } });
     if (!review) return pasTrouve();
     await prisma.accessReview.update({ where: { id }, data: { isActive: false } });
-    await prisma.reviewHistory.create({ data: { reviewId: id, action: "deleted", comment: `Revue desactivee : ${review.application}`, performedBy: user.username } });
+    await prisma.reviewHistory.create({
+      data: {
+        reviewId: id,
+        action: "deleted",
+        comment: `Revue desactivee : ${review.application}`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage("/reviews", "Revue supprimee", "success");
   });

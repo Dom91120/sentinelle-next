@@ -39,7 +39,9 @@ export const FEATURES: Record<FeatureName, [string, string, string]> = {
 };
 
 /** Un module qui est un ÉCRAN ENTIER se coupe par sa catégorie de droit. */
-export const MODULE_CATEGORIES: Record<string, PermissionCategory> = { certificates: "certificates" };
+export const MODULE_CATEGORIES: Record<string, PermissionCategory> = {
+  certificates: "certificates",
+};
 
 export const CONFIG_KEYS = new Set(Object.values(FEATURES).map(([k]) => k));
 

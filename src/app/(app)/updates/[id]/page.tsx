@@ -1,10 +1,19 @@
 import { notFound } from "next/navigation";
-import { Activite, BoutonModal, Entete, Fait, FaitBloc, Faits, Historique, ModalAction } from "@/components/fiche";
+import {
+  Activite,
+  BoutonModal,
+  Entete,
+  Fait,
+  FaitBloc,
+  Faits,
+  Historique,
+  ModalAction,
+} from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
 import { dateCourte } from "@/lib/libelles";
 import { updateStatusColor } from "@/lib/statuts";
-import { STATUS_LABELS, TYPE_LABELS, formContext } from "@/modules/updates/server";
+import { formContext, STATUS_LABELS, TYPE_LABELS } from "@/modules/updates/server";
 import { FormCorps, Synthese } from "@/modules/updates/vues";
 import { prisma } from "@/server/db";
 import { idDeRoute } from "@/server/guards";
@@ -15,7 +24,10 @@ import { getActiveSnooze } from "@/server/snooze";
 export default async function UpdateDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("updates");
   const id = idDeRoute((await params).id);
-  const update = await prisma.systemUpdate.findUnique({ where: { id }, include: { software: true, equipment: true } });
+  const update = await prisma.systemUpdate.findUnique({
+    where: { id },
+    include: { software: true, equipment: true },
+  });
   if (!update) notFound();
   const { user, csrf, nonce } = page;
   const peutEditer = user.canEdit("updates");
@@ -34,8 +46,16 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
       <Entete
         titre={update.name}
         sousTitre={sousTitre}
-        primaire={peutEditer && pasAJour ? <BoutonModal id="a-jour" libelle="Marquer à jour" icone="bi-check-lg" /> : null}
-        badges={<span className={`badge-status badge-${couleur}`}>{STATUS_LABELS[update.status ?? ""] ?? update.status}</span>}
+        primaire={
+          peutEditer && pasAJour ? (
+            <BoutonModal id="a-jour" libelle="Marquer à jour" icone="bi-check-lg" />
+          ) : null
+        }
+        badges={
+          <span className={`badge-status badge-${couleur}`}>
+            {STATUS_LABELS[update.status ?? ""] ?? update.status}
+          </span>
+        }
         voisins={voisins}
         base="/updates"
         bandeau={
@@ -47,7 +67,10 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
               <FaitBloc label="Dernière disponible">
                 <code>{update.latestVersion || "—"}</code>
               </FaitBloc>
-              <Fait label="Dernière MAJ" value={update.lastUpdate ? dateCourte(update.lastUpdate) : null} />
+              <Fait
+                label="Dernière MAJ"
+                value={update.lastUpdate ? dateCourte(update.lastUpdate) : null}
+              />
             </Faits>
           </div>
         }
@@ -56,7 +79,12 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
       <BarreOnglets id="ficheUpdate" modifier={peutEditer ? `/updates/${id}/edit` : null} surPlace>
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}
-        <Onglet cible="historique" libelle="Historique" icone="bi-clock-history" compteur={histories.length} />
+        <Onglet
+          cible="historique"
+          libelle="Historique"
+          icone="bi-clock-history"
+          compteur={histories.length}
+        />
       </BarreOnglets>
 
       <Volets>
@@ -67,7 +95,13 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
             </div>
             <div className="col-lg-3">
               <Activite histories={histories} />
-              <SnoozeCard entityType="update" entityId={id} user={user} snooze={snooze} csrf={csrf} />
+              <SnoozeCard
+                entityType="update"
+                entityId={id}
+                user={user}
+                snooze={snooze}
+                csrf={csrf}
+              />
             </div>
           </div>
         </Volet>
@@ -75,7 +109,15 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
         {peutEditer ? (
           <Volet cible="details">
             <fieldset className="edition-verrou" data-edition-verrou disabled>
-              <FormCorps update={update} {...ctx} user={user} csrf={csrf} nonce={nonce} retour={`/updates/${id}#details`} actionForm={`/updates/${id}/edit`} />
+              <FormCorps
+                update={update}
+                {...ctx}
+                user={user}
+                csrf={csrf}
+                nonce={nonce}
+                retour={`/updates/${id}#details`}
+                actionForm={`/updates/${id}/edit`}
+              />
             </fieldset>
           </Volet>
         ) : null}
@@ -86,12 +128,25 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
       </Volets>
 
       {peutEditer && pasAJour ? (
-        <ModalAction id="a-jour" titre="Marquer à jour" action={`/updates/${id}/mark-updated`} csrf={csrf} bouton="Marquer à jour" aide="Passe le statut à « À jour », aligne la version actuelle sur la dernière disponible et date la mise à jour à aujourd'hui.">
+        <ModalAction
+          id="a-jour"
+          titre="Marquer à jour"
+          action={`/updates/${id}/mark-updated`}
+          csrf={csrf}
+          bouton="Marquer à jour"
+          aide="Passe le statut à « À jour », aligne la version actuelle sur la dernière disponible et date la mise à jour à aujourd'hui."
+        >
           <div>
             <label className="form-label" htmlFor="upd_comment">
               Commentaire <span className="text-muted">(optionnel)</span>
             </label>
-            <input type="text" name="comment" id="upd_comment" className="form-control" placeholder="qui, quoi, comment…" />
+            <input
+              type="text"
+              name="comment"
+              id="upd_comment"
+              className="form-control"
+              placeholder="qui, quoi, comment…"
+            />
           </div>
         </ModalAction>
       ) : null}

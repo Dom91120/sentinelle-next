@@ -12,7 +12,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const contract = await prisma.contract.findUnique({ where: { id } });
     if (!contract) return pasTrouve();
     await prisma.contract.update({ where: { id }, data: { isActive: false } });
-    await prisma.contractHistory.create({ data: { contractId: id, action: "deleted", comment: `Contrat désactivé : ${contract.name}`, performedBy: user.username } });
+    await prisma.contractHistory.create({
+      data: {
+        contractId: id,
+        action: "deleted",
+        comment: `Contrat désactivé : ${contract.name}`,
+        performedBy: user.username,
+      },
+    });
     invalidateNavCounts();
     return redirigerAvecMessage("/contracts", "Contrat supprimé", "success");
   });

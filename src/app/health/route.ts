@@ -15,7 +15,11 @@ export async function GET() {
       prisma.domain.count(actif),
       prisma.systemUpdate.count(actif),
     ]);
-    return json({ status: "ok", ts: new Date().toISOString(), counts: { accounts, certificates, backups, tests, reviews, domains, updates } });
+    return json({
+      status: "ok",
+      ts: new Date().toISOString(),
+      counts: { accounts, certificates, backups, tests, reviews, domains, updates },
+    });
   } catch (e) {
     return json({ status: "error", error: e instanceof Error ? e.message : String(e) }, 503);
   }

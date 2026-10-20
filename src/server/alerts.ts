@@ -23,7 +23,7 @@ export function reminderDue(
   lastSentAt: Date | null,
   today = aujourdhui(),
 ): boolean {
-  if (!thresholds || thresholds.length !== 3) return false;
+  if (thresholds?.length !== 3) return false;
   const [danger, , info] = thresholds;
   if (daysLeft > info) return false;
   let cadence: number;
@@ -41,7 +41,7 @@ export async function shouldSendReminder(
   daysLeft: number,
   thresholds: Triplet | null | undefined,
 ): Promise<boolean> {
-  if (!thresholds || thresholds.length !== 3) return false;
+  if (thresholds?.length !== 3) return false;
   const [, , info] = thresholds;
   if (daysLeft > info) return false;
   const last = await prisma.alertLog.findFirst({
@@ -55,7 +55,9 @@ export async function shouldSendReminder(
 /** Destinataires d'une alerte : liste propre à la catégorie si définie, sinon la globale. */
 export function alertRecipientsFor(cfg: AppSettings, entityType?: string | null): string[] {
   if (entityType) {
-    const specific = ((cfg[`ALERT_RECIPIENTS_${entityType.toUpperCase()}`] as string[] | undefined) ?? [])
+    const specific = (
+      (cfg[`ALERT_RECIPIENTS_${entityType.toUpperCase()}`] as string[] | undefined) ?? []
+    )
       .map((r) => r.trim())
       .filter(Boolean);
     if (specific.length) return specific;

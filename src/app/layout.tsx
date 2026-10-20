@@ -32,8 +32,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="color-scheme" content="light dark" />
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script inline statique, sans donnée externe. */}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: BOOT }} suppressHydrationWarning />
-        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script inline statique, sans donnée externe. */}
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: ONGLET }} suppressHydrationWarning />
+        <script
+          nonce={nonce}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: script inline statique, sans donnée externe.
+          dangerouslySetInnerHTML={{ __html: ONGLET }}
+          suppressHydrationWarning
+        />
         <link href="/vendor/bootstrap.min.css" rel="stylesheet" />
         <link href="/vendor/bootstrap-icons.css" rel="stylesheet" />
         <link href="/vendor/fonts/ibm-plex.css" rel="stylesheet" />

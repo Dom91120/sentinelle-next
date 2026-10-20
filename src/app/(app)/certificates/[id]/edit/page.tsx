@@ -20,7 +20,15 @@ export default async function CertificateEdit({ params }: { params: Promise<{ id
   return (
     <>
       <EnteteForm titre="Modifier un certificat" retour={retour} />
-      <FormCorps certificate={cert} kind={cert.kind || "tls"} {...ctx} user={page.user} csrf={page.csrf} nonce={page.nonce} retour={retour} />
+      <FormCorps
+        certificate={cert}
+        kind={cert.kind || "tls"}
+        {...ctx}
+        user={page.user}
+        csrf={page.csrf}
+        nonce={page.nonce}
+        retour={retour}
+      />
     </>
   );
 }

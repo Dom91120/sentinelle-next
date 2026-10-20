@@ -9,7 +9,17 @@ export async function POST(req: Request) {
   return traiterFormulaire(req, async (form) => {
     const user = await requireUser();
     const res = await purgeOne(user, champ(form, "entity_type"), champ(form, "entity_id") || "0");
-    if (res) await auditRecord("suppression definitive", `${res[0]} : ${res[1]}`, "corbeille", user.username);
-    return redirigerAvecMessage("/trash", res ? "Élément supprimé définitivement." : "Suppression impossible.", res ? "success" : "danger");
+    if (res)
+      await auditRecord(
+        "suppression definitive",
+        `${res[0]} : ${res[1]}`,
+        "corbeille",
+        user.username,
+      );
+    return redirigerAvecMessage(
+      "/trash",
+      res ? "Élément supprimé définitivement." : "Suppression impossible.",
+      res ? "success" : "danger",
+    );
   });
 }

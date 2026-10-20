@@ -5,7 +5,13 @@ import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
 import { isoDate } from "@/lib/forms-util";
 import { aujourdhui, dateHeure, diffJours } from "@/lib/libelles";
-import { backupComputedStatus, backupLastOkCheck, backupStreak, backupSuccessRate, backupTodayCheck } from "@/lib/statuts";
+import {
+  backupComputedStatus,
+  backupLastOkCheck,
+  backupStreak,
+  backupSuccessRate,
+  backupTodayCheck,
+} from "@/lib/statuts";
 import { BACKUP_TYPE_LABELS_FEM, FREQ_LABELS_LOWER, formContext } from "@/modules/backups/server";
 import { FormCorps, Synthese } from "@/modules/backups/vues";
 import { prisma } from "@/server/db";
@@ -17,12 +23,19 @@ import { getActiveSnooze } from "@/server/snooze";
 export default async function BackupDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("backups");
   const id = idDeRoute((await params).id);
-  const backup = await prisma.backup.findUnique({ where: { id }, include: { equipment: true, checks: { orderBy: { checkDate: "desc" } } } });
+  const backup = await prisma.backup.findUnique({
+    where: { id },
+    include: { equipment: true, checks: { orderBy: { checkDate: "desc" } } },
+  });
   if (!backup) notFound();
   const { user, csrf } = page;
   const peutEditer = user.canEdit("backups");
   const [checkEvents, voisins, ctx, snooze] = await Promise.all([
-    prisma.backupHistory.findMany({ where: { backupId: id, action: "check" }, orderBy: { performedAt: "desc" }, take: 200 }),
+    prisma.backupHistory.findMany({
+      where: { backupId: id, action: "check" },
+      orderBy: { performedAt: "desc" },
+      take: 200,
+    }),
     voisinsDe("backup", id, "serviceName", page),
     peutEditer ? formContext() : Promise.resolve({ equipments: [] }),
     getActiveSnooze("backup", id),
@@ -61,23 +74,59 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
             <span className="text-muted">non vérifiée</span>
           )}
         </FaitBloc>
-        <FaitBloc label="Dernier OK">{d === null ? <span className="text-muted">jamais</span> : d === 0 ? "aujourd'hui" : `il y a ${d} j`}</FaitBloc>
+        <FaitBloc label="Dernier OK">
+          {d === null ? (
+            <span className="text-muted">jamais</span>
+          ) : d === 0 ? (
+            "aujourd'hui"
+          ) : (
+            `il y a ${d} j`
+          )}
+        </FaitBloc>
         <FaitBloc label="Série OK">
           {backupStreak(checks)} <small>jour(s)</small>
         </FaitBloc>
-        <FaitBloc label="Réussite 30 j">{rate !== null ? <span className={rate >= 95 ? "text-success" : rate >= 80 ? "text-warning" : "text-danger"}>{rate} %</span> : <span className="text-muted">—</span>}</FaitBloc>
+        <FaitBloc label="Réussite 30 j">
+          {rate !== null ? (
+            <span
+              className={rate >= 95 ? "text-success" : rate >= 80 ? "text-warning" : "text-danger"}
+            >
+              {rate} %
+            </span>
+          ) : (
+            <span className="text-muted">—</span>
+          )}
+        </FaitBloc>
       </Faits>
     </div>
   );
   return (
     <>
       <title>{`${backup.serviceName} - Sentinelle`}</title>
-      <Entete titre={backup.serviceName} sousTitre={sousTitre} statut={statut} primaire={peutEditer ? <BoutonModal id="check" libelle="Enregistrer un check" icone="bi-check2-square" /> : null} menu={[]} voisins={voisins} base="/backups" bandeau={bandeau} />
+      <Entete
+        titre={backup.serviceName}
+        sousTitre={sousTitre}
+        statut={statut}
+        primaire={
+          peutEditer ? (
+            <BoutonModal id="check" libelle="Enregistrer un check" icone="bi-check2-square" />
+          ) : null
+        }
+        menu={[]}
+        voisins={voisins}
+        base="/backups"
+        bandeau={bandeau}
+      />
 
       <BarreOnglets id="ficheBackup" modifier={peutEditer ? `/backups/${id}/edit` : null} surPlace>
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}
-        <Onglet cible="historique-des" libelle="Historique des checks" icone="bi-clock-history" compteur={checkEvents.length} />
+        <Onglet
+          cible="historique-des"
+          libelle="Historique des checks"
+          icone="bi-clock-history"
+          compteur={checkEvents.length}
+        />
       </BarreOnglets>
 
       <Volets>
@@ -87,7 +136,13 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
               <Synthese backup={backup} />
             </div>
             <div className="col-lg-3">
-              <SnoozeCard entityType="backup" entityId={id} user={user} snooze={snooze} csrf={csrf} />
+              <SnoozeCard
+                entityType="backup"
+                entityId={id}
+                user={user}
+                snooze={snooze}
+                csrf={csrf}
+              />
             </div>
           </div>
         </Volet>
@@ -95,7 +150,14 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
         {peutEditer ? (
           <Volet cible="details">
             <fieldset className="edition-verrou" data-edition-verrou disabled>
-              <FormCorps backup={backup} {...ctx} user={user} csrf={csrf} retour={`/backups/${id}#details`} actionForm={`/backups/${id}/edit`} />
+              <FormCorps
+                backup={backup}
+                {...ctx}
+                user={user}
+                csrf={csrf}
+                retour={`/backups/${id}#details`}
+                actionForm={`/backups/${id}/edit`}
+              />
             </fieldset>
           </Volet>
         ) : null}
@@ -108,7 +170,10 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
                   <Icone bi="bi-clock-history" taille="1em" classes="me-2" />
                   Historique des checks
                 </h6>
-                <small className="text-muted">Toutes les saisies, y compris plusieurs le même jour. Les statistiques retiennent le premier statut du jour ; l'état actuel reflète le dernier.</small>
+                <small className="text-muted">
+                  Toutes les saisies, y compris plusieurs le même jour. Les statistiques retiennent
+                  le premier statut du jour ; l'état actuel reflète le dernier.
+                </small>
               </div>
             </div>
             <div className="table-responsive">
@@ -156,19 +221,39 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
       </Volets>
 
       {peutEditer ? (
-        <ModalAction id="check" titre="Enregistrer un check" action={`/backups/${id}/check`} csrf={csrf} bouton="Enregistrer" icone="bi-check2-square" aide="Le résultat de la sauvegarde pour la date choisie. Plusieurs saisies le même jour sont possibles : la dernière fait l'état courant.">
+        <ModalAction
+          id="check"
+          titre="Enregistrer un check"
+          action={`/backups/${id}/check`}
+          csrf={csrf}
+          bouton="Enregistrer"
+          icone="bi-check2-square"
+          aide="Le résultat de la sauvegarde pour la date choisie. Plusieurs saisies le même jour sont possibles : la dernière fait l'état courant."
+        >
           <div className="row g-3">
             <div className="col-6">
               <label className="form-label" htmlFor="check_date">
                 Date
               </label>
-              <input type="date" name="check_date" id="check_date" className="form-control" defaultValue={isoDate(aujourdhui())} />
+              <input
+                type="date"
+                name="check_date"
+                id="check_date"
+                className="form-control"
+                defaultValue={isoDate(aujourdhui())}
+              />
             </div>
             <div className="col-6">
               <label className="form-label" htmlFor="check_status">
                 Résultat <span className="text-danger">*</span>
               </label>
-              <select name="status" id="check_status" className="form-select" required defaultValue="ok">
+              <select
+                name="status"
+                id="check_status"
+                className="form-select"
+                required
+                defaultValue="ok"
+              >
                 <option value="ok">OK</option>
                 <option value="warning">Avertissement</option>
                 <option value="failed">Échec</option>
@@ -178,7 +263,13 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
               <label className="form-label" htmlFor="check_comment">
                 Commentaire
               </label>
-              <textarea name="comment" id="check_comment" className="form-control" rows={2} placeholder="Que s'est-il passé ?" />
+              <textarea
+                name="comment"
+                id="check_comment"
+                className="form-control"
+                rows={2}
+                placeholder="Que s'est-il passé ?"
+              />
             </div>
           </div>
         </ModalAction>

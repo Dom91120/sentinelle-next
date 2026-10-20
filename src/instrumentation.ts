@@ -13,4 +13,12 @@ export async function register() {
   } catch (e) {
     console.error("[boot] amorçage impossible :", e);
   }
+  // Hors conteneur cron (développement, poste seul), les tâches planifiées tournent
+  // dans le processus : DEV_SCHEDULER=true les active, =false les coupe ; défaut = dev.
+  const dev =
+    process.env.DEV_SCHEDULER ?? (process.env.NODE_ENV === "production" ? "false" : "true");
+  if (dev === "true") {
+    const { demarrerMinuteurDev } = await import("@/server/scheduler");
+    demarrerMinuteurDev();
+  }
 }

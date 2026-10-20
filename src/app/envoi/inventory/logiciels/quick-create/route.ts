@@ -8,7 +8,8 @@ import { invalidateNavCounts } from "@/server/nav";
 /** POST /software/quick-create : création rapide (AJAX) d'un logiciel minimal. */
 export async function POST(req: Request) {
   const form = await lireFormulaire(req);
-  if (!(await verifierCsrf(req, form))) return json({ ok: false, error: "Jeton CSRF invalide." }, 400);
+  if (!(await verifierCsrf(req, form)))
+    return json({ ok: false, error: "Jeton CSRF invalide." }, 400);
   const f = form ?? new FormData();
   return reponseApi(async () => {
     const user = await requireEditApi("software");

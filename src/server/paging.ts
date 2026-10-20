@@ -56,7 +56,10 @@ export async function resolvePerPage(
       if (p[cle] !== valeur) {
         p[cle] = valeur;
         try {
-          await prisma.user.update({ where: { id: user.id }, data: { listPrefs: JSON.stringify(p) } });
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { listPrefs: JSON.stringify(p) },
+          });
         } catch (e) {
           console.error("[paging] mémoire de pagination impossible :", e);
         }
@@ -91,7 +94,8 @@ export type Pagination = { page: number; pages: number; total: number; perPage: 
 /** Découpe `items` selon ?page=N. perPage null = tout sur une page. */
 export function paginate<T>(items: T[], params: Params, perPage: number | null): [T[], Pagination] {
   const total = items.length;
-  if (perPage === null || perPage === 0) return [items, { page: 1, pages: 1, total, perPage: null }];
+  if (perPage === null || perPage === 0)
+    return [items, { page: 1, pages: 1, total, perPage: null }];
   let page = Number.parseInt(param(params, "page") ?? "1", 10);
   if (!Number.isFinite(page) || page < 1) page = 1;
   const pages = Math.max(1, Math.ceil(total / perPage));

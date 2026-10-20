@@ -12,10 +12,16 @@ export async function POST(req: Request) {
     const user = await requireEdit("certificates");
     const kind = kindDe(form.get("kind") ?? kindUrl ?? undefined);
     const resultat = await depuisFormulaire(kind, form, null);
-    if ("erreur" in resultat) return redirigerAvecMessage(`/certificates/create?kind=${kind}`, resultat.erreur, "danger");
+    if ("erreur" in resultat)
+      return redirigerAvecMessage(`/certificates/create?kind=${kind}`, resultat.erreur, "danger");
     const c = await prisma.certificate.create({ data: resultat.data as never });
     await prisma.certificateHistory.create({
-      data: { certificateId: c.id, action: "creation", comment: `Certificat créé : ${certificateLabel(c)}`, performedBy: user.username },
+      data: {
+        certificateId: c.id,
+        action: "creation",
+        comment: `Certificat créé : ${certificateLabel(c)}`,
+        performedBy: user.username,
+      },
     });
     invalidateNavCounts();
     return redirigerAvecMessage("/certificates", "Certificat ajouté avec succès", "success");

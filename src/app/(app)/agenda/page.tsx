@@ -42,7 +42,11 @@ export default async function Agenda() {
           <p className="page-subtitle">Échéances des prochaines semaines</p>
         </div>
         <div className="d-flex gap-2">
-          <a href="/agenda.ics" className="btn btn-outline-primary" title="Télécharger un instantané des échéances au format iCalendar">
+          <a
+            href="/agenda.ics"
+            className="btn btn-outline-primary"
+            title="Télécharger un instantané des échéances au format iCalendar"
+          >
             <Icone bi="bi-download" taille="1em" classes="me-1" /> Télécharger (.ics)
           </a>
           <a href="/" className="btn btn-outline-secondary">
@@ -59,7 +63,11 @@ export default async function Agenda() {
         {icsUrl ? (
           <>
             <p className="small text-muted mb-2">
-              Collez ce lien dans Outlook (<em>Ajouter un calendrier → S'abonner à partir du web</em>) ou Thunderbird (<em>Nouveau calendrier → Sur le réseau</em>) : votre calendrier se mettra à jour automatiquement, sans réexporter. Ce lien est personnel — il donne accès à vos échéances sans mot de passe, ne le partagez pas.
+              Collez ce lien dans Outlook (
+              <em>Ajouter un calendrier → S'abonner à partir du web</em>) ou Thunderbird (
+              <em>Nouveau calendrier → Sur le réseau</em>) : votre calendrier se mettra à jour
+              automatiquement, sans réexporter. Ce lien est personnel — il donne accès à vos
+              échéances sans mot de passe, ne le partagez pas.
             </p>
             <div className="input-group input-group-sm mb-2">
               <input type="text" className="form-control" id="icsUrl" readOnly value={icsUrl} />
@@ -70,14 +78,22 @@ export default async function Agenda() {
             <div className="d-flex gap-2">
               <form method="POST" action="/agenda/ics-token">
                 <input type="hidden" name="csrf_token" value={csrf} />
-                <button type="submit" className="btn btn-outline-secondary btn-sm" data-confirm="Régénérer le lien ? Les calendriers abonnés avec l'ancien lien cesseront de se mettre à jour.">
+                <button
+                  type="submit"
+                  className="btn btn-outline-secondary btn-sm"
+                  data-confirm="Régénérer le lien ? Les calendriers abonnés avec l'ancien lien cesseront de se mettre à jour."
+                >
                   <Icone bi="bi-arrow-repeat" taille="1em" classes="me-1" /> Régénérer
                 </button>
               </form>
               <form method="POST" action="/agenda/ics-token">
                 <input type="hidden" name="csrf_token" value={csrf} />
                 <input type="hidden" name="action" value="disable" />
-                <button type="submit" className="btn btn-outline-danger btn-sm" data-confirm="Désactiver le lien ? Les calendriers abonnés ne seront plus alimentés.">
+                <button
+                  type="submit"
+                  className="btn btn-outline-danger btn-sm"
+                  data-confirm="Désactiver le lien ? Les calendriers abonnés ne seront plus alimentés."
+                >
                   <Icone bi="bi-x-circle" taille="1em" classes="me-1" /> Désactiver
                 </button>
               </form>
@@ -86,7 +102,10 @@ export default async function Agenda() {
           </>
         ) : (
           <>
-            <p className="small text-muted mb-2">Créez un lien personnel à coller dans Outlook ou Thunderbird : votre calendrier récupérera les échéances automatiquement, sans avoir à réexporter de fichier.</p>
+            <p className="small text-muted mb-2">
+              Créez un lien personnel à coller dans Outlook ou Thunderbird : votre calendrier
+              récupérera les échéances automatiquement, sans avoir à réexporter de fichier.
+            </p>
             <form method="POST" action="/agenda/ics-token">
               <input type="hidden" name="csrf_token" value={csrf} />
               <button type="submit" className="btn btn-primary btn-sm">

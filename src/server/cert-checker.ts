@@ -32,24 +32,37 @@ function issuerName(cert: tls.DetailedPeerCertificate): string | null {
 }
 
 /** {expiryDate, issuer} du certificat présenté par le domaine. Lève en cas d'échec. */
-export function fetchCertInfo(domain: string, port?: number, timeoutMs = 10_000): Promise<{ expiryDate: Date; issuer: string | null }> {
+export function fetchCertInfo(
+  domain: string,
+  port?: number,
+  timeoutMs = 10_000,
+): Promise<{ expiryDate: Date; issuer: string | null }> {
   const [host, parsedPort] = parseHostPort(domain);
   return new Promise((resolve, reject) => {
-    const socket = tls.connect({ host, port: port ?? parsedPort, servername: host, rejectUnauthorized: false, timeout: timeoutMs }, () => {
-      try {
-        const cert = socket.getPeerCertificate(true);
-        socket.end();
-        if (!cert || !cert.valid_to) {
-          reject(new Error("Aucun certificat presente par le serveur"));
-          return;
+    const socket = tls.connect(
+      {
+        host,
+        port: port ?? parsedPort,
+        servername: host,
+        rejectUnauthorized: false,
+        timeout: timeoutMs,
+      },
+      () => {
+        try {
+          const cert = socket.getPeerCertificate(true);
+          socket.end();
+          if (!cert?.valid_to) {
+            reject(new Error("Aucun certificat presente par le serveur"));
+            return;
+          }
+          const d = new Date(cert.valid_to);
+          const expiry = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+          resolve({ expiryDate: expiry, issuer: issuerName(cert) });
+        } catch (e) {
+          reject(e);
         }
-        const d = new Date(cert.valid_to);
-        const expiry = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-        resolve({ expiryDate: expiry, issuer: issuerName(cert) });
-      } catch (e) {
-        reject(e);
-      }
-    });
+      },
+    );
     socket.setTimeout(timeoutMs, () => {
       socket.destroy();
       reject(new Error("timed out"));

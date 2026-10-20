@@ -14,7 +14,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const test = await prisma.testTask.findUnique({ where: { id } });
     if (!test) return pasTrouve();
     const name = champ(form, "name");
-    if (!name) return redirigerAvecMessage(`/tests/${id}/edit`, "Le nom du test est obligatoire.", "danger");
+    if (!name)
+      return redirigerAvecMessage(`/tests/${id}/edit`, "Le nom du test est obligatoire.", "danger");
     await prisma.testTask.update({ where: { id }, data: { name, ...depuisFormulaire(form) } });
     invalidateNavCounts();
     return redirigerAvecMessage(`/tests/${id}`, "Test modifié avec succès", "success");

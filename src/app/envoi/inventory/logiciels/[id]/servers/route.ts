@@ -15,8 +15,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const retour = `/inventory/logiciels/${id}#liaisons`;
     const eid = parseInt_(form.get("equipment_id"), null) ?? 0;
     const e = eid ? await prisma.equipment.findUnique({ where: { id: eid } }) : null;
-    if (!e || !e.isActive) return redirigerAvecMessage(retour, "Choisissez un serveur.", "danger");
-    const deja = await prisma.softwareEquipment.findUnique({ where: { softwareId_equipmentId: { softwareId: id, equipmentId: e.id } } });
+    if (!e?.isActive) return redirigerAvecMessage(retour, "Choisissez un serveur.", "danger");
+    const deja = await prisma.softwareEquipment.findUnique({
+      where: { softwareId_equipmentId: { softwareId: id, equipmentId: e.id } },
+    });
     if (deja) return redirigerAvecMessage(retour, "Ce serveur est déjà associé.", "warning");
     await prisma.softwareEquipment.create({ data: { softwareId: id, equipmentId: e.id } });
     await prisma.software.update({ where: { id }, data: { noServer: false } });

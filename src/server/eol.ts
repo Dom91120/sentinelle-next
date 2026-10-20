@@ -44,7 +44,10 @@ export type EolInfo = {
 async function fetchOne(product: string, timeoutMs = 15_000): Promise<boolean> {
   let payload: string;
   try {
-    const r = await fetch(API(product), { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(timeoutMs) });
+    const r = await fetch(API(product), {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(timeoutMs),
+    });
     if (!r.ok) {
       journal.avert("eol", "HTTP", { product, statut: r.status });
       return false;
@@ -141,12 +144,23 @@ export function lookupDans(
     return { product, cycle: null, eol_date: null, status: null, days_left: null, has_data: false };
   }
   const cyc = matchCycle(data, text);
-  if (!cyc) return { product, cycle: null, eol_date: null, status: null, days_left: null, has_data: true };
+  if (!cyc)
+    return { product, cycle: null, eol_date: null, status: null, days_left: null, has_data: true };
   const [eolDate, status, days] = statusOf(cyc.eol, today);
-  return { product, cycle: cyc.cycle != null ? String(cyc.cycle) : null, eol_date: eolDate, status, days_left: days, has_data: true };
+  return {
+    product,
+    cycle: cyc.cycle != null ? String(cyc.cycle) : null,
+    eol_date: eolDate,
+    status,
+    days_left: days,
+    has_data: true,
+  };
 }
 
 /** `eol.lookup(os, version)` : charge le cache puis cherche. */
-export async function lookup(os: string | null | undefined, version?: string | null): Promise<EolInfo | null> {
+export async function lookup(
+  os: string | null | undefined,
+  version?: string | null,
+): Promise<EolInfo | null> {
   return lookupDans(await chargerCycles(), os, version);
 }

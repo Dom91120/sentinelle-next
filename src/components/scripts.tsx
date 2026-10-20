@@ -6,10 +6,27 @@ import { Icone } from "@/components/icones";
  * `ChargeurScripts` après l'hydratation React. `rang` 1 = socle (base.html),
  * 2 = scripts propres à la page, exécutés après le socle.
  */
-export function ScriptDiffere({ src, code, nonce, rang = 2 }: { src?: string; code?: string; nonce?: string; rang?: 1 | 2 }) {
+export function ScriptDiffere({
+  src,
+  code,
+  nonce,
+  rang = 2,
+}: {
+  src?: string;
+  code?: string;
+  nonce?: string;
+  rang?: 1 | 2;
+}) {
   if (src) return <script type="text/x-differe" data-src={src} data-rang={rang} nonce={nonce} />;
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: code inline construit côté serveur, inerte jusqu'au rejeu.
-  return <script type="text/x-differe" data-rang={rang} nonce={nonce} dangerouslySetInnerHTML={{ __html: code ?? "" }} />;
+  return (
+    <script
+      type="text/x-differe"
+      data-rang={rang}
+      nonce={nonce}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: code inline construit côté serveur, inerte jusqu'au rejeu.
+      dangerouslySetInnerHTML={{ __html: code ?? "" }}
+    />
+  );
 }
 
 /** Les scripts de base.html, dans le même ordre, avec le nonce CSP. */
@@ -53,7 +70,11 @@ export function ConfirmModal({ csrf, nonce }: { csrf: string; nonce?: string }) 
               <button type="button" className="btn-close" data-bs-dismiss="modal" />
             </div>
             <div className="modal-body text-center py-2 px-4">
-              <Icone bi="bi-exclamation-triangle-fill" taille="1em" classes="text-warning fs-1 d-block mb-3" />
+              <Icone
+                bi="bi-exclamation-triangle-fill"
+                taille="1em"
+                classes="text-warning fs-1 d-block mb-3"
+              />
               <p id="confirmModalText" className="mb-0 fs-6" />
             </div>
             <div className="modal-footer border-0 pt-0 justify-content-center gap-2">
@@ -77,13 +98,22 @@ export function ToastNotifications({ nonce }: { nonce?: string }) {
   return (
     <>
       <div className="toast-container position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1100 }}>
-        <div id="alertToast" className="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive">
+        <div
+          id="alertToast"
+          className="toast align-items-center text-bg-danger border-0"
+          role="alert"
+          aria-live="assertive"
+        >
           <div className="d-flex">
             <div className="toast-body" id="alertToastBody">
               <Icone bi="bi-exclamation-triangle-fill" taille="1em" classes="me-2" />
               <span id="alertToastText" />
             </div>
-            <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" />
+            <button
+              type="button"
+              className="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast"
+            />
           </div>
         </div>
       </div>

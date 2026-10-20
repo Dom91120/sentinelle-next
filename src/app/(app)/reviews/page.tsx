@@ -17,7 +17,11 @@ export default async function ReviewsList({ searchParams }: { searchParams: Para
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let reviews = await chargerRevues();
-  reviews.sort((a, b) => (a.nextReview?.getTime() ?? Number.NEGATIVE_INFINITY) - (b.nextReview?.getTime() ?? Number.NEGATIVE_INFINITY));
+  reviews.sort(
+    (a, b) =>
+      (a.nextReview?.getTime() ?? Number.NEGATIVE_INFINITY) -
+      (b.nextReview?.getTime() ?? Number.NEGATIVE_INFINITY),
+  );
   reviews = textSearch(reviews, q, ["application", "responsible", "scope"]);
   reviews.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "reviews.list");
@@ -65,7 +69,16 @@ export default async function ReviewsList({ searchParams }: { searchParams: Para
                         {r.application}
                       </a>
                     </td>
-                    <td>{r.nextReview ? <Cellule principal={dateCourte(r.nextReview)} secondaire={<DelaiBadge days={r.nextReview} status={r.status} />} /> : <span className="text-muted">à planifier</span>}</td>
+                    <td>
+                      {r.nextReview ? (
+                        <Cellule
+                          principal={dateCourte(r.nextReview)}
+                          secondaire={<DelaiBadge days={r.nextReview} status={r.status} />}
+                        />
+                      ) : (
+                        <span className="text-muted">à planifier</span>
+                      )}
+                    </td>
                     <td>{r.responsible || "—"}</td>
                     <td>tous les {r.frequencyDays} j</td>
                     <td>
@@ -74,7 +87,11 @@ export default async function ReviewsList({ searchParams }: { searchParams: Para
                   </tr>
                 ))
               ) : (
-                <Vide colonnes={6} message="Aucune revue de droits enregistrée." urlAjout={user.canEdit("reviews") ? "/reviews/create" : null} />
+                <Vide
+                  colonnes={6}
+                  message="Aucune revue de droits enregistrée."
+                  urlAjout={user.canEdit("reviews") ? "/reviews/create" : null}
+                />
               )}
             </tbody>
           </table>

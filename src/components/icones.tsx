@@ -67,7 +67,9 @@ export function parseStyle(style: string): React.CSSProperties {
     const prop = decl.slice(0, i).trim();
     const val = decl.slice(i + 1).trim();
     if (!prop) continue;
-    const camel = prop.startsWith("--") ? prop : prop.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
+    const camel = prop.startsWith("--")
+      ? prop
+      : prop.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
     out[camel] = val;
   }
   return out as React.CSSProperties;

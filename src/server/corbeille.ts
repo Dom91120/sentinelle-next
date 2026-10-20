@@ -23,7 +23,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.account.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.account.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.account.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.accountHistory.create({ data: { accountId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.accountHistory.create({
+        data: {
+          accountId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   certificate: {
     cat: "certificates",
@@ -32,7 +40,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.certificate.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.certificate.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.certificate.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.certificateHistory.create({ data: { certificateId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.certificateHistory.create({
+        data: {
+          certificateId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   domain: {
     cat: "domains",
@@ -41,7 +57,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.domain.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.domain.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.domain.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.domainHistory.create({ data: { domainId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.domainHistory.create({
+        data: {
+          domainId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   backup: {
     cat: "backups",
@@ -50,7 +74,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.backup.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.backup.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.backup.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.backupHistory.create({ data: { backupId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.backupHistory.create({
+        data: {
+          backupId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   test: {
     cat: "tests",
@@ -59,7 +91,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.testTask.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.testTask.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.testTask.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.testHistory.create({ data: { testId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.testHistory.create({
+        data: {
+          testId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   review: {
     cat: "reviews",
@@ -68,7 +108,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.accessReview.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.accessReview.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.accessReview.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.reviewHistory.create({ data: { reviewId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.reviewHistory.create({
+        data: {
+          reviewId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   update: {
     cat: "updates",
@@ -77,7 +125,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.systemUpdate.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.systemUpdate.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.systemUpdate.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.updateHistory.create({ data: { updateId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.updateHistory.create({
+        data: {
+          updateId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   equipment: {
     cat: "inventory",
@@ -87,9 +143,15 @@ export const SPECS: Record<string, Spec> = {
     activer: (id) => prisma.equipment.update({ where: { id }, data: { isActive: true } }),
     supprimer: async (id) => {
       // Détache explicitement les éléments liés (vue 360°) avant la suppression.
-      await prisma.certificate.updateMany({ where: { equipmentId: id }, data: { equipmentId: null } });
+      await prisma.certificate.updateMany({
+        where: { equipmentId: id },
+        data: { equipmentId: null },
+      });
       await prisma.backup.updateMany({ where: { equipmentId: id }, data: { equipmentId: null } });
-      await prisma.systemUpdate.updateMany({ where: { equipmentId: id }, data: { equipmentId: null } });
+      await prisma.systemUpdate.updateMany({
+        where: { equipmentId: id },
+        data: { equipmentId: null },
+      });
       await prisma.account.updateMany({ where: { equipmentId: id }, data: { equipmentId: null } });
       await prisma.contractEquipment.deleteMany({ where: { equipmentId: id } });
       await prisma.softwareEquipment.deleteMany({ where: { equipmentId: id } });
@@ -104,7 +166,15 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.contract.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.contract.update({ where: { id }, data: { isActive: true } }),
     supprimer: (id) => prisma.contract.delete({ where: { id } }),
-    historique: (id, performedBy) => prisma.contractHistory.create({ data: { contractId: id, action: "restored", comment: "Restaure depuis la corbeille", performedBy } }),
+    historique: (id, performedBy) =>
+      prisma.contractHistory.create({
+        data: {
+          contractId: id,
+          action: "restored",
+          comment: "Restaure depuis la corbeille",
+          performedBy,
+        },
+      }),
   },
   supplier: {
     cat: "suppliers",
@@ -115,7 +185,10 @@ export const SPECS: Record<string, Spec> = {
     supprimer: async (id) => {
       await prisma.equipment.updateMany({ where: { supplierId: id }, data: { supplierId: null } });
       await prisma.contract.updateMany({ where: { supplierId: id }, data: { supplierId: null } });
-      await prisma.certificate.updateMany({ where: { supplierId: id }, data: { supplierId: null } });
+      await prisma.certificate.updateMany({
+        where: { supplierId: id },
+        data: { supplierId: null },
+      });
       await prisma.account.updateMany({ where: { supplierId: id }, data: { supplierId: null } });
       await prisma.domain.updateMany({ where: { registrarId: id }, data: { registrarId: null } });
       return prisma.supplier.delete({ where: { id } });
@@ -129,8 +202,14 @@ export const SPECS: Record<string, Spec> = {
     lire: (where) => prisma.software.findMany({ where, orderBy: { updatedAt: "desc" } }),
     activer: (id) => prisma.software.update({ where: { id }, data: { isActive: true } }),
     supprimer: async (id) => {
-      await prisma.systemUpdate.updateMany({ where: { softwareId: id }, data: { softwareId: null } });
-      await prisma.accessReview.updateMany({ where: { softwareId: id }, data: { softwareId: null } });
+      await prisma.systemUpdate.updateMany({
+        where: { softwareId: id },
+        data: { softwareId: null },
+      });
+      await prisma.accessReview.updateMany({
+        where: { softwareId: id },
+        data: { softwareId: null },
+      });
       await prisma.account.updateMany({ where: { softwareId: id }, data: { softwareId: null } });
       return prisma.software.delete({ where: { id } });
     },
@@ -138,7 +217,12 @@ export const SPECS: Record<string, Spec> = {
   },
 };
 
-export type Groupe = { etype: string; label: string; canPurge: boolean; items: { id: number; name: string; date: Date | null }[] };
+export type Groupe = {
+  etype: string;
+  label: string;
+  canPurge: boolean;
+  items: { id: number; name: string; date: Date | null }[];
+};
 
 /** Groupes d'éléments supprimés pour les catégories que l'utilisateur peut éditer. */
 export async function listTrashed(user: CurrentUser): Promise<Groupe[]> {
@@ -147,7 +231,16 @@ export async function listTrashed(user: CurrentUser): Promise<Groupe[]> {
     if (!user.canEdit(spec.cat)) continue;
     const items = await spec.lire({ isActive: false });
     if (items.length) {
-      groups.push({ etype, label: spec.label, canPurge: user.canDelete(spec.cat), items: items.map((o) => ({ id: Number(o.id), name: spec.nom(o), date: (o.updatedAt as Date) ?? null })) });
+      groups.push({
+        etype,
+        label: spec.label,
+        canPurge: user.canDelete(spec.cat),
+        items: items.map((o) => ({
+          id: Number(o.id),
+          name: spec.nom(o),
+          date: (o.updatedAt as Date) ?? null,
+        })),
+      });
     }
   }
   return groups;
@@ -155,12 +248,17 @@ export async function listTrashed(user: CurrentUser): Promise<Groupe[]> {
 
 async function purgeObj(etype: string, spec: Spec, id: number): Promise<void> {
   await clearSnooze(etype, id);
-  if (etype === "domain") await prisma.certificate.updateMany({ where: { domainId: id }, data: { domainId: null } });
+  if (etype === "domain")
+    await prisma.certificate.updateMany({ where: { domainId: id }, data: { domainId: null } });
   await spec.supprimer(id);
 }
 
 /** Suppression définitive d'un élément. Retourne (libellé, nom) ou null. */
-export async function purgeOne(user: CurrentUser, etype: string, entityId: string): Promise<[string, string] | null> {
+export async function purgeOne(
+  user: CurrentUser,
+  etype: string,
+  entityId: string,
+): Promise<[string, string] | null> {
   const spec = SPECS[etype];
   if (!spec || !/^\d+$/.test(entityId) || !user.canDelete(spec.cat)) return null;
   const [obj] = await spec.lire({ isActive: false, id: Number.parseInt(entityId, 10) });
@@ -184,7 +282,12 @@ export async function purgeAll(user: CurrentUser): Promise<number> {
 }
 
 /** Restaure un élément. Retourne (libellé, nom) ou null. */
-export async function restore(user: CurrentUser, etype: string, entityId: string, performedBy: string): Promise<[string, string] | null> {
+export async function restore(
+  user: CurrentUser,
+  etype: string,
+  entityId: string,
+  performedBy: string,
+): Promise<[string, string] | null> {
   const spec = SPECS[etype];
   if (!spec || !/^\d+$/.test(entityId) || !user.canEdit(spec.cat)) return null;
   const [obj] = await spec.lire({ isActive: false, id: Number.parseInt(entityId, 10) });

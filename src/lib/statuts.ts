@@ -84,7 +84,11 @@ export function certificateMonitored(c: CertificateLike): boolean {
   return c.isActive && c.validity !== "revoque" && c.expiryDate !== null;
 }
 
-export function certificateStatus(c: CertificateLike, seuils?: Seuils, today = aujourdhui()): Statut {
+export function certificateStatus(
+  c: CertificateLike,
+  seuils?: Seuils,
+  today = aujourdhui(),
+): Statut {
   if (c.expiryDate === null) return "warning";
   if (c.validity === "revoque") return "success";
   return statusFromDays(diffJours(c.expiryDate, today), seuil(seuils, "THRESHOLD_EXPIRY"));
@@ -158,7 +162,9 @@ export function backupSuccessRate(
 
 /** Série de pointages OK consécutifs (du plus récent vers le passé, 365 au plus). */
 export function backupStreak(checks: BackupCheckLike[]): number {
-  const tri = [...checks].sort((a, b) => b.checkDate.getTime() - a.checkDate.getTime()).slice(0, 365);
+  const tri = [...checks]
+    .sort((a, b) => b.checkDate.getTime() - a.checkDate.getTime())
+    .slice(0, 365);
   let count = 0;
   for (const c of tri) {
     if ((c.firstStatus || c.status) === "ok") count += 1;
@@ -211,7 +217,10 @@ export function domainStatus(
 }
 
 /** La fiche de domaine dont relève ce nom d'hôte (le plus long l'emporte). */
-export function domainForHost<T extends { name: string }>(host: string | null, domaines: T[]): T | null {
+export function domainForHost<T extends { name: string }>(
+  host: string | null,
+  domaines: T[],
+): T | null {
   const h = (host ?? "").trim().toLowerCase().replace(/\.+$/, "");
   if (!h) return null;
   let meilleur: T | null = null;
@@ -245,7 +254,11 @@ export function warrantyDaysLeft(e: EquipmentLike, today = aujourdhui()): number
   return e.warrantyEnd ? diffJours(e.warrantyEnd, today) : null;
 }
 
-export function warrantyStatus(e: EquipmentLike, seuils?: Seuils, today = aujourdhui()): Statut | null {
+export function warrantyStatus(
+  e: EquipmentLike,
+  seuils?: Seuils,
+  today = aujourdhui(),
+): Statut | null {
   const d = warrantyDaysLeft(e, today);
   if (d === null) return null;
   return statusFromDays(d, seuil(seuils, "THRESHOLD_WARRANTY"));

@@ -1,7 +1,7 @@
 import { Icone } from "@/components/icones";
 import { Barre, Cellule, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
 import { DelaiBadge, StatusBadge } from "@/components/macros";
-import { TEST_TYPE_LABELS, statusRank } from "@/lib/constantes";
+import { statusRank, TEST_TYPE_LABELS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { chargerTests } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
@@ -18,7 +18,11 @@ export default async function TestsList({ searchParams }: { searchParams: Params
   const q = String(params.q ?? "").trim();
   let tests = await chargerTests();
   // TestTask.next_due.asc().nullsfirst(), puis par statut (tri stable).
-  tests.sort((a, b) => (a.nextDue?.getTime() ?? Number.NEGATIVE_INFINITY) - (b.nextDue?.getTime() ?? Number.NEGATIVE_INFINITY));
+  tests.sort(
+    (a, b) =>
+      (a.nextDue?.getTime() ?? Number.NEGATIVE_INFINITY) -
+      (b.nextDue?.getTime() ?? Number.NEGATIVE_INFINITY),
+  );
   tests = textSearch(tests, q, ["name", "testType", "description"]);
   tests.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "tests.list");
@@ -31,7 +35,10 @@ export default async function TestsList({ searchParams }: { searchParams: Params
           <h1 className="page-title">
             Tests <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">Restaurations, sauvegardes sur clé, vérifications d'intégrité : les tests à refaire régulièrement</p>
+          <p className="page-subtitle">
+            Restaurations, sauvegardes sur clé, vérifications d'intégrité : les tests à refaire
+            régulièrement
+          </p>
         </div>
         <div className="page-actions">
           <a href="/tests/kanban" className="btn btn-outline-secondary">
@@ -67,9 +74,22 @@ export default async function TestsList({ searchParams }: { searchParams: Params
                       <a href={`/tests/${test.id}`} className="fw-medium text-decoration-none">
                         {test.name}
                       </a>
-                      {TEST_TYPE_LABELS[test.testType] ? <small className="d-block text-muted">{TEST_TYPE_LABELS[test.testType]}</small> : null}
+                      {TEST_TYPE_LABELS[test.testType] ? (
+                        <small className="d-block text-muted">
+                          {TEST_TYPE_LABELS[test.testType]}
+                        </small>
+                      ) : null}
                     </td>
-                    <td>{test.nextDue ? <Cellule principal={dateCourte(test.nextDue)} secondaire={<DelaiBadge days={test.nextDue} status={test.status} />} /> : <span className="text-muted">à planifier</span>}</td>
+                    <td>
+                      {test.nextDue ? (
+                        <Cellule
+                          principal={dateCourte(test.nextDue)}
+                          secondaire={<DelaiBadge days={test.nextDue} status={test.status} />}
+                        />
+                      ) : (
+                        <span className="text-muted">à planifier</span>
+                      )}
+                    </td>
                     <td>{test.lastPerformed ? dateCourte(test.lastPerformed) : "—"}</td>
                     <td>
                       <StatusBadge status={test.status} />
@@ -77,7 +97,11 @@ export default async function TestsList({ searchParams }: { searchParams: Params
                   </tr>
                 ))
               ) : (
-                <Vide colonnes={5} message="Aucun test." urlAjout={user.canEdit("tests") ? "/tests/create" : null} />
+                <Vide
+                  colonnes={5}
+                  message="Aucun test."
+                  urlAjout={user.canEdit("tests") ? "/tests/create" : null}
+                />
               )}
             </tbody>
           </table>

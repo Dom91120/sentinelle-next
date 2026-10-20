@@ -10,9 +10,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ quoteId
   return traiterFormulaire(req, async () => {
     await requireDelete("contracts");
     await requireFeature("quotes");
-    const quote = await prisma.quote.findUnique({ where: { id: quoteId }, include: { consultation: true } });
+    const quote = await prisma.quote.findUnique({
+      where: { id: quoteId },
+      include: { consultation: true },
+    });
     if (!quote) return pasTrouve();
     await prisma.quote.delete({ where: { id: quoteId } });
-    return redirigerAvecMessage(`/inventory/logiciels/${quote.consultation.softwareId}`, "Devis supprimé", "success");
+    return redirigerAvecMessage(
+      `/inventory/logiciels/${quote.consultation.softwareId}`,
+      "Devis supprimé",
+      "success",
+    );
   });
 }

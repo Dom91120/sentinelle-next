@@ -13,7 +13,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!account) return pasTrouve();
     await prisma.account.update({ where: { id }, data: { isActive: false } });
     await prisma.accountHistory.create({
-      data: { accountId: id, action: "deleted", comment: `Compte désactivé : ${account.serviceName} (${account.username})`, performedBy: user.username },
+      data: {
+        accountId: id,
+        action: "deleted",
+        comment: `Compte désactivé : ${account.serviceName} (${account.username})`,
+        performedBy: user.username,
+      },
     });
     invalidateNavCounts();
     return redirigerAvecMessage("/accounts", "Compte supprimé", "success");

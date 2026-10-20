@@ -9,11 +9,30 @@ import { prisma } from "@/server/db";
 export const DEFAULT_MAX_MB = 10;
 
 export const ALLOWED_EXTENSIONS = new Set([
-  "pdf", "doc", "docx", "odt", "rtf", "txt", "md",
-  "xls", "xlsx", "ods", "csv",
-  "ppt", "pptx", "odp",
-  "png", "jpg", "jpeg", "gif", "webp", "svg",
-  "zip", "7z", "eml", "msg",
+  "pdf",
+  "doc",
+  "docx",
+  "odt",
+  "rtf",
+  "txt",
+  "md",
+  "xls",
+  "xlsx",
+  "ods",
+  "csv",
+  "ppt",
+  "pptx",
+  "odp",
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "svg",
+  "zip",
+  "7z",
+  "eml",
+  "msg",
 ]);
 
 export const INLINE_TYPES: Record<string, string> = {
@@ -34,7 +53,7 @@ export function inlineViewEnabled(cfg: AppSettings): boolean {
 }
 
 export function extension(nom: string): string {
-  return nom.includes(".") ? nom.split(".").pop()?.toLowerCase() ?? "" : "";
+  return nom.includes(".") ? (nom.split(".").pop()?.toLowerCase() ?? "") : "";
 }
 
 export function viewable(cfg: AppSettings, doc: { filename: string }): boolean {
@@ -94,7 +113,12 @@ const ECRANS: Record<string, string> = {
 /** Là d'où l'on vient. Un parent disparu ramène au tableau de bord. */
 export async function retour(kind: string | null, parentIdValue: number | null): Promise<string> {
   if (kind === "quote") {
-    const devis = parentIdValue ? await prisma.quote.findUnique({ where: { id: parentIdValue }, include: { consultation: true } }) : null;
+    const devis = parentIdValue
+      ? await prisma.quote.findUnique({
+          where: { id: parentIdValue },
+          include: { consultation: true },
+        })
+      : null;
     return devis ? `/inventory/logiciels/${devis.consultation.softwareId}` : "/";
   }
   const base = kind ? ECRANS[kind] : undefined;
@@ -112,15 +136,22 @@ export function nomAffiche(valeur: unknown): string {
 /** `secure_filename` de Werkzeug, en version simplifiée. */
 export function secureFilename(nom: string): string {
   const normalise = nom.normalize("NFKD").replace(/[̀-ͯ]/g, "");
-  const sans = normalise.replace(/[/\\]/g, " ").replace(/[^A-Za-z0-9_.-]+/g, "_").replace(/^[._]+|[._]+$/g, "");
+  const sans = normalise
+    .replace(/[/\\]/g, " ")
+    .replace(/[^A-Za-z0-9_.-]+/g, "_")
+    .replace(/^[._]+|[._]+$/g, "");
   return sans;
 }
 
 export type FichierLu = { nom: string; mime: string; octets: Buffer };
 
 /** (nom, mime, octets) du fichier envoyé, ou le message qui explique le refus. */
-export async function lireFichier(cfg: AppSettings, fichier: FormDataEntryValue | null): Promise<FichierLu | string> {
-  if (!fichier || typeof fichier === "string" || !(fichier.name || "").trim()) return "Choisissez un fichier.";
+export async function lireFichier(
+  cfg: AppSettings,
+  fichier: FormDataEntryValue | null,
+): Promise<FichierLu | string> {
+  if (!fichier || typeof fichier === "string" || !(fichier.name || "").trim())
+    return "Choisissez un fichier.";
   const nom = secureFilename(fichier.name) || "piece-jointe";
   const ext = extension(nom);
   if (!ALLOWED_EXTENSIONS.has(ext)) {
@@ -137,5 +168,8 @@ export async function lireFichier(cfg: AppSettings, fichier: FormDataEntryValue 
 
 /** Les catégories de pièces (Référentiels). */
 export async function docCategories(): Promise<Referential[]> {
-  return prisma.referential.findMany({ where: { kind: "doc_category", isActive: true }, orderBy: [{ position: "asc" }, { label: "asc" }] });
+  return prisma.referential.findMany({
+    where: { kind: "doc_category", isActive: true },
+    orderBy: [{ position: "asc" }, { label: "asc" }],
+  });
 }

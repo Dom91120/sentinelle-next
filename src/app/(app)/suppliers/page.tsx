@@ -14,7 +14,10 @@ export default async function SuppliersList({ searchParams }: { searchParams: Pa
   const page = await contexteModule("suppliers");
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
-  let suppliers = await prisma.supplier.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
+  let suppliers = await prisma.supplier.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+  });
   suppliers = textSearch(suppliers, q, SEARCH_FIELDS as (keyof (typeof suppliers)[number])[]);
   const perPage = await resolvePerPage(params, page.user, "suppliers.list");
   const [rows, p] = paginate(suppliers, params, perPage);
@@ -26,7 +29,9 @@ export default async function SuppliersList({ searchParams }: { searchParams: Pa
           <h1 className="page-title">
             Fournisseurs <span className="page-count">{p.total}</span>
           </h1>
-          <p className="page-subtitle">Qui appeler en cas d'incident : hotlines, n° client, portails</p>
+          <p className="page-subtitle">
+            Qui appeler en cas d'incident : hotlines, n° client, portails
+          </p>
         </div>
         <div className="page-actions">
           {user.canEdit("suppliers") ? (
@@ -66,13 +71,28 @@ export default async function SuppliersList({ searchParams }: { searchParams: Pa
                     <tr key={s.id}>
                       <td>
                         <span className="d-flex align-items-center gap-2">
-                          <a href={`/suppliers/${s.id}`} className="fw-medium text-decoration-none text-truncate" style={{ minWidth: 0 }} title={s.name}>
+                          <a
+                            href={`/suppliers/${s.id}`}
+                            className="fw-medium text-decoration-none text-truncate"
+                            style={{ minWidth: 0 }}
+                            title={s.name}
+                          >
                             {s.name}
                           </a>
-                          {s.kind !== "editor" ? <span className="badge-status badge-muted flex-shrink-0">{kindLabel(s)}</span> : null}
+                          {s.kind !== "editor" ? (
+                            <span className="badge-status badge-muted flex-shrink-0">
+                              {kindLabel(s)}
+                            </span>
+                          ) : null}
                         </span>
                         {s.website ? (
-                          <a href={s.website} target="_blank" rel="noopener" className="d-block text-truncate pile-site" title={`Ouvrir ${s.website}`}>
+                          <a
+                            href={s.website}
+                            target="_blank"
+                            rel="noopener"
+                            className="d-block text-truncate pile-site"
+                            title={`Ouvrir ${s.website}`}
+                          >
                             {s.website}
                           </a>
                         ) : null}
@@ -80,7 +100,11 @@ export default async function SuppliersList({ searchParams }: { searchParams: Pa
                       <td>
                         <div className="pile">
                           {ccMail ? (
-                            <a href={`mailto:${ccMail}`} className="pile-principal" title={`Écrire à ${ccMail}`}>
+                            <a
+                              href={`mailto:${ccMail}`}
+                              className="pile-principal"
+                              title={`Écrire à ${ccMail}`}
+                            >
                               <Icone bi="bi-envelope" taille="1em" />
                               <span className="text-truncate">{ccNom || ccMail}</span>
                             </a>
@@ -90,7 +114,10 @@ export default async function SuppliersList({ searchParams }: { searchParams: Pa
                             </span>
                           ) : null}
                           {ccTel ? (
-                            <a href={`tel:${ccTel.replace(/ /g, "")}`} className="pile-faint text-nowrap">
+                            <a
+                              href={`tel:${ccTel.replace(/ /g, "")}`}
+                              className="pile-faint text-nowrap"
+                            >
                               <Icone bi="bi-telephone" taille="1em" />
                               {ccTel}
                             </a>
@@ -100,19 +127,32 @@ export default async function SuppliersList({ searchParams }: { searchParams: Pa
                       <td>
                         <div className="pile">
                           {s.supportUrl ? (
-                            <a href={s.supportUrl} target="_blank" rel="noopener" className="pile-accent casse" title="Ouvrir le portail support">
+                            <a
+                              href={s.supportUrl}
+                              target="_blank"
+                              rel="noopener"
+                              className="pile-accent casse"
+                              title="Ouvrir le portail support"
+                            >
                               <Icone bi="bi-globe2" taille="1em" />
                               {s.supportUrl}
                             </a>
                           ) : null}
                           {s.supportEmail ? (
-                            <a href={`mailto:${s.supportEmail}`} className="pile-faint casse" title={`Écrire à ${s.supportEmail}`}>
+                            <a
+                              href={`mailto:${s.supportEmail}`}
+                              className="pile-faint casse"
+                              title={`Écrire à ${s.supportEmail}`}
+                            >
                               <Icone bi="bi-envelope" taille="1em" />
                               {s.supportEmail}
                             </a>
                           ) : null}
                           {s.supportPhone ? (
-                            <a href={`tel:${s.supportPhone.replace(/ /g, "")}`} className="pile-faint text-nowrap">
+                            <a
+                              href={`tel:${s.supportPhone.replace(/ /g, "")}`}
+                              className="pile-faint text-nowrap"
+                            >
                               <Icone bi="bi-telephone" taille="1em" />
                               {s.supportPhone}
                             </a>
