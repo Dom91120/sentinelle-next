@@ -12,7 +12,7 @@ Légende : `[x]` porté et vérifié · `[~]` porté, à vérifier côte à côt
 - [x] Next.js 16 App Router, `output: "standalone"`, en-têtes de sécurité statiques, CSP par nonce (`src/proxy.ts`, `src/lib/csp.ts`)
 - [x] Prisma 7 + `@prisma/adapter-pg`, client généré dans `src/generated/prisma`, `prisma.config.ts`
 - [x] Better Auth 1.7 (emailAndPassword + plugin `username`, twoFactor, nextCookies, rateLimit en base)
-- [x] Tailwind v4 (`@tailwindcss/postcss`) + feuille héritée `src/app/sentinelle.css` (= `static/css/style.css`)
+- [x] Tailwind v4 (`@tailwindcss/postcss`, utilitaires seuls, sans preflight) + feuille héritée `public/css/sentinelle.css` (= `static/css/style.css`), liée dans le `<head>` après Bootstrap comme dans `base.html`, avec une version calculée du fichier (`static_v`)
 - [x] Zod 4, Nodemailer 10, Puppeteer 25 (PDF), qrcode.react, chart.js
 - [x] Biome 2 (lint + format), Vitest 4, pnpm 11, Node ≥ 22
 - [x] Dockerfile multi-stage node:22-alpine (chromium, postgresql18-client, uid 10001), `docker-entrypoint.sh` (migrate deploy)

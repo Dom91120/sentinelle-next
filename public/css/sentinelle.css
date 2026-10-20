@@ -1,0 +1,3429 @@
+/* ============================================================================
+   Sentinelle — Design system (refonte « pro » — juin 2026)
+   Theme retravaille : IBM Plex Sans/Mono, accent bleu corporate, en-tetes de
+   tableau clairs, surfaces assagies. Memes classes que l'origine -> drop-in.
+   100% hors-ligne : voir base.html pour le chargement des polices.
+   ========================================================================== */
+
+/* Jetons. Memes noms qu'avant (les gabarits et theming.py s'y appuient),
+   plus les ROLES de SoftInventory (page / surface / inset / line / sub /
+   strong / body / muted / faint) pour que les deux outils de la DSI partagent
+   le meme vocabulaire et les memes valeurs. */
+:root {
+    /* Accent unique : indigo. La couleur du site (Preferences) le surcharge. */
+    --primary: #4f46e5;        /* indigo-600 */
+    --primary-dark: #4338ca;   /* indigo-700 */
+    --primary-rgb: 79, 70, 229;
+    --primary-dim: rgba(var(--primary-rgb), 0.08);
+    --success: #059669;        /* emerald-600 */
+    --success-rgb: 5, 150, 105;
+    --success-dim: #d1fae5;
+    --success-text: #065f46;
+    --warning: #d97706;        /* amber-600 */
+    --warning-rgb: 217, 119, 6;
+    --warning-dim: #fef3c7;
+    --warning-text: #92400e;
+    --danger: #dc2626;         /* red-600 */
+    --danger-rgb: 220, 38, 38;
+    --danger-strong: #b91c1c;
+    --danger-dim: #fee2e2;
+    --danger-text: #991b1b;
+    --info: #2563eb;           /* blue-600 */
+    --info-rgb: 37, 99, 235;
+    --info-dim: #dbeafe;
+    --info-text: #1e40af;
+
+    /* Neutres (gamme slate), par role */
+    --page: #f8fafc;
+    --surface: #ffffff;
+    --inset: #f1f5f9;
+    --zebra: #f1f4f9;   /* une ligne sur deux, legerement grisee */
+    --line: #e2e8f0;
+    --sub: #cbd5e1;
+    --strong: #0f172a;
+    --body: #334155;
+    --muted: #64748b;
+    --faint: #94a3b8;
+
+    /* Alias historiques (gabarits, theming.py, JS) */
+    --dark: #1e293b;
+    --darker: #0f172a;
+    --sidebar: var(--surface);
+    --sidebar-hover: var(--inset);
+    --sidebar-active: var(--primary);
+    --sidebar-active-bg: var(--primary-dim);
+    --sidebar-section: var(--faint);
+    --sidebar-text: var(--muted);
+    --sidebar-text-strong: var(--strong);
+    --sidebar-border: var(--line);
+    --card-bg: var(--surface);
+    --card: var(--surface);
+    --bg-card: var(--surface);
+    --bg-secondary: var(--inset);
+    --body-bg: var(--page);
+    --text: var(--body);
+    --text-strong: var(--strong);
+    --text-muted: var(--muted);
+    --text-light: var(--faint);
+    --border: var(--line);
+    --border-strong: var(--sub);
+    --input-bg: var(--surface);
+    --table-hover: var(--inset);
+    --hover-bg: var(--inset);
+
+    /* Echelle d'espacement (grille 8pt + demi-pas) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+
+    /* Rayons : controles 8 px, conteneurs 16 px, pilules pleines */
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 999px;
+
+    /* Elevations : faibles au repos, plus marquees au survol */
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+
+    /* Anneau de focus accessible */
+    --ring: 0 0 0 3px rgba(var(--primary-rgb), 0.35);
+
+    --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', 'Consolas', monospace;
+}
+
+/* Theme sombre : le primaire S'ECLAIRCIT, les pastels de badge aussi. */
+[data-theme="dark"] {
+    --primary: #818cf8;        /* indigo-400 */
+    --primary-dark: #6366f1;   /* indigo-500 */
+    --primary-rgb: 129, 140, 248;
+    --primary-dim: rgba(var(--primary-rgb), 0.14);
+    --success: #34d399;
+    --success-dim: #064e3b;
+    --success-text: #6ee7b7;
+    --warning: #fbbf24;
+    --warning-dim: #78350f;
+    --warning-text: #fcd34d;
+    --danger: #f87171;
+    --danger-strong: #ef4444;
+    --danger-dim: #7f1d1d;
+    --danger-text: #fca5a5;
+    --info: #60a5fa;
+    --info-dim: #1e3a5f;
+    --info-text: #93c5fd;
+
+    --page: #0b1120;
+    --surface: #1e293b;
+    --inset: #233247;
+    --zebra: #2c3b52;
+    --line: #2b3a4f;
+    --sub: #3a4a61;
+    --strong: #f8fafc;
+    --body: #e2e8f0;
+    --muted: #94a3b8;
+    --faint: #64748b;
+
+    --dark: #0f172a;
+    --darker: #020617;
+    --input-bg: #0f1b2d;
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 14px 32px rgba(0, 0, 0, 0.6);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.65);
+    --ring: 0 0 0 3px rgba(var(--primary-rgb), 0.4);
+}
+
+/* ---- Base ---- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--body-bg);
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.005em;
+    /* Bascule clair/sombre sans a-coup */
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Barres de defilement fines et themees (contenu principal et panneaux) */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--body-bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
+h1, h2, h3, h4, h5, h6 { color: var(--text-strong); }
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--primary-dark); }
+
+code {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.88em;
+}
+
+hr { border-color: var(--border); opacity: 1; }
+
+/* Transitions ciblées (plus performantes qu'un sélecteur universel) */
+a, .btn, .sidebar-link, .stat-card, .data-card, .badge-status,
+.form-control, .form-select, .sidebar-footer-link, .theme-toggle,
+.topbar-toggle, .accordion-button {
+    transition: background-color 0.18s ease, color 0.18s ease,
+                border-color 0.18s ease, box-shadow 0.18s ease,
+                transform 0.18s ease;
+}
+
+/* Accessibilité : focus clavier visible et homogène */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.sidebar-link:focus-visible,
+.sidebar-footer-link:focus-visible,
+.theme-toggle:focus-visible,
+.topbar-toggle:focus-visible,
+[tabindex]:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--radius-sm);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: var(--ring);
+    background-color: var(--input-bg);
+    color: var(--text);
+}
+
+/* Respect des préférences de mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* Lien d'évitement (skip link) */
+.skip-link {
+    position: absolute;
+    left: -999px;
+    top: 8px;
+    z-index: 2000;
+    background: var(--primary);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+}
+.skip-link:focus {
+    left: 8px;
+    color: #fff;
+}
+
+/* Les lignes ne se colorent pas selon leur statut : le badge « Critique » et
+   le delai en rouge le disent deja, et un lavis rouge une ligne sur deux
+   (avec la zebrure) se lisait comme un damier sans logique. Les classes
+   row-<statut> restent posees : elles servent aux pastilles de filtre. */
+
+/* Le delai (« dans 12 j », « en retard de 5 j ») et la priorite en texte. */
+.delai { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.prio { color: var(--text); }
+
+/* ============================ SIDEBAR ============================
+   Coque de SoftInventory : marque sur 48 px, sections en micro-capitales,
+   liens de 28 px, bloc d'identite en pied avec ses deux boutons-icones. */
+.sidebar {
+    background: var(--sidebar);
+    height: 100vh;
+    width: 240px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--sidebar-border);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--sidebar-border);
+    flex-shrink: 0;
+    color: var(--primary);
+}
+.sidebar-header:hover { color: var(--primary-dark); }
+
+.sidebar-logo-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+}
+
+/* Le nom dans la couleur principale (indigo-600), en aplat, et la meme au
+   survol : il ne bouge pas (Dom 2026-09-23). */
+.sidebar-logo-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+}
+.sidebar-header:hover .sidebar-logo-text { color: var(--primary); }
+
+.sidebar-search { padding: 10px 12px 4px !important; }
+
+.sidebar-search-form { position: relative; display: flex; align-items: center; }
+
+.sidebar-search-form :is(i, svg.lucide) {
+    position: absolute;
+    left: 12px;
+    color: var(--faint);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.sidebar-search-form input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--sub);
+    border-radius: var(--radius-sm);
+    color: var(--strong);
+    padding: 4px 12px 4px 36px;
+    line-height: 20px;
+    font-size: 0.875rem;
+    outline: none;
+}
+
+.sidebar-search-form input::placeholder { color: var(--faint); }
+
+/* Le raccourci, affiche dans le champ : la seule recherche de l'outil. */
+.sidebar-search-form kbd {
+    position: absolute;
+    right: 8px;
+    font-family: var(--font-sans);
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--faint);
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0 5px;
+    line-height: 16px;
+    pointer-events: none;
+}
+.sidebar-search-form input:focus ~ kbd { display: none; }
+.sidebar-search-form input { padding-right: 56px; }
+.sidebar-search-form input::-webkit-search-cancel-button { display: none; }
+
+/* Section repliable (Administration) : le titre devient un bouton discret. */
+details.sidebar-section--repliable > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+details.sidebar-section--repliable > summary::-webkit-details-marker { display: none; }
+details.sidebar-section--repliable > summary :is(i, svg.lucide) { margin-left: auto; font-size: 0.7rem; transition: transform 0.15s ease; }
+details.sidebar-section--repliable[open] > summary :is(i, svg.lucide) { transform: rotate(90deg); }
+details.sidebar-section--repliable > summary:hover { color: var(--muted); }
+
+/* Fil d'Ariane : le domaine, puis la liste ; le titre de la page suit en H1. */
+.fil-ariane {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: -6px 0 6px;
+    font-size: 0.74rem;  /* celle du sous-titre d'une fiche */
+    color: var(--muted);
+}
+.fil-ariane a { color: var(--muted); text-decoration: none; }
+.fil-ariane a:hover { color: var(--primary); text-decoration: underline; }
+.fil-ariane .fil-actuel { color: var(--text); font-weight: 600; }
+.fil-ariane .fil-sep { color: var(--faint); }
+
+.sidebar-search-form input:focus {
+    border-color: var(--primary);
+    box-shadow: var(--ring);
+}
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 12px; }
+.sidebar-nav::-webkit-scrollbar { width: 5px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 3px; }
+
+/* Le rythme du menu de SoftInventory : lignes de 28 px espacees de 2 px,
+   titre de section a 8 px de la ligne precedente. */
+.sidebar-section { margin-bottom: 0; }
+
+.sidebar-section-title {
+    padding: 6px 12px 2px;   /* + les 2 px sous la ligne precedente = 8 px */
+    font-size: 0.64rem;
+    font-weight: 700;
+    line-height: 1rem;
+    letter-spacing: normal;
+    color: var(--faint);
+    text-transform: uppercase;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 2px 12px;
+    margin-bottom: 2px;
+    color: var(--text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 20px;
+    border-radius: var(--radius-sm);
+    position: relative;
+}
+
+/* Une couleur par domaine du menu (voir app/navigation.py), partagee par les
+   icones du menu et celles des vignettes du tableau de bord. Les icones restent
+   monochromes : la teinte dit a quel domaine on appartient. */
+.dom-aujourdhui     { --nav-icon: #6366f1; } /* indigo-500 (Dom 2026-09-23) */
+.dom-echeances      { --nav-icon: #f97316; } /* orange-500 */
+.dom-exploitation   { --nav-icon: var(--success); }
+.dom-parc           { --nav-icon: #facc15; } /* yellow-400 */
+.dom-administration { --nav-icon: #7c3aed; } /* violet-600 */
+[data-theme="dark"] .dom-aujourdhui     { --nav-icon: #6366f1; }
+[data-theme="dark"] .dom-echeances      { --nav-icon: #fb923c; }
+[data-theme="dark"] .dom-parc           { --nav-icon: #fde047; }
+[data-theme="dark"] .dom-administration { --nav-icon: #a78bfa; }
+
+.sidebar-link i { width: 16px; text-align: center; font-size: 1rem; flex-shrink: 0; color: var(--nav-icon, currentColor); }
+/* Icones Lucide (celles de SoftInventory) : un trait, pas un glyphe. La
+   couleur vient de `color` via stroke="currentColor" ; le trait est plus
+   gras que le 2 d'origine pour tenir aux petites tailles. Le SVG se cale
+   sur la ligne de texte comme le ferait un <i>. */
+svg.lucide { flex-shrink: 0; vertical-align: -0.18em; fill: none; stroke: currentColor; stroke-width: 2.75; stroke-linecap: round; stroke-linejoin: round; }
+.sidebar-link svg.lucide { width: 16px; height: 16px; vertical-align: baseline; color: var(--nav-icon, currentColor); }
+/* Icones de domaine en gras : une police d'icones ignore font-weight, on
+   epaissit donc le trait par un contour de la meme couleur. */
+[class*="dom-"] .sidebar-link i { -webkit-text-stroke: 0.4px currentColor; }
+
+.sidebar-link:hover {
+    background: var(--inset);
+    color: var(--strong);
+}
+
+/* L'entree selectionnee ne change que de fond : le texte garde sa couleur et
+   l'icone celle de son domaine, sinon le menu perdait son code couleur la ou
+   l'on se trouve. */
+.sidebar-link.active {
+    background: var(--primary-dim);
+    color: var(--text);
+}
+
+/* Compteur d'alertes : pastille rouge pastel, pas un aplat. */
+.sidebar-link .badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    background: var(--danger-dim) !important;
+    color: var(--danger-text) !important;
+}
+.sidebar-link .badge.bg-secondary { background: var(--inset) !important; color: var(--muted) !important; }
+
+/* ---- Pied : identite + boutons-icones ---- */
+.sidebar-footer {
+    position: relative;
+    border-top: 1px solid var(--sidebar-border);
+    padding: 8px;
+    margin-top: auto;
+}
+
+.sidebar-user { position: relative; }
+.sidebar-user > summary { list-style: none; }
+.sidebar-user > summary::-webkit-details-marker { display: none; }
+
+.sidebar-user-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+.sidebar-user-row:hover { background: var(--inset); }
+
+.sidebar-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.sidebar-user-text { min-width: 0; flex: 1; padding-right: 32px; }
+.sidebar-username {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--strong);
+    line-height: 1.25;
+}
+.sidebar-username > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-username .sidebar-caret { color: var(--faint); flex-shrink: 0; transition: transform 0.15s ease; }
+.sidebar-user[open] .sidebar-username .sidebar-caret { transform: rotate(180deg); }
+.sidebar-role {
+    display: block;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Le menu s'ouvre VERS LE HAUT : le pied est au bord de l'ecran. */
+.sidebar-user-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    z-index: 20;
+    margin-bottom: 12px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+}
+.sidebar-user-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8125rem;   /* 13 px, comme CultuResa */
+    font-weight: 500;
+    color: var(--muted);
+}
+.sidebar-user-item:hover { background: var(--inset); color: var(--strong); }
+.sidebar-user-item svg.lucide { color: var(--faint); }
+.sidebar-user-item:hover svg.lucide { color: currentColor; }
+/* La deconnexion vit dans le menu, en rouge : c'est la seule action qui
+   fait sortir, elle ne se confond pas avec les autres. */
+.sidebar-user-item--danger { color: var(--danger); }
+.sidebar-user-item--danger svg.lucide { color: var(--danger); }
+.sidebar-user-item--danger:hover { background: var(--danger-dim); color: var(--danger); }
+.sidebar-user-sep { height: 1px; margin: 4px 6px; background: var(--line); }
+
+.sidebar-footer-icons {
+    position: absolute;
+    top: 14px;
+    right: 8px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sidebar-icon-btn,
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--sub);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.sidebar-icon-btn:hover,
+.theme-toggle:hover { background: var(--inset); color: var(--strong); }
+/* L'emoji du theme (lune / soleil) : un peu plus petit que le glyphe qu'il
+   remplace, pour tenir dans le bouton de 28 px. */
+.theme-toggle .js-theme-icon { font-size: 0.8rem; line-height: 1; }
+.sidebar-icon-btn-danger:hover { background: var(--danger-dim); color: var(--danger); border-color: transparent; }
+
+/* ---- Backdrop + topbar mobile ---- */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    z-index: 1035;
+    backdrop-filter: blur(1px);
+}
+.sidebar-backdrop.show { display: block; }
+
+.app-topbar {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    padding: 0 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+
+.topbar-toggle {
+    border: 1px solid var(--sub);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    width: 32px;
+    height: 32px;
+    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.topbar-toggle:hover { background: var(--inset); }
+.topbar-title { font-weight: 600; color: var(--primary); font-size: 1.125rem; letter-spacing: -0.02em; flex: 1; }
+
+/* ============================ CONTENU ============================ */
+.main-content {
+    margin-left: 240px;
+    padding: 16px 32px;
+    min-height: 100vh;
+}
+
+/* ---- En-tete de page : titre, sous-titre, actions a droite ---- */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.page-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--strong);
+}
+.page-title :is(i, svg.lucide) { display: none; }
+/* Un lien dans le titre d'une fiche (ouvrir l'application d'un logiciel) : la
+   seule icône que le titre montre, discrète, indigo au survol. */
+.page-title .titre-lien { display: inline-flex; align-items: center; color: var(--muted); text-decoration: none; }
+.page-title .titre-lien svg.lucide { display: inline-block; }
+.page-title .titre-lien:hover { color: var(--primary); }
+/* Le compteur dans le titre (« Certificats 5 ») et le ? d'aide. */
+.page-count { margin-left: 6px; font-size: 1.05rem; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.help-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; margin-left: 8px; padding: 0;
+    border: 1px solid var(--sub); border-radius: 50%; background: var(--surface);
+    color: var(--muted); font-size: 0.72rem; font-weight: 700; line-height: 1; cursor: pointer;
+    vertical-align: middle;
+}
+.help-toggle:hover, .help-toggle[aria-expanded="true"] { border-color: var(--primary); color: var(--primary); }
+/* Les actions de l'en-tete : a droite, une seule primaire, les autres neutres. */
+.page-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.page-subtitle {
+    display: block;
+    margin: 2px 0 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+/* ---- Tuiles de synthese (KPI) : rail colore, pastille d'icone teintee,
+   nombre en chasse fixe. ---- */
+/* Les vignettes de synthese restent des CARTES en grille : on les lit d'un
+   coup d'oeil, une par domaine. Sans rail colore (la couleur ne dit que
+   l'urgence, la mini-barre s'en charge). */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+/* La liste « A traiter » : des groupes par horizon, un statut, un delai, un geste. */
+.urgent-table td { vertical-align: middle; }
+.urgent-table .urgent-groupe td { padding: 6px 16px; background: var(--inset); font-size: 0.72rem; font-weight: 700; letter-spacing: normal; text-transform: uppercase; }
+.urgent-table .urgent-statut { width: 110px; }
+.urgent-table .urgent-icone { width: 32px; padding-right: 0; }
+.urgent-table .urgent-detail { width: 220px; }
+.urgent-table .col-actions .btn { white-space: nowrap; }
+
+.stat-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px 12px 20px;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+    color: inherit;
+    overflow: hidden;
+}
+/* Plus de rail colore a gauche : la couleur est reservee aux statuts, et la
+   mini-barre rouge / orange / vert sous le nombre dit deja tout. */
+.stat-card::before { display: none; }
+
+a:hover .stat-card,
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: inherit;
+}
+
+.stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    color: var(--nav-icon, var(--muted));
+    background: var(--inset);
+}
+.stat-card .stat-icon svg.lucide { width: 20px; height: 20px; vertical-align: baseline; }
+.stat-card .stat-icon[class*="dom-"] {
+    background: color-mix(in srgb, var(--nav-icon) 12%, transparent);
+    -webkit-text-stroke: 0.5px currentColor;
+}
+
+.stat-card .stat-number {
+    font-family: var(--font-mono);
+    font-size: 1.7rem;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--strong);
+    font-variant-numeric: tabular-nums;
+}
+.stat-card .stat-texte { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.stat-card .stat-label {
+    display: block;
+    min-width: 0;
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: normal;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Mini-barre de santé (proportion critique / alerte / OK) */
+.mini-bar {
+    display: flex;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    background: var(--border);
+}
+.mini-bar .seg { height: 100%; }
+
+.stat-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+.stat-legend span { white-space: nowrap; }
+
+.min-w-0 { min-width: 0; }
+
+/* ---- Autocompletion annuaire (responsable AD) ---- */
+.ad-suggest {
+    position: absolute;
+    z-index: 1080;
+    background: var(--card-bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 4px;
+}
+.ad-suggest-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius);
+    padding: 6px 8px;
+    color: var(--text-strong);
+    line-height: 1.2;
+}
+.ad-suggest-item:hover,
+.ad-suggest-item.active { background: var(--border); }
+.ad-suggest-item .ad-name { font-weight: 600; }
+.ad-suggest-item .ad-mail { font-size: 0.82rem; }
+.ad-suggest-item .ad-login {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+.ad-suggest-note { padding: 6px 8px; font-size: 0.85rem; color: var(--text-muted); }
+
+/* ---- Tableau de bord personnalisable (grille de blocs) ---- */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+}
+.dash-widget { grid-column: span var(--w-span, 12); min-width: 0; position: relative; }
+@media (max-width: 991.98px) {
+    .dash-widget { grid-column: 1 / -1; }
+    .dash-resize { display: none !important; }
+}
+
+/* Poignee de redimensionnement (largeur) : bord droit, mode edition uniquement. */
+.dash-resize { display: none; }
+body.dash-editing #dashGrid > .dash-widget > .dash-resize {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: -5px;
+    width: 12px;
+    height: 100%;
+    cursor: ew-resize;
+    z-index: 3;
+}
+body.dash-editing #dashGrid > .dash-widget > .dash-resize::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 40px;
+    max-height: 60%;
+    border-radius: 3px;
+    background: var(--border-strong);
+}
+body.dash-editing #dashGrid > .dash-widget > .dash-resize:hover::after { background: var(--primary); }
+.dash-widget.resizing { user-select: none; }
+.dash-span-badge { color: var(--primary); font-variant-numeric: tabular-nums; }
+
+/* Barre d'edition d'un bloc : masquee hors mode edition. */
+.dash-widget-bar { display: none; }
+.dash-widget-body { min-width: 0; }
+
+body.dash-editing .dash-widget {
+    outline: 1px dashed var(--border-strong);
+    outline-offset: 3px;
+    border-radius: var(--radius);
+}
+body.dash-editing .dash-widget-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    background: var(--surface, var(--card-bg));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+}
+.dash-widget-name { font-weight: 600; color: var(--text-strong); flex-grow: 1; min-width: 0; }
+.dash-drag { cursor: grab; color: var(--text-muted); }
+body.dash-editing .dash-widget[draggable="true"] { cursor: default; }
+.dash-widget.dragging { opacity: 0.45; }
+
+/* Vignettes de synthese deplacables / masquables en mode edition. */
+body.dash-editing .stat-card { cursor: move; }
+body.dash-editing .stat-card[draggable="true"] { outline: 1px dashed var(--border-strong); outline-offset: 2px; }
+.stat-card.dragging { opacity: 0.45; }
+
+/* Bouton oeil (masquer/afficher une vignette), visible seulement en edition. */
+.stat-toggle {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2px 6px;
+    line-height: 1;
+    box-shadow: var(--shadow-xs);
+    z-index: 2;
+    cursor: pointer;
+}
+body.dash-editing .stat-toggle { display: inline-flex; }
+.stat-toggle:hover { color: var(--primary); border-color: var(--border-strong); }
+
+/* Tiroir des vignettes masquees (visible seulement en mode edition). */
+.stat-tray {
+    margin-top: var(--space-3);
+    background: var(--card-bg);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+}
+.stat-tray-title { font-weight: 600; color: var(--text-strong); margin-bottom: 8px; }
+.stat-tray-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-3);
+}
+.stat-tray-empty { grid-column: 1 / -1; }
+.dash-toggle {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 2px 6px;
+    border-radius: var(--radius);
+    line-height: 1;
+}
+.dash-toggle:hover { color: var(--primary); background: var(--border); }
+
+/* Tiroir des blocs masques (visible seulement en mode edition). */
+.dash-tray {
+    background: var(--card-bg);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+.dash-tray-title { font-weight: 600; color: var(--text-strong); margin-bottom: 8px; }
+.dash-tray-items { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#dashTrayItems .dash-widget { grid-column: auto; }
+#dashTrayItems .dash-widget-body { display: none; }
+#dashTrayItems .dash-widget { outline: none; }
+#dashTrayItems .dash-widget-bar { display: flex; margin-bottom: 0; }
+
+/* ---- Cartes de donnees : conteneur 16 px, en-tete a barre d'accent et
+   titre en micro-capitales ---- */
+.data-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header-custom {
+    --sec: var(--sec-indigo);
+    position: relative;
+    /* Fond de la carte : l'en-tete ne se distingue que par son titre, sa
+       barre d'accent et le filet qui le souligne. */
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    min-height: 2.65rem;
+    padding: 8px 20px 8px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.card-header-custom::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 1.1em;
+    border-radius: 999px;
+    background: rgb(var(--sec));
+}
+
+/* La teinte est portee par le TITRE (fiche-titre--amber), le fond par le
+   bandeau qui l'entoure : `:has()` fait remonter l'une jusqu'a l'autre, ce que
+   la cascade des variables ne sait pas faire -- elle ne descend que. */
+.card-header-custom:has(.fiche-titre--indigo)  { --sec: var(--sec-indigo); }
+.card-header-custom:has(.fiche-titre--sky)     { --sec: var(--sec-sky); }
+.card-header-custom:has(.fiche-titre--emerald) { --sec: var(--sec-emerald); }
+.card-header-custom:has(.fiche-titre--amber)   { --sec: var(--sec-amber); }
+.card-header-custom:has(.fiche-titre--rose)    { --sec: var(--sec-rose); }
+.card-header-custom:has(.fiche-titre--violet)  { --sec: var(--sec-violet); }
+.card-header-custom:has(.fiche-titre--teal)    { --sec: var(--sec-teal); }
+.card-header-custom:has(.fiche-titre--slate)   { --sec: var(--sec-slate); }
+.card-header-custom h6.fiche-titre { color: var(--text); }
+
+/* En theme sombre, 7 % d'une teinte deja eclaircie ne se voit plus sur le fond
+   d'ardoise des cartes : la teinte monte, le filet aussi. */
+[data-theme="dark"] .card-header-custom {
+    background: var(--surface);
+    border-bottom-color: var(--line);
+}
+[data-theme="dark"] .data-card h6.fw-bold:not(.card-header-custom h6):not(.fiche-bloc > h6) {
+    background: rgba(var(--sec, var(--sec-indigo)), 0.12);
+}
+.card-header-custom h6,
+.card-header-custom .h6 {
+    margin: 0;
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: normal;
+    color: var(--text);
+}
+.card-header-custom h6 :is(i, svg.lucide) { margin-right: 6px; }
+
+/* Titres de bloc posés dans le corps d'une carte : meme barre, meme casse.
+   Le titre d'une RUBRIQUE (.fiche-bloc) en est exclu : il a sa propre mise
+   en forme (pastille d'icone, pas de barre) et doit s'aligner sur les champs
+   qu'il coiffe, sans le retrait de la barre. */
+.data-card h6.fw-bold:not(.card-header-custom h6):not(.fiche-bloc > h6) {
+    position: relative;
+    padding-left: 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: normal;
+    color: var(--text);
+}
+.data-card h6.fw-bold:not(.card-header-custom h6):not(.fiche-bloc > h6)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 1.1em;
+    border-radius: 999px;
+    background: rgb(var(--sec, var(--sec-indigo)));
+}
+
+/* Le meme titre, pose dans le corps d'une carte plutot que dans un bandeau :
+   il porte sa teinte en fond lui aussi, en retrait des bords de la carte.
+
+   Le titre d'une RUBRIQUE (.fiche-bloc) en est exclu : son panneau porte deja
+   la teinte, et deux lavis l'un sur l'autre font une bande foncee, pas un
+   titre. */
+.data-card h6.fw-bold:not(.card-header-custom h6):not(.fiche-bloc > h6) {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px 6px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--sec, var(--sec-indigo)), 0.07);
+}
+
+/* Etat vide : cadre pointille, texte estompe, rien d'autre. */
+.empty-state {
+    border: 1px dashed var(--sub);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--faint);
+}
+
+/* ---- Tables : en-tetes en micro-capitales sans fond, zebrure une ligne
+   sur deux, survol qui l'emporte ---- */
+.table {
+    color: var(--text);
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: rgba(var(--primary-rgb), 0.07);
+    --bs-table-hover-color: var(--text);
+    --bs-table-striped-bg: var(--zebra);
+    --bs-table-border-color: var(--line);
+    font-size: 0.875rem;
+    margin-bottom: 0;
+}
+
+[data-theme="dark"] .table {
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: rgba(var(--primary-rgb), 0.07);
+    --bs-table-hover-color: var(--text);
+    --bs-table-striped-bg: var(--zebra);
+    color: var(--text);
+}
+
+/* Le tableau de SoftInventory : en-tete sans fond, en petites capitales
+   grises, sous un filet ; pas de zebrure, des lignes hautes que seul un
+   filet separe. C'est l'espace qui aere, pas la couleur. */
+.table thead th {
+    border-top: none;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: normal;
+    color: var(--text-muted);
+    padding: 10px 12px;
+    white-space: nowrap;
+    background: transparent;
+}
+.table tbody td {
+    /* 48 px de haut au minimum, peu de rembourrage : une ligne a deux
+       etages (nom + sous-titre) ne grandit presque pas. */
+    height: 48px;
+    padding: 5px 12px;
+    vertical-align: middle;
+    border-top: 1px solid var(--line);
+    border-bottom: 0;
+}
+.table tbody tr:first-child td { border-top: 0; }
+/* Les filets s'arretent a l'aplomb du contenu, pas au bord de la carte :
+   c'est la carte qui porte la marge, comme dans SoftInventory. */
+.data-card > .table-responsive { padding: 0 20px 8px; }
+
+[data-theme="dark"] .table thead th {
+    background: transparent;
+    color: var(--text-muted);
+}
+/* En-tetes a code couleur (ex. seuils Critique/Attention/Proche) : teintes
+   claires lisibles sur le fond indigo plein, tout en gardant la semantique. */
+/* En-tetes triables : lien blanc, fleche d'inactivite estompee. */
+.table thead th a.th-sort { color: var(--text-muted); text-decoration: none; white-space: nowrap; }
+.table thead th a.th-sort:hover { text-decoration: underline; }
+.table thead th a.th-sort .th-sort-idle { opacity: 0.35; font-size: 0.85em; }
+
+/* Materiel decommissionne : ligne grisee/attenuee dans l'inventaire */
+/* Nature d'un equipement (colonne Type de l'inventaire) : une couleur par
+   nature, meme trait epaissi que les icones du menu. */
+.kind-icon { -webkit-text-stroke: 0.4px currentColor; }
+.kind-icon--vm       { color: #0284c7; } /* sky-600 */
+.kind-icon--physical { color: #4f46e5; } /* indigo-600 */
+.kind-icon--nas      { color: #059669; } /* emerald-600 */
+.kind-icon--storage  { color: #d97706; } /* amber-600 */
+.kind-icon--network  { color: #7c3aed; } /* violet-600 */
+.kind-icon--software { color: #facc15; } /* jaune de l'entree Logiciels du menu */
+[data-theme="dark"] .kind-icon--vm       { color: #38bdf8; }
+[data-theme="dark"] .kind-icon--physical { color: #818cf8; }
+[data-theme="dark"] .kind-icon--nas      { color: #34d399; }
+[data-theme="dark"] .kind-icon--storage  { color: #fbbf24; }
+[data-theme="dark"] .kind-icon--network  { color: #a78bfa; }
+
+#invTable tbody tr.inv-decommissioned td {
+    color: var(--text-light);
+    opacity: 0.6;
+    font-style: italic;
+}
+#invTable tbody tr.inv-decommissioned td .badge,
+#invTable tbody tr.inv-decommissioned td .badge-status { filter: grayscale(0.7); }
+
+/* Selecteur « lignes par page » (toutes les listes) : compact, aligne sur les boutons btn-sm */
+.pagination-perpage {
+    width: auto;
+    font-size: 0.8rem;
+    padding: 4px 28px 4px 10px;
+    line-height: 20px;
+    color: var(--text-light);
+    background-color: transparent;
+    border-color: var(--border-strong);
+}
+.pagination-perpage:focus { color: var(--text); }
+
+/* Filtre type Excel par colonne */
+.colfiltre-btn {
+    background: transparent;
+    border: 0;
+    color: var(--text-light);
+    opacity: 0.55;
+    padding: 0 2px;
+    margin-left: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    line-height: 1;
+}
+.colfiltre-btn:hover { opacity: 1; }
+.colfiltre-btn.active { opacity: 1; color: var(--warning); }
+.colfiltre-panel {
+    position: absolute;
+    z-index: 1080;
+    width: 230px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md, 0 6px 24px rgba(0,0,0,.18));
+    padding: 10px;
+}
+.colfiltre-panel .cf-list {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px;
+}
+.colfiltre-panel .cf-item {
+    font-size: 0.82rem;
+    padding: 2px 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table thead th.text-danger  { color: var(--danger) !important; }
+.table thead th.text-warning { color: var(--warning) !important; }
+.table thead th.text-info    { color: var(--info) !important; }
+.table thead th.text-success { color: var(--success) !important; }
+
+.table td {
+    padding: 12px 18px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.table tbody tr:last-child td { border-bottom: none; }
+/* Les liens des lignes se lisent comme du texte ; la couleur d'accent ne
+   vient qu'au survol, pour dire que c'est cliquable. Les boutons et les
+   badges, qui portent leur propre couleur, ne sont pas concernes. */
+.table tbody td a:not(.btn):not(.badge-status):not(.badge) { color: var(--text); }
+.table tbody td a:not(.btn):not(.badge-status):not(.badge):hover { color: var(--primary); }
+/* Sous la derniere ligne : ni filet ni ascenseur qui traine. L'ascenseur
+   horizontal ne parait que si le tableau deborde vraiment. */
+.table-responsive { overflow-y: hidden; }
+
+/* En-tete sur deux lignes (« Prochain<br>changement ») : une colonne de
+   dates n'a pas a etre aussi large que son intitule. */
+.table thead th.th-2l { white-space: normal; line-height: 1; }
+/* A cote d'un intitule sur deux lignes, un intitule d'une ligne cale en bas
+   (le defaut de Bootstrap) semble tomber : on centre, comme les cellules. */
+.table thead th { vertical-align: middle; }
+
+/* Validation rapide des sauvegardes (tableau de bord) : trois boutons et un
+   champ par ligne, serres pour ne pas dicter la hauteur des lignes. */
+.qc-btn { padding: 2px 9px; font-size: 0.78rem; line-height: 1.4; border-radius: 6px; white-space: nowrap; }
+.qc-btn :is(i, svg.lucide) { font-size: 0.85em; }
+.qc-commentaire { padding: 2px 8px; font-size: 0.78rem; height: 26px; min-height: 26px; border-radius: 6px; }
+
+/* Utilitaires des cellules a deux etages (voir certificates/list.html). */
+.text-faint { color: var(--faint) !important; }
+.tabular { font-variant-numeric: tabular-nums; }
+.tableau-certificats { table-layout: fixed; }
+.tableau-certificats td { overflow: hidden; }
+/* Liste des logiciels : meme disposition fixe que les certificats. Les
+   cellules de texte se tronquent. Les pastilles sont centrees sans rembourrage
+   a droite : centrees dans leur boite de contenu, elles tombaient 6 px a
+   gauche du milieu de la colonne. Les services, seule colonne qui se replie,
+   en petit et serre pour ne pas creuser la rangee. */
+.tableau-logiciels { table-layout: fixed; }
+.tableau-logiciels td { overflow: hidden; }
+.tableau-logiciels .cell-services { font-size: 0.75rem; line-height: 1.15; }
+.tableau-logiciels .badge-status { vertical-align: middle; }
+/* Liste des fournisseurs : la disposition de l'annuaire des editeurs de
+   SoftInventory. Quatre colonnes fixes (26 / 27 / 27 / 20) ; les cellules
+   sans rembourrage vertical, la pile support (portail, adresse, numero) tenant
+   exactement dans les 48 px de la rangee. Une case vide reste vide, sans
+   tiret : ici l'absence est la regle, pas l'exception. */
+.tableau-fournisseurs { table-layout: fixed; }
+.tableau-fournisseurs td { overflow: hidden; }
+.tableau-fournisseurs tbody td { padding-top: 0; padding-bottom: 0; }
+/* Une pile de coordonnees : chaque ligne porte son icone a gauche, en petit
+   et en gris ; la premiere ligne du contact commercial garde le corps du
+   texte (c'est un nom), les autres sont en 12 px. */
+.pile { display: flex; flex-direction: column; font-size: 0.75rem; line-height: 1.35; min-width: 0; }
+.pile > * { display: flex; align-items: center; gap: 5px; min-width: 0; text-decoration: none; }
+/* L'icone se centre sur sa ligne (calee en haut, elle depassait du texte, plus
+   grand qu'elle) ; seule une valeur qui peut passer a la ligne (.casse : un
+   courriel, une adresse) la garde en haut, face a sa premiere ligne. */
+.pile > *:has(.casse) { align-items: flex-start; }
+.pile > *:has(.casse) > :is(i, svg.lucide) { margin-top: 0.3em; }
+.pile > .pile-principal { font-size: 0.875rem; line-height: 1.4; }
+.pile :is(i, svg.lucide) { flex-shrink: 0; font-size: 0.7rem; line-height: inherit; color: var(--faint); }
+.pile .casse { word-break: break-all; }
+/* Les liens gris et le portail en couleur d'accent : la regle generale des
+   tableaux (liens couleur du texte) est plus specifique, d'ou le selecteur. */
+.table.tableau-fournisseurs tbody td .pile a.pile-faint { color: var(--faint); }
+.table.tableau-fournisseurs tbody td .pile a.pile-accent { color: var(--primary); }
+.table.tableau-fournisseurs tbody td .pile a:hover,
+.table.tableau-fournisseurs tbody td .pile a:hover :is(i, svg.lucide) { color: var(--primary); }
+/* Le site sous le nom, du gris des telephones : le :not() egale la regle
+   generale des liens de tableau (.table tbody td a:not(.btn)...), qui l'emportait. */
+.table.tableau-fournisseurs tbody td a.pile-site:not(.btn):not(.badge) { font-size: 0.75rem; color: var(--faint); }
+.table.tableau-fournisseurs tbody td a.pile-site:hover { color: var(--primary); text-decoration: underline; }
+.tableau-fournisseurs .cell-horaires { font-size: 0.75rem; line-height: 1.35; }
+/* Liste des contrats : la disposition des marches de SoftInventory. Trois
+   colonnes de texte en pourcentage (43 / 37 / 20), puis periode, montant et
+   etat en largeur fixe. La periode et le montant en 12 px gris : ce sont des
+   donnees de plus sur la ligne, pas son sujet ; tabular-nums aligne les
+   chiffres d'une ligne a l'autre. L'etat garde la pastille d'urgence de
+   Sentinelle, le delai en petit dessous ("dans 24 j", "depasse de 76 j"). */
+.tableau-contrats { table-layout: fixed; }
+.tableau-contrats td { overflow: hidden; }
+.tableau-contrats .cell-periode { text-align: center; white-space: nowrap; font-size: 0.75rem; line-height: 1.15; }
+/* Dans l'onglet Contrats d'un fournisseur, les dates a la taille des autres
+   cellules (le montant, l'echeance a agir), alignees a gauche sous leur titre
+   comme les autres colonnes : centrees, elles s'en decalaient des que la
+   colonne s'elargit. */
+.contrats-fournisseur .cell-periode { text-align: left; white-space: nowrap; line-height: 1.15; }
+.tableau-contrats .cell-montant { text-align: right; white-space: nowrap; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.tableau-contrats .cell-etat { text-align: center; padding-right: 0; }
+.tableau-contrats .cell-etat .delai { display: block; margin-top: 3px; font-size: 0.72rem; line-height: 1.15; white-space: normal; }
+.tableau-contrats .cell-logiciels { font-size: 0.75rem; line-height: 1; }
+/* Jusqu'a trois lignes (3 x 12 px dans les 48 px de la rangee), interligne 1,
+   et les trois points en bout de derniere ligne quand la liste deborde. */
+.tableau-contrats .cell-logiciels .clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1; word-break: break-word; }
+.badge-status svg.lucide { margin-right: 3px; }
+.table-responsive::-webkit-scrollbar { height: 6px; }
+.table-hover tbody tr { transition: background-color 0.12s ease; }
+.table-hover tbody tr:hover { background-color: rgba(var(--primary-rgb), 0.07); }
+
+/* ---- Badges de statut : le badge de SoftInventory. Le texte porte la
+   couleur pleine, le fond n'en est qu'un lavis (14 %) cerne d'un liseret
+   de la meme teinte (35 %) : une pilule qui se lit sans peser. Chaque
+   variante ne fournit que sa couleur (--badge, --badge-rgb). ---- */
+.badge-status {
+    --badge: var(--muted);
+    --badge-rgb: 100, 116, 139;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 0.6875rem;   /* 11 px */
+    font-weight: 600;
+    white-space: nowrap;
+    line-height: 1.5;
+    color: var(--badge);
+    background: rgba(var(--badge-rgb), 0.14);
+    box-shadow: inset 0 0 0 1px rgba(var(--badge-rgb), 0.35);
+}
+
+.badge-success { --badge: var(--success); --badge-rgb: var(--success-rgb); }
+.badge-warning { --badge: var(--warning); --badge-rgb: var(--warning-rgb); }
+.badge-danger  { --badge: var(--danger);  --badge-rgb: var(--danger-rgb); }
+.badge-info    { --badge: var(--info);    --badge-rgb: var(--info-rgb); }
+.badge-muted   { --badge: var(--faint);   --badge-rgb: 148, 163, 184; }
+.badge-accent  { --badge: var(--primary); --badge-rgb: var(--primary-rgb); }
+
+a.badge-status:hover { filter: brightness(0.96); }
+
+/* ---- Pills de filtre par statut (barre au-dessus des listes) ---- */
+.status-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.3;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+.status-filter::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.85;
+    flex-shrink: 0;
+}
+.status-filter .status-filter-count {
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: var(--radius-pill);
+    background: rgba(0, 0, 0, 0.06);
+}
+.status-filter:hover { border-color: currentColor; }
+
+/* Couleur propre a chaque statut (texte = couleur, point herite via currentColor) */
+.status-filter-secondary { color: var(--text-light); }
+.status-filter-danger    { color: #b91c1c; }
+.status-filter-warning   { color: #b45309; }
+.status-filter-info      { color: #1d4ed8; }
+.status-filter-success   { color: #047857; }
+
+/* Etat actif : fond teinte plein dans la couleur du statut */
+.status-filter.active { border-color: transparent; }
+.status-filter-secondary.active { background: var(--table-hover); color: var(--text); }
+.status-filter-danger.active    { background: #fee2e2; color: #991b1b; }
+.status-filter-warning.active   { background: #fef3c7; color: #92400e; }
+.status-filter-info.active      { background: #dbeafe; color: #1e40af; }
+.status-filter-success.active   { background: #d1fae5; color: #065f46; }
+.status-filter.active .status-filter-count { background: rgba(0, 0, 0, 0.08); }
+
+[data-theme="dark"] .status-filter-danger    { color: #f87171; }
+[data-theme="dark"] .status-filter-warning   { color: #fbbf24; }
+[data-theme="dark"] .status-filter-info      { color: #60a5fa; }
+[data-theme="dark"] .status-filter-success   { color: #34d399; }
+[data-theme="dark"] .status-filter .status-filter-count { background: rgba(255, 255, 255, 0.1); }
+/* ---- Preferences : accordeon en cartes espacees, classables via flex order
+   (l'ordre DOM est conserve, l'ordre visuel est defini par style="order:N"). ---- */
+#prefsAccordion {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#prefsAccordion .accordion-item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+/* ---- Controle segmente (onglets type : Tous / VM / Physiques / NAS) ----
+   Resserre (Dom 2026-09-23) : 2 px de piste, 2 x 10 px par onglet, texte en
+   0.78 rem -- la barre tombe de 36 a 27 px de haut. */
+.seg-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    background: var(--table-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+}
+.seg-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+.seg-tab:hover { color: var(--text); background: rgba(var(--primary-rgb), 0.08); }
+.seg-tab.active { background: var(--primary); color: #fff; }
+.seg-tab-count {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: var(--radius-pill);
+    background: rgba(0, 0, 0, 0.06);
+}
+.seg-tab.active .seg-tab-count { background: rgba(255, 255, 255, 0.22); }
+[data-theme="dark"] .seg-tab-count { background: rgba(255, 255, 255, 0.1); }
+
+[data-theme="dark"] .status-filter-secondary.active { background: var(--table-hover); color: var(--text); }
+[data-theme="dark"] .status-filter-danger.active    { background: #7f1d1d; color: #fca5a5; }
+[data-theme="dark"] .status-filter-warning.active   { background: #78350f; color: #fcd34d; }
+[data-theme="dark"] .status-filter-info.active      { background: #1e3a5f; color: #93c5fd; }
+[data-theme="dark"] .status-filter-success.active   { background: #064e3b; color: #6ee7b7; }
+
+/* ---- Boutons : une hauteur (30 px, celle des champs), un rayon (8 px).
+   Plein = accent ; secondaire = contour ; « Annuler » = contour ambre ;
+   destructeur = rouge plein, au meme rang que l'enregistrement. ---- */
+.btn {
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    padding: 4px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 20px;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled, .btn.disabled { opacity: 0.5; pointer-events: none; }
+
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover, .btn-primary:focus {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: #fff;
+}
+
+.btn-outline-secondary {
+    background: var(--surface);
+    border-color: var(--sub);
+    color: var(--body);
+    box-shadow: var(--shadow-sm);
+}
+.btn-outline-secondary:hover, .btn-outline-secondary:focus,
+.btn-outline-secondary.active, .btn-outline-secondary.show {
+    background: var(--surface);
+    border-color: var(--primary);
+    color: var(--strong);
+}
+
+.btn-outline-primary {
+    background: var(--surface);
+    border-color: rgba(var(--primary-rgb), 0.45);
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+.btn-outline-primary.active, .btn-check:checked + .btn-outline-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.btn-warn,
+.btn-outline-warning {
+    background: var(--surface);
+    border-color: rgba(var(--warning-rgb), 0.35);
+    color: var(--warning);
+    box-shadow: var(--shadow-sm);
+}
+.btn-warn:hover, .btn-warn:focus,
+.btn-outline-warning:hover, .btn-outline-warning:focus { background: var(--warning-dim); color: var(--warning-text); border-color: rgba(var(--warning-rgb), 0.35); }
+
+.btn-outline-danger {
+    background: var(--surface);
+    border-color: rgba(var(--danger-rgb), 0.35);
+    color: var(--danger);
+    box-shadow: var(--shadow-sm);
+}
+.btn-outline-danger:hover, .btn-outline-danger:focus { background: var(--danger-dim); color: var(--danger-text); border-color: rgba(var(--danger-rgb), 0.35); }
+
+.btn-outline-success {
+    background: var(--surface);
+    border-color: rgba(var(--success-rgb), 0.35);
+    color: var(--success);
+    box-shadow: var(--shadow-sm);
+}
+.btn-outline-success:hover, .btn-outline-success:focus { background: var(--success-dim); color: var(--success-text); border-color: rgba(var(--success-rgb), 0.35); }
+
+.btn-outline-info {
+    background: var(--surface);
+    border-color: rgba(var(--info-rgb), 0.35);
+    color: var(--info);
+    box-shadow: var(--shadow-sm);
+}
+.btn-outline-info:hover, .btn-outline-info:focus { background: var(--info-dim); color: var(--info-text); border-color: rgba(var(--info-rgb), 0.35); }
+
+.btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+.btn-danger:hover, .btn-danger:focus { background: var(--danger-strong); border-color: var(--danger-strong); color: #fff; }
+[data-theme="dark"] .btn-danger { color: #0b1120; }
+
+.btn-success { background: var(--success); border-color: var(--success); color: #fff; font-weight: 600; }
+.btn-success:hover { filter: brightness(0.92); color: #fff; }
+[data-theme="dark"] .btn-success { color: #0b1120; }
+
+.btn-light, .btn-secondary {
+    background: var(--inset);
+    border-color: var(--inset);
+    color: var(--body);
+}
+.btn-light:hover, .btn-secondary:hover { background: var(--line); border-color: var(--line); color: var(--strong); }
+
+/* Fantome : texte seul, fond au survol. */
+.btn-ghost, .btn-link {
+    background: transparent;
+    border-color: transparent;
+    color: var(--muted);
+    text-decoration: none;
+    box-shadow: none;
+}
+.btn-ghost:hover, .btn-link:hover { background: var(--inset); color: var(--strong); }
+/* Icone seule (34 px), et la variante qui rougit au survol pour un geste
+   qui defait quelque chose : retirer une liaison. */
+.btn-ghost.btn-icone, .btn-outline-secondary.btn-icone { padding: 6px 8px; line-height: 1; display: inline-flex; align-items: center; }
+.btn-ghost.btn-ghost-danger:hover { color: #dc2626; background: rgba(220, 38, 38, 0.08); }
+
+/* Compact (tableaux, barres d'outils) : 26 px. */
+.btn-sm, .btn-group-sm > .btn {
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    line-height: 20px;
+}
+/* Bouton-icone : carre, sans marge de texte. */
+.btn-icon { padding-left: 8px; padding-right: 8px; }
+.btn-sm.btn-icon { padding-left: 6px; padding-right: 6px; }
+
+/* ============================ FORMULAIRES ============================
+   Intitules en micro-capitales, champs de 30 px (comme les boutons), bordure
+   slate-300, focus = bordure accent + anneau. */
+.form-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1rem;
+    letter-spacing: normal;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.form-label .text-danger { font-weight: 700; }
+.form-text { font-size: 0.75rem; color: var(--faint); }
+
+.form-control, .form-select {
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--sub);
+    padding: 4px 12px;
+    line-height: 20px;
+    background-color: var(--input-bg);
+    color: var(--strong);
+    font-size: 0.875rem;
+}
+.form-control-sm, .form-select-sm {
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    line-height: 20px;
+    border-radius: var(--radius-sm);
+    /* Bootstrap donne aux champs (pas aux listes) une hauteur minimale de
+       29 px : sans ceci, un champ et une liste cote a cote n'etaient pas
+       de la meme hauteur. */
+    min-height: 26px;
+}
+.form-control-lg, .form-select-lg { padding: 8px 14px; font-size: 1rem; }
+
+.form-control:hover:not(:focus):not(:disabled),
+.form-select:hover:not(:focus):not(:disabled) {
+    border-color: rgba(var(--primary-rgb), 0.55);
+}
+
+.form-control::placeholder { color: var(--faint); opacity: 1; }
+.form-control:disabled::placeholder { color: transparent; }
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] .form-select::placeholder { color: var(--faint); }
+
+.form-control:disabled,
+.form-select:disabled {
+    background-color: var(--inset);
+    color: var(--muted);
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+textarea.form-control { min-height: 70px; line-height: 1.5; }
+
+.form-select { cursor: pointer; }
+.input-group-text {
+    border-radius: var(--radius-sm);
+    border-color: var(--sub);
+    background: var(--inset);
+    color: var(--muted);
+    font-size: 0.875rem;
+    padding: 4px 10px;
+    line-height: 20px;
+}
+/* Chevron du select : invisible en theme sombre avec le SVG Bootstrap par
+   defaut (trait #343a40) -> variante claire. */
+[data-theme="dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.82rem;
+    margin-bottom: 5px;
+}
+.form-text { color: var(--text-light); }
+
+/* Saisie de date/heure : pictogramme cliquable, inverse en theme sombre */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.65; }
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+
+/* Champ fichier : bouton interne aligne sur le design system */
+.form-control[type="file"] { padding: 5px 11px; }
+.form-control[type="file"]::file-selector-button {
+    background: var(--table-hover);
+    color: var(--text);
+    border: 0;
+    border-right: 1px solid var(--border-strong);
+    border-radius: 5px 0 0 5px;
+    padding: 5px 12px;
+    margin: -5px 12px -5px -11px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+.form-control[type="file"]:hover::file-selector-button { background: rgba(var(--primary-rgb), 0.1); }
+
+/* Autocomplete navigateur : fond/texte coherents en theme sombre */
+[data-theme="dark"] input:-webkit-autofill,
+[data-theme="dark"] input:-webkit-autofill:hover,
+[data-theme="dark"] input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
+    -webkit-text-fill-color: var(--text);
+    caret-color: var(--text);
+}
+
+/* Prefixe/suffixe de champ (icones login, unites...) */
+.input-group-text {
+    background: var(--table-hover);
+    border-color: var(--border-strong);
+    color: var(--text-light);
+    border-radius: var(--radius-sm);
+}
+
+/* ---- Cases a cocher, radios, interrupteurs ----
+   Bootstrap les laisse au bleu par defaut : on les rallie a la couleur
+   primaire, avec une taille confortable et un vrai retour visuel. */
+.form-check { min-height: 1.45rem; }
+.form-check-input {
+    width: 1.15em;
+    height: 1.15em;
+    margin-top: 0.16em;
+    flex-shrink: 0;
+    background-color: var(--input-bg);
+    border: 1.5px solid var(--border-strong);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-check-input:hover:not(:disabled):not(:checked) { border-color: var(--primary); }
+.form-check-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25);
+}
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+.form-check-input:disabled { cursor: not-allowed; }
+.form-check-label { cursor: pointer; user-select: none; }
+.form-check-input:disabled ~ .form-check-label { cursor: not-allowed; }
+
+/* Interrupteurs (booleens on/off) : piste plus large, pouce contraste */
+.form-switch .form-check-input {
+    width: 2.1em;
+    height: 1.15em;
+    border-radius: var(--radius-pill);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2394a3b8'/%3e%3c/svg%3e");
+    background-position: left center;
+    transition: background-position 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.15s ease;
+}
+.form-switch .form-check-input:checked {
+    background-position: right center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+[data-theme="dark"] .form-switch .form-check-input:not(:checked) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2364748b'/%3e%3c/svg%3e");
+}
+
+/* ---- Accordéon (préférences) ---- */
+.accordion {
+    --bs-accordion-bg: transparent;
+    --bs-accordion-border-color: var(--border);
+    --bs-accordion-border-radius: var(--radius-lg);
+    --bs-accordion-inner-border-radius: var(--radius-lg);
+    --bs-accordion-btn-color: var(--text-strong);
+    --bs-accordion-color: var(--text);
+    --bs-accordion-active-color: var(--primary);
+    --bs-accordion-active-bg: rgba(var(--primary-rgb), 0.06);
+    --bs-accordion-btn-focus-box-shadow: var(--ring);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.accordion-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.accordion-button {
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 12px 20px;
+    background: var(--card-bg);
+    color: var(--text-strong);
+}
+.accordion-button:not(.collapsed) {
+    background: rgba(var(--primary-rgb), 0.06);
+    color: var(--primary);
+    box-shadow: none;
+}
+.accordion-button:focus { box-shadow: var(--ring); }
+[data-theme="dark"] .accordion-button::after {
+    filter: invert(1) grayscale(100%) brightness(180%);
+}
+.accordion-body { padding: 16px 20px; }
+
+/* ---- Éléments urgents (dashboard) ---- */
+.urgent-item {
+    padding: 10px 14px;
+    border-left: 3px solid;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.urgent-item:hover { transform: translateX(2px); box-shadow: var(--shadow-sm); }
+
+.urgent-danger { border-color: var(--danger); background: rgba(var(--danger-rgb), 0.06); }
+.urgent-warning { border-color: var(--warning); background: rgba(var(--warning-rgb), 0.07); }
+.urgent-info { border-color: var(--info); background: rgba(var(--info-rgb), 0.06); }
+
+/* ---- Alertes / messages flash : teinte a 8 %, filet a 30 %, coins de 8 px.
+   Les fonds pleins sont reserves aux boutons. ---- */
+.alert {
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    box-shadow: none;
+}
+.alert-success { background: color-mix(in srgb, var(--success) 8%, transparent); border-color: rgba(var(--success-rgb), 0.3); color: var(--success-text); }
+.alert-danger  { background: color-mix(in srgb, var(--danger) 7%, transparent);  border-color: rgba(var(--danger-rgb), 0.3);  color: var(--danger-text); }
+.alert-warning { background: color-mix(in srgb, var(--warning) 8%, transparent); border-color: rgba(var(--warning-rgb), 0.3); color: var(--warning-text); }
+.alert-info    { background: color-mix(in srgb, var(--info) 8%, transparent);    border-color: rgba(var(--info-rgb), 0.3);    color: var(--info-text); }
+.alert-secondary, .alert-light { background: var(--inset); border-color: var(--line); color: var(--body); }
+.alert .alert-link { color: inherit; font-weight: 600; }
+.alert.alert-dismissible .btn-close { padding: 12px 14px; }
+
+/* ---- Divers thème sombre ---- */
+[data-theme="dark"] .text-muted { color: #7c8aa0 !important; }
+[data-theme="dark"] .border-bottom { border-bottom-color: var(--border) !important; }
+[data-theme="dark"] .input-group-text { background: #1e293b; color: #e2e8f0; border-color: var(--border-strong); }
+[data-theme="dark"] .text-dark { color: #e2e8f0 !important; }
+[data-theme="dark"] .text-body { color: #e2e8f0 !important; }
+[data-theme="dark"] .form-label,
+[data-theme="dark"] label { color: #cbd5e1; }
+[data-theme="dark"] .form-check-label { color: #cbd5e1; }
+[data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th,
+[data-theme="dark"] .table span,
+[data-theme="dark"] .table small,
+[data-theme="dark"] .table strong,
+[data-theme="dark"] .table code { color: var(--text); }
+[data-theme="dark"] select option { background: #1e293b; color: #e2e8f0; }
+[data-theme="dark"] ::selection { background: var(--primary); color: #0b1120; }
+[data-theme="dark"] small,
+[data-theme="dark"] .small { color: #94a3b8; }
+[data-theme="dark"] .list-group-item { color: var(--text); }
+
+/* ---- Timeline ---- */
+.timeline { position: relative; padding-left: 30px; }
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+.timeline-item { position: relative; padding-bottom: 14px; }
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--card-bg);
+}
+.timeline-item .timeline-date { font-size: 0.8rem; color: var(--text-light); }
+
+/* ---- Connexion : degrade sombre tirant vers l'indigo, marque en blanc,
+   carte de 384 px sans bordure ---- */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #312e81 100%);
+}
+.login-wrap { width: 100%; max-width: 384px; }
+.login-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+.login-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 15px -3px rgba(var(--primary-rgb), 0.2);
+}
+.login-brand-name { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; color: #fff; line-height: 1.2; }
+.login-brand-tagline { font-size: 0.875rem; color: rgba(255, 255, 255, 0.6); }
+
+.login-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    width: 100%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    border: 0;
+}
+.login-card h1 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 12px; }
+.login-card .alert { margin-bottom: 12px; }
+.login-card .form-control { line-height: 20px; }
+.login-footnote { margin: 12px 0 0; text-align: center; font-size: 0.75rem; color: var(--muted); }
+
+/* ---- Badges Bootstrap : memes pastels que les pastilles de statut. Un
+   `bg-danger` plein criait plus fort que le statut critique qu'il cotoyait ;
+   la priorite, la categorie, le compteur parlent desormais a voix egale. ---- */
+.badge {
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    letter-spacing: 0;
+}
+.badge.bg-danger, .badge.text-bg-danger     { background: var(--danger-dim) !important;  color: var(--danger-text) !important; }
+.badge.bg-warning, .badge.text-bg-warning   { background: var(--warning-dim) !important; color: var(--warning-text) !important; }
+.badge.bg-success, .badge.text-bg-success   { background: var(--success-dim) !important; color: var(--success-text) !important; }
+.badge.bg-info, .badge.text-bg-info         { background: var(--info-dim) !important;    color: var(--info-text) !important; }
+.badge.bg-primary, .badge.text-bg-primary   { background: var(--primary-dim) !important; color: var(--primary) !important; }
+.badge.bg-secondary, .badge.text-bg-secondary,
+.badge.bg-dark, .badge.text-bg-dark         { background: var(--inset) !important;       color: var(--muted) !important; }
+.badge.bg-light, .badge.text-bg-light {
+    background: var(--inset) !important;
+    color: var(--body) !important;
+    border-color: var(--line) !important;
+}
+
+/* Tables compactes : padding reellement reduit (sinon ecrase par .table td) */
+.table-sm td,
+.table-sm th { padding: 7px 12px; }
+
+/* Tableaux clé/valeur (.table-borderless) : sans bordure, compacts, colonne
+   libellé de largeur uniforme sur toutes les pages de détail. */
+.table-borderless td,
+.table-borderless th { border: 0 !important; padding: 7px 10px; }
+.table-borderless td:first-child {
+    width: 42%;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+/* ---- Calendrier / heatmap des backups (thème-aware) ---- */
+.heat-cell {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    margin: 0 auto;
+}
+.heat-ok { background: var(--success); }
+.heat-warning { background: var(--warning); }
+.heat-failed { background: var(--danger); }
+.heat-empty { background: var(--border-strong); }
+/* Jour avec incident corrige dans la journee : pastille verte d'angle
+   par-dessus la couleur de l'incident d'origine. */
+.heat-recovered {
+    position: relative;
+}
+.heat-recovered::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 1px var(--bg-card, #fff);
+}
+
+.heat-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    vertical-align: middle;
+}
+
+/* ---- QR code 2FA : toujours sur fond blanc, même en thème sombre ---- */
+.qr-box {
+    background: #fff;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    line-height: 0;
+}
+
+/* ============================ RÔLES & PERMISSIONS ============================ */
+.role-card { position: relative; overflow: hidden; --role-color: var(--primary); }
+.role-card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--role-color);
+}
+
+.role-head { display: flex; align-items: flex-start; gap: 14px; }
+
+.role-avatar {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.3rem; flex-shrink: 0;
+    background: var(--role-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.perm-legend { display: flex; flex-wrap: wrap; gap: 14px; }
+.perm-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-light); }
+.perm-legend .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+.perm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 10px;
+}
+.perm-tile {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 11px;
+    background: var(--body-bg);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.perm-tile:hover { box-shadow: var(--shadow-sm); }
+.perm-tile-head {
+    font-size: 0.8rem; font-weight: 600; color: var(--text);
+    margin-bottom: 7px; display: flex; align-items: center; gap: 6px;
+}
+.perm-tile-head :is(i, svg.lucide) { color: var(--text-light); font-size: 0.95rem; }
+
+/* Code couleur du niveau (bordure gauche du select) */
+.lvl-select { border-left-width: 4px !important; font-weight: 500; }
+.lvl-select.lvl-0 { border-left-color: var(--text-light) !important; }
+.lvl-select.lvl-1 { border-left-color: var(--info) !important; }
+.lvl-select.lvl-2 { border-left-color: var(--warning) !important; }
+.lvl-select.lvl-3 { border-left-color: var(--danger) !important; }
+
+/* ============================ RESPONSIVE ============================ */
+@media (max-width: 991.98px) {
+    .app-topbar { display: flex; }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: var(--shadow-lg);
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    .main-content {
+        margin-left: 0;
+        padding: var(--space-4);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .main-content { padding: var(--space-3); }
+    .stat-card .stat-number { font-size: 21px; }
+}
+
+/* ── Kanban ────────────────────────────────────────────── */
+.kanban-column { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 1rem; }
+.kanban-col-header { font-size: .85rem; letter-spacing: normal; text-transform: uppercase; }
+.kanban-card { cursor: default; transition: box-shadow .15s; }
+.kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+.btn-xs { padding: .15rem .45rem; font-size: .7rem; line-height: 1.4; border-radius: .25rem; }
+
+/* ── Icône Docker (absente de Bootstrap Icons) ─────────────────────── */
+/* Baleine Docker (Simple Icons, CC0) en masque : hérite de la couleur du texte,
+   s'utilise comme une icône bi : <i class="icon-docker"></i> */
+.icon-docker {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* ==========================================================================
+   SECTIONS DE FORMULAIRE
+   Un long formulaire sans relief se lit mal : trente champs de meme poids
+   visuel, et l'oeil n'a nulle part ou s'accrocher. Chaque section porte donc
+   sa couleur — bandeau teinte, icone, barre d'accent.
+
+   La couleur est un REPERE, pas une decoration : deux sections de meme couleur
+   dans un meme formulaire annuleraient l'effet. D'ou une palette de sept
+   teintes, et une couleur par section.
+
+   Les teintes vivent en variables pour que le theme sombre les eclaircisse
+   d'un bloc : les memes valeurs y seraient trop saturees sur fond fonce.
+   ========================================================================== */
+/* Refonte de septembre 2026 : LA COULEUR NE DIT QUE L'URGENCE.
+   Huit teintes de rubrique (violet, vert, orange, bleu, rose...) se
+   disputaient l'oeil avec le rouge / orange / vert des statuts, et le rouge
+   d'un « Critique » se noyait dans le rose d'une rubrique « Description ».
+   Les huit noms restent (les gabarits les posent encore), mais ils pointent
+   tous sur le meme gris ardoise : une rubrique se reconnait a son titre, pas
+   a sa couleur. Retirer les arguments de couleur des gabarits est un
+   nettoyage, pas un prerequis. */
+:root {
+    --sec-slate: 71, 85, 105;      /* slate-600 */
+    --sec-indigo: var(--sec-slate);
+    --sec-sky: var(--sec-slate);
+    --sec-emerald: var(--sec-slate);
+    --sec-amber: var(--sec-slate);
+    --sec-rose: var(--sec-slate);
+    --sec-violet: var(--sec-slate);
+    --sec-teal: var(--sec-slate);
+}
+[data-theme="dark"] {
+    --sec-slate: 148, 163, 184;
+}
+
+/* ==========================================================================
+   LE GABARIT DE FORMULAIRE (septembre 2026, voir _formulaire.html)
+   Sommaire numerote a gauche, rubriques numerotees, Enregistrer en haut et en
+   barre fixe en bas, aide repliee derriere un ?, puces pour les choix multiples.
+   ========================================================================== */
+.form-page { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: start; max-width: 1180px; }
+.form-corps { min-width: 0; }
+.form-sommaire { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 2px; }
+.form-sommaire:empty { display: none; }
+.form-sommaire-lien {
+    display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: var(--radius-sm);
+    color: var(--muted); font-size: 0.875rem; font-weight: 500; text-decoration: none;
+}
+.form-sommaire-lien:hover { background: var(--inset); color: var(--strong); text-decoration: none; }
+.form-sommaire-lien.active { background: var(--primary-dim); color: var(--primary); font-weight: 600; }
+.form-sommaire-n {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--inset); color: var(--muted);
+    font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+}
+.form-sommaire-lien.active .form-sommaire-n { background: var(--primary); color: #fff; }
+@media (max-width: 991.98px) {
+    .form-page { grid-template-columns: 1fr; }
+    .form-sommaire { display: none; }
+}
+
+/* Les rubriques se numerotent toutes seules : une rubrique = un numero, le
+   meme que dans le sommaire. */
+.formulaire { counter-reset: rubrique; }
+.formulaire .form-section > .form-section-titre { counter-increment: rubrique; display: flex; align-items: center; gap: 10px; }
+.formulaire .form-section > .form-section-titre::before {
+    content: counter(rubrique);
+    width: 22px; height: 22px; border-radius: 50%; background: var(--inset); color: var(--muted);
+    font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+}
+.formulaire .form-section > .form-section-titre :is(i, svg.lucide) { display: none; }
+
+/* La barre fixe du bas : Annuler et Enregistrer suivent le defilement. */
+.form-pied {
+    position: sticky; bottom: 0; z-index: 5;
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    margin: 8px -24px -24px; padding: 12px 24px;
+    background: var(--surface); border-top: 1px solid var(--line);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.form-pied-note { margin-right: auto; }
+/* Supprimer, tout à gauche du pied : rouge dès le repos, le fond rouge pâle au survol. */
+.form-pied-supprimer { color: var(--danger); margin-right: 8px; }
+
+/* L'aide repliee : masquee, revelee par le ? de l'intitule. */
+.formulaire .form-text--repliee { display: none; }
+.formulaire .form-text--repliee.est-ouverte { display: block; }
+.formulaire .form-label .help-toggle { margin-left: 6px; vertical-align: -2px; }
+
+/* Les puces : le select natif reste (c'est lui qui est envoye), mais cache. */
+/* La liste d'origine, cachee derriere ses puces. Tout en !important : desactivee
+   (formulaire verrouille en lecture), les regles des champs desactives lui
+   rendaient son opacite et ses 26 px de haut -- et son ascenseur apparaissait
+   sur la premiere puce. */
+.puces-source { position: absolute !important; width: 1px !important; height: 1px !important; min-height: 0 !important; padding: 0 !important; border: 0 !important; margin: 0 !important; overflow: hidden !important; clip-path: inset(50%) !important; opacity: 0 !important; pointer-events: none; }
+.puces { position: relative; border: 1px solid var(--sub); border-radius: var(--radius-sm); background: var(--input-bg); padding: 5px 8px; display: flex; flex-direction: column; gap: 6px; }
+.puces:focus-within { border-color: var(--primary); box-shadow: var(--ring); }
+/* Sans recherche (data-sans-recherche), ce n'est plus un champ : les puces
+   seules, sans contour ni fond. */
+.puces-source[data-sans-recherche] + .puces { border: 0; padding: 0; background: none; box-shadow: none; }
+.puces-liste { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Une puce : le fond et le contour d'une pastille selectionnee dans la
+   fenetre de choix -- c'est la meme selection, vue du champ. */
+.puce { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 4px 0 10px; border: 1px solid rgba(79, 70, 229, 0.45); border-radius: 6px; background: rgba(79, 70, 229, 0.12); font-size: 0.8rem; font-weight: 600; }
+/* La famille d'une puce (logiciel, matériel) quand la liste en mêle plusieurs :
+   l'icône Lucide du groupe, en gris, à 6 px du nom ; l'étiquette de texte
+   reste pour un groupe sans icône. */
+.puce-icone { color: var(--muted); margin-right: 6px; vertical-align: -2px; flex-shrink: 0; }
+/* La modale de choix d'une famille : une ligne a cocher par element, 32 px,
+   teintee au survol ; la liste defile dans la modale. */
+/* Trois pastilles de 200 px de front : le nom le plus long du catalogue en
+   demande 194 (152 de texte, 42 d'icone, marges et bordure) ; un plus long se
+   coupe en « … » et se lit au survol. La fenetre se regle dessus : 3 x 200,
+   2 ecarts de 6, 2 x 16 de marge du corps, 2 de bordure, et la place de
+   l'ascenseur (12), reservee pour qu'il ne morde pas sur les colonnes.
+   Au-dela de huit rangees (8 x 30 + 7 x 6 = 282 px, 24 elements), la liste
+   defile ; l'en-tete et les boutons restent en vue. Sur un ecran bas, elle
+   se borne a la hauteur restante (en-tete, aide, boutons et marges : 240 px)
+   -- la liste seule defile, jamais la fenetre : un seul ascenseur. */
+.modal-choix { --bs-modal-width: 658px; }
+.choix-liste { max-height: min(282px, calc(100vh - 240px)); overflow-y: auto; scrollbar-gutter: stable; scrollbar-width: thin; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; align-content: start; }
+.choix-liste > .text-muted { grid-column: 1 / -1; }
+/* Chaque element, une pastille comme les puces du champ ; selectionnee, elle
+   prend la teinte de l'accent (la case, cachee, porte l'etat). */
+.choix-ligne { display: flex; align-items: center; min-width: 0; height: 30px; padding: 0 10px; margin: 0; border: 1px solid transparent; border-radius: 6px; background: var(--inset); font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; }
+.choix-ligne:hover { border-color: var(--line); }
+.choix-ligne:has(input:checked) { background: rgba(79, 70, 229, 0.12); border-color: rgba(79, 70, 229, 0.45); color: var(--text); }
+.choix-ligne:has(input:checked) .puce-icone:not(.kind-icon) { color: var(--primary); }
+/* Un materiel garde la couleur de son type (liste du materiel), dans les puces
+   comme dans la fenetre de choix, selectionne ou non. */
+.puce-icone.kind-icon--vm       { color: #0284c7; }
+.puce-icone.kind-icon--physical { color: #4f46e5; }
+.puce-icone.kind-icon--nas      { color: #059669; }
+.puce-icone.kind-icon--storage  { color: #d97706; }
+.puce-icone.kind-icon--network  { color: #7c3aed; }
+/* Un logiciel : une seule couleur, le jaune de l'entree Logiciels du menu. */
+.puce-icone.kind-icon--software { color: #facc15; }
+[data-theme="dark"] .puce-icone.kind-icon--vm       { color: #38bdf8; }
+[data-theme="dark"] .puce-icone.kind-icon--physical { color: #818cf8; }
+[data-theme="dark"] .puce-icone.kind-icon--nas      { color: #34d399; }
+[data-theme="dark"] .puce-icone.kind-icon--storage  { color: #fbbf24; }
+[data-theme="dark"] .puce-icone.kind-icon--network  { color: #a78bfa; }
+.choix-ligne:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 1px; }
+@media (max-width: 679.98px) { .choix-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 575.98px) { .choix-liste { grid-template-columns: 1fr; } }
+.puce-groupe { display: inline-block; margin-right: 6px; padding: 0 5px; border-radius: 4px; background: var(--surface); border: 1px solid var(--line); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: normal; color: var(--muted); vertical-align: 1px; }
+/* La puce d'un élément qui a sa fiche (option data-url, formulaire.js) : un lien
+   quand le formulaire est verrouillé — la fiche se lit, on va voir l'élément ;
+   du texte en modification, où le geste est de retirer, pas de naviguer. */
+.puce a { color: inherit; text-decoration: none; pointer-events: none; }
+fieldset.edition-verrou[disabled] .puce a { pointer-events: auto; }
+/* Verrouillée, la puce-lien est la pastille de la Synthèse (.pastille-lien) :
+   même espacement, le contour indigo au survol — le texte ne se souligne pas. */
+fieldset.edition-verrou[disabled] .puce:has(> a) { padding: 4px 10px; cursor: pointer; }
+fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--primary); }
+.puce button { border: 0; background: none; color: var(--muted); font-size: 1rem; line-height: 1; padding: 0 4px; cursor: pointer; border-radius: 4px; }
+.puce button:hover { color: var(--danger); background: var(--danger-dim); }
+.puces-vide { font-size: 0.82rem; color: var(--faint); padding: 3px 2px; }
+.puces-champ { border: 0; background: none; outline: none; font-size: 0.875rem; color: var(--strong); padding: 2px; width: 100%; }
+.puces-champ::placeholder { color: var(--faint); }
+.puces-menu { position: absolute; left: -1px; right: -1px; top: 100%; z-index: 20; max-height: 240px; overflow-y: auto; background: var(--surface); border: 1px solid var(--sub); border-radius: 0 0 var(--radius-sm) var(--radius-sm); box-shadow: var(--shadow-md); }
+.puces-option { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 12px; font-size: 0.875rem; color: var(--text); cursor: pointer; }
+.puces-option:hover, .puces-option.est-cible { background: var(--primary-dim); color: var(--primary); }
+.puces-rien { padding: 8px 12px; font-size: 0.82rem; color: var(--faint); }
+
+.form-section {
+    --sec: var(--sec-indigo);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin: 0 0 18px;
+    padding: 0;
+    background: var(--card);
+    overflow: hidden;
+}
+
+/* Un `legend` ordinaire chevauche la bordure et coupe le trait d'accent. On le
+   remet dans le flux : il redevient un bandeau plein, que la teinte remplit. */
+.form-section > .form-section-titre {
+    float: none;
+    width: 100%;
+    margin: 0;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: rgb(var(--sec));
+    background: rgba(var(--sec), 0.08);
+    border-bottom: 1px solid rgba(var(--sec), 0.18);
+}
+.form-section > .form-section-titre :is(i, svg.lucide) { margin-right: 8px; }
+
+.form-section-aide {
+    margin: 0;
+    padding: 10px 16px 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+.form-section-corps { padding: 16px; }
+
+/* ---- Preferences : rubriques ouvertes par familles (Dom 2026-09-23) ----
+   Le bandeau d etat en tete, le sommaire par familles (icone + point d etat),
+   et les bandeaux de rubrique qui poussent leurs pastilles a droite. */
+.pref-etat { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.pref-etat .badge-status { font-size: 0.75rem; padding: 3px 10px; gap: 6px; }
+.pref-etat .badge-status :is(i, svg.lucide) { font-size: 0.8rem; }
+.pref-page .som-famille { margin: 14px 0 4px; padding: 0 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: normal; text-transform: uppercase; color: var(--faint); }
+.pref-page .som-famille:first-child { margin-top: 0; }
+.pref-page .form-sommaire-lien :is(i, svg.lucide) { width: 16px; text-align: center; color: var(--faint); font-size: 0.9rem; }
+.pref-page .form-sommaire-lien.active :is(i, svg.lucide) { color: var(--primary); }
+.som-etat { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); opacity: 0.5; flex: 0 0 auto; }
+.som-etat.ok { background: var(--success); opacity: 1; }
+.som-etat.ko { background: var(--danger); opacity: 1; }
+.form-famille { margin: 0 0 10px; font-size: 0.72rem; font-weight: 700; letter-spacing: normal; text-transform: uppercase; color: var(--muted); }
+.form-section + .form-famille { margin-top: 28px; }
+.pref-rubrique { scroll-margin-top: 16px; }
+.pref-rubrique > .form-section-titre { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.pref-rubrique > .form-section-titre .badge { font-size: 0.68rem; padding: 2px 8px; margin-left: 0 !important; }
+.pref-rubrique > .form-section-titre .badge:first-of-type { margin-left: auto !important; }
+
+/* Les intitules de champ, un ton plus marque : dans une grille de trente, un
+   gris pale se confond avec la valeur saisie. */
+.form-section-corps .form-label { font-weight: 600; color: var(--text); }
+
+.form-section--indigo  { --sec: var(--sec-indigo); }
+.form-section--sky     { --sec: var(--sec-sky); }
+.form-section--emerald { --sec: var(--sec-emerald); }
+.form-section--amber   { --sec: var(--sec-amber); }
+.form-section--rose    { --sec: var(--sec-rose); }
+.form-section--violet  { --sec: var(--sec-violet); }
+.form-section--teal    { --sec: var(--sec-teal); }
+.form-section--slate   { --sec: var(--sec-slate); }
+
+/* ==========================================================================
+   FORMULAIRE D'UN MARCHE (contracts/form.html) : la grille de SoftInventory.
+   Pas de sommaire ni de rubriques numerotees : une carte, trois rangees ou
+   chaque champ prend sa largeur naturelle (une date en 116 px, un libelle tout
+   ce qui reste), en champs de 26 px sous des intitules en micro-capitales,
+   sur toute la largeur de la colonne.
+   ========================================================================== */
+.marche-saisie .rangee { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 12px; margin-bottom: 8px; }
+.marche-saisie .rangee > .grandit { flex: 1 1 140px; min-width: 0; }
+/* Un intitule ne se replie pas : la rangee se replie a la place, champ entier. */
+/* Les intitules a la taille du titre de la carte (« CONTRAT ») : 12 px. */
+.marche-saisie .form-label { white-space: nowrap; font-size: 12px; }
+/* Des jours de 0 a 365 (« 365 » fait 23,1 px) avec la molette, les marges
+   reduites a 6 et 4 px : 54 px. */
+.marche-saisie .form-control.l-jours { width: 54px; padding-left: 6px; padding-right: 4px; }
+/* Un chiffre (« 4 » fait 7,7 px) avec sa molette, les marges reduites a 6 et
+   4 px : 40 px. Une duree de 1 a 4 ans (« 4 ans », 31,1 px) avec la fleche de
+   la liste rapprochee du bord : 64 px. */
+.marche-saisie .form-control.l-chiffre { width: 40px; padding-left: 6px; padding-right: 4px; }
+.marche-saisie .form-select.l-duree { width: 64px; padding-left: 6px; padding-right: 20px; background-position: right 5px center; }
+/* Un montant : « 9 999 999,99 » en 12,8 px fait 78,7 px ; avec 10 px de marge
+   de chaque cote et la bordure, 104 px, deux pixels d'air compris. */
+.marche-saisie .l-montant { width: 104px; }
+.marche-saisie .l-100 { width: 100px; }
+/* Une date : « 31/12/2030 » fait 71,2 px, plus le pictogramme du calendrier,
+   les marges reduites a 6 et 4 px et la bordure : 108 px. */
+.marche-saisie .form-control.l-date { width: 108px; padding-left: 6px; padding-right: 4px; }
+.marche-saisie .l-140 { width: 140px; }
+.marche-saisie .l-150 { width: 150px; }
+/* Le + a cote du fournisseur : carre de 26 px, la hauteur de la liste. */
+.marche-saisie .fournisseur .btn { padding: 4px; line-height: 1; height: 26px; flex: 0 0 26px; display: inline-flex; align-items: center; justify-content: center; }
+/* L'interrupteur « Tacite » tient la hauteur d'un champ (26 px), son texte
+   centre dessus, sous l'intitule « Reconduction » comme les autres. */
+.marche-saisie .reconduction { min-height: 26px; display: flex; align-items: center; margin: 0; }
+.marche-saisie .reconduction .form-check-input { margin-top: 0; }
+/* Le pied n'est plus dans une carte a marge de 24 px : il devient une carte. */
+.form-seul .form-pied { margin: 8px 0 0; border: 1px solid var(--line); border-radius: var(--radius-lg); }
+/* Le formulaire ouvert dans une liste (formulaire-inline.js) se pose sur le
+   fond gris clair du formulaire de SoftInventory ; la carte qu'il contient
+   garde son blanc. */
+.formulaire-inline { background: var(--inset); }
+.formulaire-inline.rounded-3 { border: 1px solid var(--line); }
+/* Deux rubriques dans une carte : un filet entre le corps de l'une et
+   l'en-tete de la suivante. */
+.marche-saisie .data-card > .p-3 + .card-header-custom,
+.logiciel-saisie .data-card > .p-3 + .card-header-custom,
+.fournisseur-saisie .data-card > .p-3 + .card-header-custom { border-top: 1px solid var(--line); }
+@media (max-width: 767.98px) {
+    .marche-saisie .rangee > div:not(.form-switch) { flex: 1 1 100%; }
+    .marche-saisie .rangee [class^="l-"], .marche-saisie .rangee [class*=" l-"] { width: 100%; }
+    .marche-saisie .rangee .l-montant { width: 100%; }
+}
+
+/* Le formulaire d'un logiciel (software/_form_corps.html) : la grille de
+   SoftInventory (FicheForm), une rangée = des colonnes en fractions, chaque
+   champ à sa largeur naturelle. Sous 768 px, une colonne. */
+.logiciel-saisie .grille { display: grid; gap: 8px 12px; align-items: end; margin-bottom: 8px; }
+.logiciel-saisie .grille:last-child { margin-bottom: 0; }
+.logiciel-saisie .grille-identite { grid-template-columns: 25fr 8fr 33fr 33fr; }
+.logiciel-saisie .grille-usage { grid-template-columns: 15fr 12fr 11fr 8fr 27fr 27fr; }
+.logiciel-saisie .grille-technique,
+.logiciel-saisie .grille-rgpd { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.logiciel-saisie .grille-rgpd { grid-template-columns: 1fr 1.3fr 1fr 1fr; }
+.logiciel-saisie .grille-large { grid-column: span 2; }
+.logiciel-saisie .grille > div { min-width: 0; }
+.logiciel-saisie .form-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+/* La case 2FA a la hauteur d'un champ, centree sous son intitule. */
+.logiciel-saisie .case-2fa { width: 1.1rem; height: 1.1rem; margin: 5px 0; }
+/* Le + de l'editeur : un carre de la hauteur d'un champ. */
+.logiciel-saisie .grille-identite .btn { padding: 4px; line-height: 1; height: 26px; flex: 0 0 26px; display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 767.98px) {
+    .logiciel-saisie .grille { grid-template-columns: 1fr !important; }
+    .logiciel-saisie .grille-large { grid-column: auto; }
+}
+
+/* Le formulaire d'un fournisseur (suppliers/_form_corps.html) : la meme
+   mecanique que celui d'un logiciel, des rangees en fractions ; un contact
+   par ligne, son role en tete. Sous 768 px, une colonne.
+   La rubrique (_synthese.html) enveloppe son contenu dans .lu-grille, faite
+   pour la lecture : ici les rangees s'empilent au lieu de se ranger cote a cote. */
+.fournisseur-saisie .lu-grille { display: block; }
+.fournisseur-saisie .grille { display: grid; gap: 8px 12px; align-items: end; margin-bottom: 8px; }
+.fournisseur-saisie .grille:last-child { margin-bottom: 0; }
+.fournisseur-saisie .grille > * { min-width: 0; }
+.fournisseur-saisie .grille-identite { grid-template-columns: 2fr 1fr 2fr; }
+.fournisseur-saisie .grille-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fournisseur-saisie .grille-adresse { grid-template-columns: 3fr 1fr 2fr; }
+.fournisseur-saisie .grille-contact { grid-template-columns: 170px repeat(3, minmax(0, 1fr)); }
+.fournisseur-saisie .contact-role { font-size: 0.82rem; font-weight: 600; padding-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fournisseur-saisie .form-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+/* Les intitules des contacts, une fois en tete de colonnes : les lignes n'ont
+   que leurs champs, a 8 px l'une de l'autre. */
+.fournisseur-saisie .contact-entete { margin-bottom: 4px; align-items: end; }
+.fournisseur-saisie .contact-label { display: none; }
+@media (max-width: 767.98px) {
+    .fournisseur-saisie .grille { grid-template-columns: 1fr !important; }
+    .fournisseur-saisie .contact-entete { display: none; }
+    .fournisseur-saisie .contact-label { display: block; }
+}
+
+/* Les formulaires des fiches d'echeance et du parc (comptes, certificats,
+   domaines, sauvegardes, tests, mises a jour, revues, materiel) : le format
+   des trois precedents — UNE carte, des rubriques collees sous l'en-tete
+   colore de la Synthese (rubrique_form, _form_section.html), des champs de
+   26 px sous des intitules de 12 px. Leurs champs restent ranges par les
+   colonnes Bootstrap ; seuls les ecarts se resserrent. */
+.fiche-saisie .saisie-rubrique + .saisie-rubrique > .card-header-custom { border-top: 1px solid var(--line); }
+.fiche-saisie .form-label { font-size: 12px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fiche-saisie .form-control, .fiche-saisie .form-select { padding: 2px 10px; font-size: 0.8rem; line-height: 20px; min-height: 26px; }
+.fiche-saisie .form-select { padding-right: 28px; }
+.fiche-saisie .input-group > .btn { padding: 2px 6px; line-height: 1; min-height: 26px; display: inline-flex; align-items: center; justify-content: center; }
+.fiche-saisie .row { --bs-gutter-x: 12px; }
+/* Un champ qui prend « la place qui reste » ne descend pas sous 150 px :
+   en dessous, une liste ne montre plus son choix. Il passe a la ligne. */
+@media (min-width: 768px) { .fiche-saisie .row > .col-md { min-width: 150px; } }
+.fiche-saisie .row.g-3 { --bs-gutter-y: 8px; }
+.fiche-saisie .mb-3, .fiche-saisie .mb-2 { margin-bottom: 8px !important; }
+/* Le bas d'une rubrique : pas d'ecart apres le dernier champ. Une rangee
+   finale dont les champs passent a la ligne garde ses 8 px ENTRE ses lignes
+   -- les annuler sur chaque colonne collait la derniere ligne a la
+   precedente -- et rend l'ecart du bas par une marge negative. */
+.fiche-saisie .saisie-rubrique > .p-3 > :last-child:not(.row) { margin-bottom: 0 !important; }
+.fiche-saisie .saisie-rubrique > .p-3 > .row:last-child:not(.g-3) { margin-bottom: -8px; }
+/* Un message encore vide sous un champ (« Vérifier ») ne pousse pas la ligne
+   suivante. */
+.fiche-saisie small:empty { display: none !important; }
+.fiche-saisie .form-section-aide { padding: 0; margin-bottom: 8px; }
+/* Une date a sa largeur naturelle, comme dans le formulaire d'un marche
+   (.marche-saisie .l-date) : « 31/12/2030 » et le pictogramme, 108 px. */
+.fiche-saisie .form-control.l-date { width: 108px; padding-left: 6px; padding-right: 4px; }
+/* Un nombre de jours : trois chiffres (« 999 ») et les fleches du champ,
+   comme le preavis d'un marche (.marche-saisie .l-jours). */
+.fiche-saisie .form-control.l-jours { width: 54px; padding-left: 6px; padding-right: 4px; }
+/* Une liste a la largeur de son choix le plus long, une heure a celle de
+   « 23:59 » et de son pictogramme. */
+.fiche-saisie .form-select.l-contenu { width: auto; padding-right: 34px; }
+/* Accolee a un bouton d'ajout, la liste garde sa largeur au lieu de s'etirer. */
+.fiche-saisie .input-group > .form-select.l-contenu { flex: 0 0 auto; }
+.fiche-saisie .form-control.l-heure { width: 78px; padding-left: 6px; padding-right: 4px; }
+/* Un numero de version : dix-huit caracteres (« 2024.10.15-rc12+b7 »). */
+.fiche-saisie .form-control.l-version { width: calc(18ch + 22px); }
+/* Un montant : « 99 999,99 ». */
+.fiche-saisie .form-control.l-montant { width: calc(9ch + 22px); }
+@media (max-width: 767.98px) { .fiche-saisie .form-control:is(.l-date, .l-jours, .l-heure, .l-version, .l-montant), .fiche-saisie .form-select.l-contenu { width: 100%; } }
+/* Le ? d'aide tient dans la ligne de l'intitule (16 px) : a 20 px il etait
+   rogne par l'intitule et descendait son champ sous celui du voisin. */
+.fiche-saisie .form-label .help-toggle { width: 16px; height: 16px; font-size: 0.65rem; vertical-align: top; }
+/* Sous un champ a sa largeur naturelle, l'aide depliee se replie dans la
+   colonne au lieu de l'elargir et de pousser les champs voisins. */
+.fiche-saisie .col-md-auto > .form-text { width: 0; min-width: 100%; }
+/* L'aide sur la ligne de l'intitule (.saisie-intitule) : a droite du ?, en une
+   seule ligne. Elle ne prend aucune largeur dans sa colonne (flex 0 0 0) et
+   deborde sur l'espace libre au-dessus des champs voisins, sans les pousser. */
+.fiche-saisie .saisie-intitule { display: flex; align-items: center; margin-bottom: 4px; }
+.fiche-saisie .saisie-intitule > .form-label { margin-bottom: 0; flex: 0 0 auto; overflow: visible; }
+.fiche-saisie .saisie-intitule > .form-text { flex: 0 0 0; width: 0; margin: 0 -8px 0 8px; white-space: nowrap; overflow: visible; line-height: 16px; }
+/* Un interrupteur dans une rangee de champs : un intitule vide au-dessus le
+   pose sur la ligne des champs, quelle que soit la hauteur des voisins. */
+.fiche-saisie .saisie-interrupteur { min-height: 26px; display: flex; align-items: center; gap: 6px; margin: 0; }
+.fiche-saisie .saisie-interrupteur .form-check-input { margin-top: 0; }
+
+/* La nouvelle Synthese (_synthese.html) : le formulaire de l'onglet Details en
+   lecture, rubriques collees, un filet entre elles. Dans une rubrique, une
+   grille de paires « intitule | valeur » : l'intitule a gauche, la valeur en
+   face, sans filet entre deux lignes. Les rangees du gabarit s'y
+   fondent (display: contents). Les champs vides n'y sont pas : ils forment la
+   ligne « A completer » sous la grille. Deux colonnes, trois pour une
+   rubrique aux valeurs courtes (rubrique(colonnes=3), deux sous 1200 px),
+   une sous 768 px. Chaque colonne d'intitules prend la largeur du plus long
+   (140 px au plus, au-dela il passe a la ligne) : les valeurs ont le reste,
+   et restent alignees d'une ligne a l'autre grace a la sous-grille. */
+.synthese > .p-3 + .card-header-custom { border-top: 1px solid var(--line); }
+.lu-grille { display: grid; grid-template-columns: repeat(2, fit-content(140px) minmax(0, 1fr)); column-gap: 10px; }
+.lu-grille--3 { grid-template-columns: repeat(3, fit-content(140px) minmax(0, 1fr)); }
+.lu-grille:empty { display: none; }
+.lu-rangee { display: contents; }
+/* Une rangee qui commence toujours une nouvelle ligne de la grille. */
+.lu-rangee--ligne > :first-child { grid-column: 1 / span 2; }
+.lu { min-width: 0; grid-column: span 2; display: grid; grid-template-columns: subgrid; column-gap: 10px; align-items: baseline; padding: 3px 0; }
+.lu--large, .lu--pleine { grid-column: 1 / -1; }
+.lu--pleine > .lu-valeur { grid-column: 2 / -1; }
+.lu-grille > .lu-vide { grid-column: 1 / -1; }
+@media (max-width: 1199.98px) {
+    .lu-grille--3 { grid-template-columns: repeat(2, fit-content(140px) minmax(0, 1fr)); }
+}
+/* synthese--cases (fournisseur) : des colonnes de largeur egale, les memes
+   d'une rubrique a l'autre -- chaque case (intitule puis valeur) commence au
+   meme endroit dans Identite, Assistance et Contacts. Les largeurs
+   d'intitules, propres a chaque rubrique, ne decalent plus les colonnes. */
+.synthese--cases .lu-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.synthese--cases .lu-grille--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.synthese--cases .lu { grid-column: span 1; display: flex; gap: 10px; }
+/* Intitules de largeur fixe, la meme dans les trois colonnes : chaque valeur
+   commence au meme endroit dans sa colonne, d'une rubrique a l'autre.
+   100 px = le plus long intitule d'un fournisseur ou d'un contrat (« Mail
+   commercial 2 », 98 px). Chaque _synthese.html peut poser sa propre largeur
+   (style="--lu-intitule: …") : 75 ou 80 px pour les fiches aux intitules
+   courts, 110 px pour le materiel. */
+.synthese--cases { --lu-intitule: 100px; }
+.synthese--cases .lu:not(.lu--large) .lu-label { flex: 0 0 var(--lu-intitule); width: var(--lu-intitule); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.synthese--cases .lu-valeur { flex: 1 1 auto; }
+
+.synthese--cases .lu--large, .synthese--cases .lu--pleine,
+.synthese--cases .lu-grille > .lu-vide { grid-column: 1 / -1; }
+.synthese--cases .lu--large { display: block; }
+.synthese--cases .lu-rangee--ligne > :first-child { grid-column: 1; }
+@media (max-width: 1199.98px) {
+    .synthese--cases .lu-grille--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767.98px) {
+    .synthese--cases .lu-grille, .synthese--cases .lu-grille--3 { grid-template-columns: minmax(0, 1fr); }
+}
+.lu--large { display: block; padding-top: 14px; }
+.lu--large .lu-label { display: block; margin-bottom: 2px; }
+/* Un paragraphe en TETE de rubrique n'a rien a detacher au-dessus de lui : il
+   reprend l'ecart d'un champ ordinaire. Seul dans sa rubrique (Notes,
+   Procedure, Perimetre), son intitule repeterait le titre juste au-dessus. */
+.lu-grille > .lu-rangee:first-child > .lu--large:first-child { padding-top: 3px; }
+.lu-grille > .lu-rangee:only-child > .lu--large:only-child > .lu-label { display: none; }
+.lu-label { font-size: 12px; color: var(--muted); }
+.lu-valeur { font-size: 0.8rem; font-weight: 600; line-height: 1; color: var(--text); overflow-wrap: break-word; min-width: 0; }
+/* Interligne 1 : une valeur coupee par « … » (overflow cache) garde un peu
+   de marge en bas, sinon les jambages (g, p, j) seraient rognes. */
+/* Toutes les syntheses : faute de place, une valeur reste sur sa ligne et
+   finit par « … » (texte entier au survol, texte-tronque.js). Sauf les notes
+   (lu--large) et les etiquettes (nature, statut), qui passent a la ligne. */
+.lu:not(.lu--large) .lu-valeur:not(:has(.badge-nature, .badge-status)) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Un texte libre en face de son intitulé (lu--texte) : il commence sur la
+   ligne de l'intitulé, à la colonne des valeurs, puis passe à la ligne en
+   reprenant au bord gauche, sous l'intitulé — un paragraphe, en maigre. */
+.synthese--cases .lu.lu--pleine.lu--texte { display: block; }
+/* overflow visible : un inline-block qui cache son débordement pose sa ligne
+   de base en bas, et l'intitulé flotterait au-dessus du texte. */
+.synthese--cases .lu.lu--pleine.lu--texte .lu-label { display: inline-block; vertical-align: baseline; overflow: visible; margin-right: 7px; /* + l'espace du flux = les 10 px des autres champs */ }
+.synthese--cases .lu.lu--pleine.lu--texte .lu-valeur { display: inline; white-space: pre-line; overflow: visible; text-overflow: clip; font-weight: 400; }
+.lu-valeur .text-truncate, .lu:not(.lu--large) .lu-valeur { padding-bottom: .15em; }
+.lu--large .lu-valeur { font-weight: 400; white-space: pre-line; }
+.lu-valeur a { color: var(--primary); text-decoration: none; }
+.lu-valeur a:hover { text-decoration: underline; }
+/* Un numero de telephone se lit comme du texte : couleur du texte, rien au
+   survol. Le lien tel: reste, pour appeler depuis un poste qui sait le faire. */
+a[href^="tel:"], a[href^="tel:"]:hover, a[href^="tel:"]:focus,
+.lu-valeur a[href^="tel:"], .lu-valeur a[href^="tel:"]:hover { color: var(--text); text-decoration: none; }
+.lu-valeur .badge-status { font-size: 12px; }
+.lu-manques { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--faint); }
+.lu-grille:empty + .lu-manques { margin-top: 0; }
+.lu-manque { border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; color: var(--muted); }
+@media (max-width: 767.98px) {
+    .lu-grille, .lu-grille--3 { grid-template-columns: fit-content(120px) minmax(0, 1fr); }
+}
+/* La nature d'un logiciel : les boutons cochés du formulaire, en étiquettes. */
+.badge-nature { display: inline-flex; align-items: center; margin: 0 6px 4px 0; padding: 2px 8px; border: 1px solid rgba(79, 70, 229, 0.45); border-radius: 6px; background: rgba(79, 70, 229, 0.12); font-size: 0.8rem; }
+/* Un élément lié : la puce du formulaire (fond et contour indigo), sans la
+   croix, et lien vers sa fiche. */
+.pastilles { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Dans une rubrique, les pastilles prennent toute la largeur et s'enchainent
+   sur la ligne, comme les puces du formulaire -- pas une colonne de la grille. */
+.lu-grille > .pastilles, .lu-grille > .text-muted { grid-column: 1 / -1; }
+.pastille-lien { display: inline-flex; align-items: center; gap: 6px; min-height: 26px; padding: 4px 10px; line-height: 1; border: 1px solid rgba(79, 70, 229, 0.45); border-radius: 6px; background: rgba(79, 70, 229, 0.12); font-size: 0.8rem; font-weight: 600; color: var(--text); text-decoration: none; }
+.pastille-lien:hover { border-color: var(--primary); color: var(--text); }
+.pastille-lien svg { flex-shrink: 0; }
+
+/* ==========================================================================
+   FICHES
+   ------------------------------------------------------------------
+   Une fiche n'est pas un formulaire. Un formulaire de trente champs a besoin
+   qu'on le decoupe en boites ; une fiche de quinze valeurs a besoin d'etre lue
+   vite. Trois versions l'ont oublie : huit boites colorees, l'intitule pose
+   AU-DESSUS de sa valeur — donc deux fois plus haut —, et des blocs pleine
+   largeur pour un seul badge.
+
+   Ce qui reste : l'essentiel en tete, en tuiles ; le detail en colonnes qui
+   COULENT, valeur a droite de son intitule. Trois principes tiennent le
+   dessin.
+
+   1. La couleur nomme, elle ne remplit pas. Chaque rubrique porte sa teinte sur
+      une pastille d'icone et un filet qui s'efface — jamais sur un aplat : huit
+      aplats font un damier, et un damier ne repere rien.
+   2. Le trait separe, le blanc groupe. Les lignes se touchent presque, les
+      rubriques respirent : c'est l'ecart qui dit ou finit une idee.
+   3. Rien ne bouge au survol sauf ce qu'on survole.
+   ========================================================================== */
+
+/* ---- Le bandeau : ce qu'on vient verifier neuf fois sur dix ----
+   En tuiles separees plutot qu'en bande jointive : chacune porte son filet
+   d'accent a gauche, et la derniere ligne n'a pas de case vide a combler. ---- */
+.fiche-faits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+.fiche-fait {
+    --sec: var(--sec-slate);
+    flex: 1 1 150px;
+    min-width: 0;
+    position: relative;
+    padding: 11px 14px 11px 15px;
+    border: 1px solid var(--border);
+    border-left: 3px solid rgb(var(--sec));
+    border-radius: 4px 10px 10px 4px;
+    background:
+        linear-gradient(105deg, var(--primary-dim), transparent 62%),
+        var(--card);
+}
+.fiche-fait-k {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: normal;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.fiche-fait-v {
+    margin-top: 4px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+.fiche-fait-v small { font-weight: 500; font-size: 0.78rem; color: var(--text-muted); }
+.fiche-fait-v .badge, .fiche-fait-v .badge-status { font-size: 0.78rem; vertical-align: 1px; }
+
+/* ---- Le detail : une grille, pour que les rubriques s'alignent ----
+   Le fondu en colonnes remplissait mieux l'espace, mais chaque rubrique y
+   commencait la ou la precedente s'arretait : les titres tombaient a des
+   hauteurs differentes d'une colonne a l'autre, et l'oeil n'avait plus de
+   ligne d'appui. La grille les remet sur la meme rangee. Elle laisse un peu
+   d'air sous les groupes courts — c'est le prix de l'alignement, et il se paie
+   volontiers depuis que les valeurs se posent en FACE de leur intitule et non
+   plus dessous : les groupes ont perdu la moitie de leur hauteur. ---- */
+.fiche-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+/* La rubrique est un PANNEAU teinte, pas seulement un titre suivi de lignes.
+   Quatre rubriques cote a cote et sans fond, les colonnes se melangeaient a la
+   lecture : « Criticite 3 - Elevee » et « Authentification Comptes locaux » se
+   lisaient comme une meme rangee. Le lavis dit ou commence et ou finit un
+   groupe, sans qu'on ait a suivre un filet des yeux.
+
+   Il reste UN LAVIS et non un aplat : 5 % de la teinte, un filet a 16 %. Huit
+   couleurs pleines feraient le damier que cette fiche a deja connu. */
+.fiche-bloc {
+    --sec: var(--sec-indigo);
+    min-width: 0;
+    margin: 0;
+    padding: 11px 14px 12px;
+    border: 1px solid rgba(var(--sec), 0.16);
+    border-radius: var(--radius);
+    /* Le fond de la page : la rubrique se creuse dans la carte blanche, et
+       c'est le filet et le titre qui la delimitent. */
+    background: var(--page);
+}
+[data-theme="dark"] .fiche-bloc {
+    border-color: rgba(var(--sec), 0.22);
+}
+
+/* ---- La rubrique : pastille, intitule, filet qui s'efface ---- */
+.data-card .fiche-bloc > h6.fiche-titre {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 9px;
+    padding: 0;
+    font-size: 0.71rem;
+    font-weight: 800;
+    letter-spacing: normal;
+    text-transform: uppercase;
+    color: var(--text);
+    background: none;
+    border: 0;
+}
+.data-card .fiche-bloc > h6.fiche-titre::before { display: none; }
+.data-card .fiche-bloc > h6.fiche-titre > i {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 25px;
+    height: 25px;
+    margin: 0;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    color: rgb(var(--sec)) !important;
+    background: rgba(var(--sec), 0.13);
+}
+/* La meme pastille pour une icone Lucide, teintee par sa famille (.ico-*) :
+   l'icone en couleur pleine, le fond en lavis. */
+.data-card .fiche-bloc > h6.fiche-titre > svg.lucide.ico {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    margin: 0;
+    border-radius: 8px;
+    vertical-align: middle;
+    color: rgb(var(--ico-rgb, var(--sec)));
+    background: rgba(var(--ico-rgb, var(--sec)), 0.13);
+    stroke-width: 2.5;
+}
+/* Dans un en-tete de carte, pas de pastille : l'icone seule, en couleur. */
+.card-header-custom h6.fiche-titre > svg.lucide.ico { margin-right: 6px; color: rgb(var(--ico-rgb, var(--sec))); }
+/* Dans les cartes de la colonne de droite d'une fiche (Editeur…) : l'icone en
+   couleur, 8 px avant le titre, comme les cartes Contrats et Liaisons. */
+.fiche-cote h6.fiche-titre > svg.lucide.ico { margin-right: 8px; color: rgb(var(--ico-rgb, var(--sec))); }
+.ico-indigo  { --ico-rgb: 79, 70, 229; }
+.ico-sky     { --ico-rgb: 2, 132, 199; }
+.ico-emerald { --ico-rgb: 5, 150, 105; }
+.ico-amber   { --ico-rgb: 217, 119, 6; }
+.ico-orange  { --ico-rgb: 249, 115, 22; }
+.ico-rose    { --ico-rgb: 225, 29, 72; }
+.ico-violet  { --ico-rgb: 124, 58, 237; }
+.ico-slate   { --ico-rgb: 100, 116, 139; }
+/* L'icone d'une carte du rail (fournisseur, activite, alertes) dans la
+   couleur de sa famille : violet pour un fournisseur (comme la carte Editeur),
+   ambre pour l'activite (l'onglet Historique), vert pour des alertes actives. */
+.ico-carte { color: rgb(var(--ico-rgb)); }
+/* Le vert des liaisons dans leur carte de la Synthese logiciel : l'icone du
+   titre et les fleches des flux. */
+.ico-vert { --ong-icon: #059669; color: #059669; }
+[data-theme="dark"] .ico-vert { --ong-icon: #34d399; color: #34d399; }
+[data-theme="dark"] .ico-indigo  { --ico-rgb: 129, 140, 248; }
+[data-theme="dark"] .ico-sky     { --ico-rgb: 56, 189, 248; }
+[data-theme="dark"] .ico-emerald { --ico-rgb: 52, 211, 153; }
+[data-theme="dark"] .ico-amber   { --ico-rgb: 251, 191, 36; }
+[data-theme="dark"] .ico-orange  { --ico-rgb: 251, 146, 60; }
+[data-theme="dark"] .ico-rose    { --ico-rgb: 251, 113, 133; }
+[data-theme="dark"] .ico-violet  { --ico-rgb: 167, 139, 250; }
+[data-theme="dark"] .ico-slate   { --ico-rgb: 148, 163, 184; }
+
+/* Le filet prolonge l'intitule jusqu'au bord de la colonne et s'y dissout :
+   il dit ou commence la rubrique sans tracer de cadre autour d'elle. */
+.data-card .fiche-bloc > h6.fiche-titre::after { display: none; }
+
+/* ---- L'en-tete d'un marche sur la fiche logiciel ----
+   Trois blocs de deux lignes, centres sur la hauteur de l'en-tete : ce qui
+   NOMME l'acte (reference, intitule, societe) puis ce qu'il engage (nature,
+   periode, montant). La disposition de
+   SoftInventory, que les yeux connaissent. Sur un ecran etroit, les colonnes
+   s'empilent. ---- */
+.marche-entete {
+    display: grid;
+    grid-template-columns: minmax(3rem, 6.25rem) minmax(8rem, 1fr) minmax(6rem, 15.625rem);
+    column-gap: .5rem;
+    align-items: center;
+    min-width: 0;
+}
+.marche-entete > * { min-width: 0; }
+.marche-entete .marche-droite { text-align: right; }
+/* Les trois noms de la premiere ligne sont des liens, mais se lisent comme
+   du texte : la couleur du lien ne vient qu'au survol. */
+.marche-entete a { color: var(--text); }
+.marche-entete a:hover { color: var(--primary); }
+.marche-entete .marche-tronque { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* La ligne du dessous, et celle de chaque document : le gris leger de
+   SoftInventory (--faint), en 12 px. */
+.marche-entete .marche-sous, .marche-docs small { font-size: 12px; color: var(--faint) !important; }
+.marche-docs-titre { font-size: 12px; font-weight: 600; color: var(--faint); }
+/* Les boutons de l'en-tete (maillon, +) s'alignent sur ceux des marches
+   dessous : l'en-tete a 4 px de marge droite de plus que le corps, et les
+   deux boutons se serrent a 4 px comme le crayon et le maillon rompu. */
+.marches-actions { margin-right: -4px; gap: 4px !important; }
+.marche-docs-entete { border-bottom: 1px dotted var(--line); }
+/* Le bouton + descend de la marge basse de l'en-tete (4 px) pour toucher
+   le filet, le titre gardant sa place. */
+.marche-docs-entete .btn-icone { margin-bottom: -4px; }
+.marche-docs-vide { font-size: 14px; color: var(--faint); }
+.marche-docs-zone { padding: 1px 16px 0; margin-top: 5px; }  /* 6 px sous la ligne du marche */
+.doc-aide { font-size: 12px; color: var(--faint); margin-top: 4px; }
+/* Le bouton de depot du fichier, dans la ligne du formulaire de piece : un
+   carre de 26 px, la hauteur des champs qui l'entourent. */
+.doc-edit .btn-sm.btn-icone, .doc-depot .btn-sm.btn-icone { padding: 4px; }
+/* La paire qui clot une saisie en ligne (piece, dossier partage) : la coche
+   qui enregistre est verte, la croix qui annule garde le gris des boutons
+   fantomes ; toutes deux font 26 px, la hauteur des champs. */
+.btn-sm.btn-icone.btn-valider, .btn-sm.btn-icone.btn-annuler { padding: 4px; }
+.btn-ghost.btn-valider, .btn-ghost.btn-valider:hover { color: var(--success); }
+.btn-ghost.btn-valider:hover { background: var(--success-dim); }
+/* Ouvert, le formulaire de piece prend la place de la ligne qu'il modifie :
+   on corrige ce qu'on lit, on ne le lit pas deux fois au-dessus des champs.
+   Les voisins du volet disparaissent des le debut de l'animation (.collapsing)
+   et reviennent a la fin de la fermeture. L'icone de fichier et les boutons
+   restent centres sur la hauteur du formulaire, comme sur celle de la ligne. */
+:has(> .doc-edit-volet.show) > :not(.doc-edit-volet),
+:has(> .doc-edit-volet.collapsing) > :not(.doc-edit-volet) { display: none !important; }
+/* L'icone de fichier a gauche et les boutons crayon / corbeille a droite
+   s'effacent aussi : le formulaire prend toute la largeur de la ligne, sa
+   croix suffisant a le refermer. */
+li:has(.doc-edit-volet.show) > .marche-doc-ico, li:has(.doc-edit-volet.collapsing) > .marche-doc-ico,
+li:has(.doc-edit-volet.show) > .doc-ico, li:has(.doc-edit-volet.collapsing) > .doc-ico,
+li:has(.doc-edit-volet.show) > .d-flex.flex-shrink-0,
+li:has(.doc-edit-volet.collapsing) > .d-flex.flex-shrink-0 { display: none !important; }
+/* La liste des pieces jointes, a la SoftInventory : icone de fichier et
+   fleche de telechargement en gris leger, sous-ligne en 12 px. */
+/* Les pieces de l'onglet Documents : la ligne des pieces d'un marche (voir
+   .marche-doc plus bas) — 5 px de marge, l'icone a 12 px du texte, le nom en
+   14 px sur 20 px, le detail en 12 px sur 16 px, 46 px par ligne. Au survol,
+   la ligne se teinte (8 px de debord de chaque cote), sauf formulaire ouvert. */
+.docs-liste > li { padding: 5px 8px; margin: 0 -8px; gap: 12px; font-size: 14px; border-radius: 6px; }
+.docs-liste > li:hover:not(:has(.doc-edit-volet.show)) { background: var(--inset); }
+.docs-liste .docs-ligne { gap: 6px; line-height: 20px; }
+.docs-liste .docs-ligne > a, .docs-liste .docs-ligne > .fw-medium { font-weight: 500; color: var(--strong); }
+.docs-liste .docs-ligne > a:hover { color: var(--primary); }
+.docs-liste .doc-ico { color: var(--faint); }
+.docs-liste .doc-dl { color: var(--faint); display: inline-flex; align-items: center; }
+.docs-liste .doc-dl:hover { color: var(--primary); }
+.docs-liste .doc-sous { font-size: 12px; line-height: 16px; color: var(--faint); }
+.docs-liste a { color: var(--text); }
+.docs-liste a:hover { color: var(--primary); }
+/* Les dossiers du partage reseau, memes lignes que les pieces jointes ; le
+   chemin en chasse fixe, 12 px, et un bouton de copie sans cadre. */
+.dossiers-liste .doc-ico { color: var(--faint); margin-top: 3px; }
+.dossiers-liste .doc-dl { color: var(--faint); display: inline-flex; align-items: center; background: none; border: 0; padding: 0; }
+.dossiers-liste .doc-dl:hover { color: var(--primary); }
+.dossiers-liste .doc-sous { font-size: 12px; color: var(--faint); }
+.dossiers-liste .dossier-chemin { font-size: 12px; color: var(--strong); word-break: break-all; border: 0; }
+.dossiers-liste .border-top { border-color: var(--line) !important; }
+/* Les services utilisateurs d'un logiciel : la grille de cases de
+   SoftInventory, quatre colonnes qui se replient avec la largeur. */
+.services-grille { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 1rem; }
+@media (max-width: 1199.98px) { .services-grille { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767.98px) { .services-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 575.98px) { .services-grille { grid-template-columns: 1fr; } }
+.serveurs-liste a, .flux-liste a { color: var(--text); }
+.serveurs-liste a:hover, .flux-liste a:hover { color: var(--primary); }
+/* Lignes serrees, comme dans SoftInventory : 20 px de haut, texte en 14 px,
+   et des icones d'action de 20 px qui ne font pas grandir la ligne. */
+.serveurs-liste > li, .flux-liste > li > .d-flex { min-height: 20px; line-height: 20px; font-size: 14px; }
+.serveurs-liste .btn-icone, .flux-liste .btn-icone { width: 20px; height: 20px; padding: 2px; }
+.serveurs-liste form, .flux-liste form { display: flex; }
+.flux-liste .flux-sens { color: var(--primary); }
+.serveurs-liste .serveur-ico { color: rgb(var(--ico-rgb, var(--sec))); }
+.btn-carre { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.btn-carre-plus { font-size: 14px; line-height: 1; }
+.flux-liste .flux-desc { font-size: 12px; color: var(--muted); }
+/* Le sens d'un nouveau flux : une fleche deroulante, a la hauteur de la liste voisine. */
+.flux-sens-choix > .btn { height: 26px; padding: 0 9px; display: inline-flex; align-items: center; gap: 6px; }
+.flux-sens-choix .js-sens-icone { display: inline-flex; }
+.flux-sens-choix .dropdown-item { font-size: 13px; }
+/* Une piece d'un marche, comme dans SoftInventory : 5 px de marge verticale,
+   l'icone en gris leger a 12 px du texte, le nom en 14 px sur 20 px, le detail
+   en 12 px sur 16 px juste dessous ; la fleche de telechargement (14 px)
+   a 6 px du nom, en gris leger, prend la couleur du lien au survol. */
+.marche-doc { padding: 5px 8px; margin: 0 -8px; gap: 12px; font-size: 14px; border-radius: 6px; }
+/* Au survol, la ligne se teinte comme un lien du rail ; le formulaire ouvert
+   ne bouge pas, il a deja son propre fond. */
+.marche-doc:hover:not(:has(.doc-edit-volet.show)) { background: var(--inset); }
+.marche-doc-ico { color: var(--faint); }
+.marche-doc-ligne { gap: 6px; line-height: 20px; }
+.marche-doc-nom { font-weight: 500; color: var(--strong); }
+a.marche-doc-nom:hover { color: var(--primary); }
+.marche-doc-sous { margin-top: 0; line-height: 16px; }
+.marche-doc-dl { color: var(--faint); display: inline-flex; align-items: center; }
+.marche-doc-dl:hover { color: var(--primary); }
+.marche-entete .marche-droite .marche-sous { font-variant-numeric: tabular-nums; }
+@media (max-width: 767.98px) {
+    .marche-entete { grid-template-columns: 1fr; }
+    .marche-entete .marche-droite { text-align: left; }
+}
+
+/* ---- La ligne : intitule a gauche, valeur a droite ----
+   C'est la correction qui compte le plus : l'intitule pose au-dessus de sa
+   valeur doublait la hauteur de chaque champ, et la fiche defilait sur deux
+   ecrans pour quinze valeurs. ---- */
+.fiche-grille { display: block; padding: 0; }
+.fiche-champ {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    min-width: 0;
+    margin: 0 -8px;
+    padding: 5px 8px;
+    border-radius: 7px;
+}
+.fiche-champ + .fiche-champ { box-shadow: inset 0 1px 0 rgba(var(--sec), 0.18); }
+.fiche-champ:hover { background: rgba(var(--sec), 0.14); }
+.fiche-champ .fiche-label {
+    flex: 0 1 auto;
+    font-size: 0.815rem;
+    color: var(--text-muted);
+}
+.fiche-champ .fiche-valeur {
+    flex: 0 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+/* Une liste de badges ou un paragraphe : l'alignement a droite les hacherait.
+   Ceux-la reprennent l'intitule au-dessus, et toute la largeur. */
+.fiche-champ--large { display: block; }
+.fiche-champ--large .fiche-valeur {
+    display: block;
+    margin-top: 4px;
+    text-align: left;
+    font-weight: 500;
+}
+.fiche-bloc > *:not(h6):not(.fiche-grille) { padding-left: 0; }
+
+/* Une rubrique dont AUCUN champ n'est renseigne disparait avec eux : depuis que
+   les champs vides se taisent, un titre de section suivi d'un filet et de rien
+   se lisait comme une panne d'affichage. `:has()` evite d'avoir a compter les
+   champs dans chacun des onze gabarits de fiche. */
+.fiche-bloc:not(:has(.fiche-champ)) { display: none; }
+/* Sauf la rubrique « libre », qui ne passe pas par des champs : ses valeurs
+   (badges, liens) viennent directement sous le titre, et « aucun » s'y dit. */
+.fiche-bloc.fiche-bloc--libre:not(:has(.fiche-champ)) { display: block; }
+
+/* ---- Les titres des cartes autonomes : la barre d'accent, teintee ---- */
+.fiche-titre { --sec: var(--sec-indigo); }
+.data-card h6.fiche-titre { color: var(--text); }
+.data-card h6.fiche-titre::before { background: rgb(var(--sec)); }
+/* !important : les gabarits posent encore des utilitaires Bootstrap
+   (text-primary, text-success) sur ces icones. */
+.data-card h6.fiche-titre > i:not(.ico-onglet),
+.data-card h6.fiche-titre > svg.lucide:not(.ico):not(.ico-onglet) { color: rgb(var(--sec)) !important; }
+
+.fiche-titre--indigo  { --sec: var(--sec-indigo); }
+.fiche-titre--sky     { --sec: var(--sec-sky); }
+.fiche-titre--emerald { --sec: var(--sec-emerald); }
+.fiche-titre--amber   { --sec: var(--sec-amber); }
+.fiche-titre--rose    { --sec: var(--sec-rose); }
+.fiche-titre--violet  { --sec: var(--sec-violet); }
+.fiche-titre--teal    { --sec: var(--sec-teal); }
+.fiche-titre--slate   { --sec: var(--sec-slate); }
+
+.fiche-bloc--indigo  { --sec: var(--sec-indigo); }
+.fiche-bloc--sky     { --sec: var(--sec-sky); }
+.fiche-bloc--emerald { --sec: var(--sec-emerald); }
+.fiche-bloc--amber   { --sec: var(--sec-amber); }
+.fiche-bloc--rose    { --sec: var(--sec-rose); }
+.fiche-bloc--violet  { --sec: var(--sec-violet); }
+.fiche-bloc--teal    { --sec: var(--sec-teal); }
+.fiche-bloc--slate   { --sec: var(--sec-slate); }
+
+/* Les tuiles du bandeau peuvent porter la meme teinte que leur rubrique. */
+.fiche-fait--indigo  { --sec: var(--sec-indigo); }
+.fiche-fait--sky     { --sec: var(--sec-sky); }
+.fiche-fait--emerald { --sec: var(--sec-emerald); }
+.fiche-fait--amber   { --sec: var(--sec-amber); }
+.fiche-fait--rose    { --sec: var(--sec-rose); }
+.fiche-fait--violet  { --sec: var(--sec-violet); }
+.fiche-fait--teal    { --sec: var(--sec-teal); }
+
+@media (min-width: 992px) { .fiche-cote { position: sticky; top: 16px; } }
+
+/* ==========================================================================
+   LE GABARIT DE FICHE (septembre 2026, voir _fiche.html)
+   L'en-tete porte l'identite et le statut, le bandeau porte l'echeance, les
+   rubriques portent le detail. Rien n'est ecrit deux fois.
+   ========================================================================== */
+/* 16 px sous l'en-tete, l'ecart standard d'un .page-header : le bandeau est
+   dans l'en-tete, les onglets doivent respirer. */
+.fiche-entete { margin-bottom: 16px; }
+/* Les actions d'une fiche (_fiche.html, entete) sur deux lignes calées à
+   droite : les chevrons Précédent / Suivant en haut, dans le coin ; l'action
+   métier et le menu « ⋯ » sur la ligne du dessous, qui ne se replie pas. En
+   petits boutons de 26 px (la taille .btn-sm), chevrons compris : ils ne
+   doivent pas peser plus que le titre à côté. */
+.fiche-actions { flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 6px; }
+/* Les colonnes de l'en-tête ont la même hauteur (les chevrons en haut, l'action
+   métier en bas). Le bandeau d'échéance se pose à droite du titre, sur sa
+   ligne, et laisse le reste de la largeur aux actions. */
+.fiche-entete { align-items: stretch; flex-wrap: nowrap; }
+/* Pas de repli, et le titre ne se casse pas : quand la place manque, c'est le
+   complément du bandeau (« rotation tous les 180 j · dernier changement… »)
+   qui se coupe par « … », en dernier. */
+.fiche-entete-titre { flex: 0 0 auto; }
+/* Le bandeau se centre entre le titre et les actions (marges auto des deux côtés). */
+.fiche-entete-bandeau { flex: 0 1 auto; min-width: 0; margin: -1px auto 0; align-self: flex-start; }
+.fiche-entete-bandeau .fiche-bandeau { max-width: 100%; }
+.fiche-entete .fiche-actions { flex: 0 0 auto; }
+@media (max-width: 767.98px) { .fiche-entete { flex-wrap: wrap; } }
+.fiche-entete-bandeau .fiche-bandeau { margin: 0; }
+.fiche-actions-ligne { display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.fiche-actions-ligne .btn { white-space: nowrap; }
+.fiche-actions .btn, .fiche-actions .menu-seul .dropdown-item { padding: 2px 10px; font-size: 0.8rem; line-height: 20px; height: 26px; }
+.fiche-actions .btn-icon, .fiche-actions .menu-seul .dropdown-item { padding-left: 6px; padding-right: 6px; }
+/* Le titre d'une fiche, un poil plus petit que celui d'une liste (1.35 rem
+   au lieu de 1.5), son badge de statut avec lui. */
+.fiche-entete .page-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1.35rem; line-height: 1.1; }
+.fiche-entete .page-title .badge-status { font-size: 0.72rem; vertical-align: middle; }
+/* Le sous-titre d'une fiche : plus petit que celui d'une liste, collé au titre. */
+/* Le sous-titre ne dépasse pas la largeur du titre (width: 0, il ne compte pas
+   dans la largeur du bloc ; min-width: 100 %, il la remplit), et au moins
+   200 px sous un titre court. */
+.fiche-entete .page-subtitle { margin-top: -1px; width: 0; min-width: max(200px, 100%); font-size: 0.74rem; line-height: 1.25; }
+.fiche-entete .page-subtitle code { font-size: 0.85em; }
+
+/* Le bandeau : la date, le delai a cote, le complement dessous ; puis la frise
+   entre le debut et l'echeance. Un liseret de la couleur du statut sur le haut
+   du bandeau -- c'est le seul endroit ou la fiche porte sa couleur en dehors
+   des badges. Petit, sous le sous-titre de l'en-tete, sur UNE ligne quelle que
+   soit la place : la carte prend la largeur de son contenu, pas plus — une
+   etiquette, pas une banniere (Dom, 2026-10-12). */
+.fiche-bandeau {
+    width: max-content; max-width: 100%;
+    height: 26px; box-sizing: border-box;  /* la hauteur du bouton d'action en face */
+    display: flex; align-items: center;
+    padding: 0 12px;
+    margin-bottom: 12px;
+    border-top: 2px solid var(--sub);
+    border-radius: 10px;
+    line-height: 1.25;
+}
+/* Avec une frise (compte, contrat, revue), le bandeau prend la hauteur qu'il faut. */
+.fiche-bandeau:has(.fiche-frise) { height: auto; display: block; padding: 4px 12px 3px; }
+.fiche-bandeau--danger  { border-top-color: var(--danger); }
+.fiche-bandeau--warning { border-top-color: var(--warning); }
+.fiche-bandeau--info    { border-top-color: var(--info); }
+.fiche-bandeau--success { border-top-color: var(--success); }
+/* Un bandeau de faits (matériel, sauvegarde, mise à jour) : chaque fait sur
+   deux lignes, l'intitulé au-dessus de sa valeur, un filet entre les faits ;
+   le bandeau prend la hauteur qu'il faut. Faute de place (fenêtre étroite),
+   les faits se replient plutôt que d'être coupés. */
+.fiche-bandeau:has(.fiche-faits) { height: auto; display: block; padding: 6px 12px 5px; }
+.fiche-bandeau .fiche-faits { flex-wrap: wrap; gap: 0; margin: 0; }
+.fiche-bandeau .fiche-fait { border: 0; padding: 0 14px 0 0; background: none; border-radius: 0; flex: 0 0 auto; white-space: nowrap; }
+.fiche-bandeau .fiche-fait + .fiche-fait { border-left: 1px solid var(--line); padding-left: 14px; }
+.fiche-bandeau-ligne { display: flex; flex-wrap: nowrap; white-space: nowrap; align-items: baseline; gap: 10px; min-width: 0; }
+.fiche-bandeau-ligne > * { flex: 0 0 auto; }
+.fiche-bandeau-k {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: normal; text-transform: uppercase;
+    color: var(--muted);
+}
+.fiche-bandeau-date { font-size: 0.9rem; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.fiche-bandeau .delai { font-size: 0.8rem; }
+.fiche-bandeau-c { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; margin-left: 6px; font-size: 0.74rem; color: var(--muted); }
+.fiche-frise { position: relative; height: 6px; margin-top: 8px; border-radius: 3px; background: var(--inset); overflow: hidden; }
+.fiche-frise-fait { display: block; height: 100%; border-radius: 4px; background: var(--sub); }
+.fiche-bandeau--danger  .fiche-frise-fait { background: var(--danger); }
+.fiche-bandeau--warning .fiche-frise-fait { background: var(--warning); }
+.fiche-bandeau--info    .fiche-frise-fait { background: var(--info); }
+.fiche-bandeau--success .fiche-frise-fait { background: var(--success); }
+.fiche-frise-legende { display: flex; justify-content: space-between; margin-top: 3px; font-size: 0.66rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+/* Le rail droit : « Lie a », activite, alertes. */
+/* Les liens se suivent a 8 px (4 px de marge chacun) : deux lignes de texte
+   par lien suffisent a les separer, le bloc garde son air aux deux bouts. */
+.fiche-lies { display: flex; flex-direction: column; padding: 8px 0; }
+.fiche-lie { display: flex; align-items: center; gap: 10px; padding: 4px 16px; color: inherit; text-decoration: none; }
+.fiche-lie:hover { background: var(--inset); color: inherit; }
+/* L'onglet Contrats d'un fournisseur : un acte echu ou a venir se lit en grise. */
+.contrats-fournisseur tr.contrat-hors-periode > td { opacity: 0.6; }
+.contrats-fournisseur td { vertical-align: top; }
+/* Le delai sous le statut : du texte en couleur, l'icone du calendrier devant. */
+.contrats-fournisseur .delai-contrat { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+/* ... dans la couleur exacte du badge de statut au-dessus (--danger, --info...),
+   pas dans celle des classes text-* de Bootstrap, qui n'en sont que voisines. */
+.delai-contrat--success { color: var(--success); }
+.delai-contrat--warning { color: var(--warning); }
+.delai-contrat--danger  { color: var(--danger); }
+.delai-contrat--info    { color: var(--info); }
+/* Ce que couvre un contrat : une ligne par element, en plus petit que le
+   reste de la ligne -- une liste, pas une valeur. */
+.contrats-fournisseur .cell-couvre a { font-size: 0.8rem; line-height: 1.35; }
+/* Le filet de la ligne de total : au-dessus d'elle, pas dessous. */
+.contrats-fournisseur tfoot td { border-top: 1px solid var(--line); border-bottom: 0; }
+.fiche-lie > i, .fiche-lie > svg { font-size: 1rem; flex: 0 0 auto; }
+.fiche-lie > i { color: var(--muted); }
+/* Une icone Lucide garde la couleur de sa famille (kind-icon--…) quand elle en a une. */
+.fiche-lie > svg:not([class*="kind-icon--"]) { color: var(--text); }
+/* Le recapitulatif des liaisons d'un logiciel : un groupe par nature de lien
+   (services, serveurs, flux), 8 px entre deux groupes. */
+.liaisons-groupe + .liaisons-groupe { margin-top: 8px; }
+.liaisons-resume svg:not([class*="kind-icon--"]):not(.ico-vert), .liaisons-titre { color: var(--text); }
+.liaisons-titre { font-weight: 600; }
+/* Les serveurs et les flux de la carte Liaisons : le nom en couleur du texte,
+   en gras. */
+.liaisons-resume .liaison-serveur { color: var(--text); font-weight: 600; }
+.liaisons-resume .liaison-serveur:hover { color: var(--primary); }
+/* Une ligne sans sous-titre (le nom seul) se serre. */
+.fiche-lie:not(:has(small)) { padding-top: 1px; padding-bottom: 1px; }
+/* Titre et sous-titre serres : pas d'ecart entre les deux, et un interligne
+   de titre reduit (la regle generale .cell2 en met 1,3). */
+.fiche-lie .cell2 { gap: 0; line-height: 1.15; }
+.fiche-lie strong { font-weight: 600; color: var(--text); }
+/* Le sous-titre d'un lien (« Logiciel · v2024.2 ») : le meme petit gris leger
+   que le detail d'une piece de marche (12 px sur 16 px). */
+.fiche-lie .cell2 small { font-size: 12px; line-height: 16px; color: var(--faint); }
+.fiche-activite { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; font-size: 0.85rem; }
+.fiche-alertes { padding: 10px 14px; font-size: 0.85rem; }
+.fiche-alertes summary { list-style: none; cursor: pointer; }
+.fiche-alertes summary::-webkit-details-marker { display: none; }
+.fiche-alertes .cell2 small { font-size: 0.75rem; }
+.card-header-custom .btn-ghost.btn-sm { margin-left: auto; font-size: 0.78rem; }
+
+/* Un champ « large » vide se tait comme les autres. */
+.fiche-champ--large .fiche-valeur:empty { display: none; }
+
+/* Sur un telephone, une seule colonne — et la valeur repasse sous son intitule :
+   « Contrat de maintenance » et sa valeur ne tiennent pas de front sur 360 px. */
+@media (max-width: 575.98px) {
+    .fiche-sections { grid-template-columns: 1fr; }
+    .fiche-champ { display: block; }
+    .fiche-champ .fiche-valeur { text-align: left; margin-top: 2px; }
+}
+
+/* ==========================================================================
+   ONGLETS DE FICHE
+   Les pieces jointes, les flux, les consultations vivaient deux ecrans plus
+   bas, et rien ne signalait leur existence depuis le haut. Les onglets les
+   remontent a portee d'un clic et affichent leur nombre : « Documents 3 » se
+   lit sans descendre.
+
+   Dessin : un soulignement, pas des boites. Des onglets encadres ajouteraient
+   un troisieme niveau de cadre a une page qui en a deja deux (la carte, les
+   rubriques) — et le trait suffit a dire lequel est ouvert.
+   ========================================================================== */
+/* Serre pour tenir sur une ligne : 10 px de marge laterale par onglet, 5 entre
+   icone, libelle et compteur, aucun entre deux onglets (sept onglets et le
+   crayon dans les 788 px d'une fiche : 784 px). */
+.fiche-onglets {
+    gap: 0;
+    margin: 0 0 12px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+.fiche-onglets .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 10px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 8px 8px 0 0;
+    background: none;
+    color: var(--text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    /* Le trait du bas deborde d'un pixel sur celui du conteneur : sans cela
+       l'onglet actif parait pose au-dessus de la ligne, pas dessus. */
+    margin-bottom: -1px;
+}
+.fiche-onglets .nav-link:hover { color: var(--text); background: var(--hover-bg, rgba(0, 0, 0, 0.03)); }
+/* L'onglet ouvert ne se distingue que par son trait : le texte garde sa
+   couleur et l'icone la sienne. */
+.fiche-onglets .nav-link.active {
+    color: var(--text);
+    border-bottom-color: var(--primary);
+    background: none;
+}
+.fiche-onglets .nav-link i { font-size: 0.95rem; color: var(--ong-icon, currentColor); -webkit-text-stroke: 0.4px currentColor; }
+.fiche-onglets .nav-link > svg.lucide { flex-shrink: 0; color: var(--ong-icon, currentColor); }
+/* L'icone d'un onglet reprise en tete d'une carte qui le resume (« Tout voir ») :
+   meme dessin, meme couleur, 8 px avant le titre. */
+.ico-onglet { font-size: 0.95rem; color: var(--ong-icon, currentColor); -webkit-text-stroke: 0.4px currentColor; margin-right: 8px; }
+/* Le crayon « Modifier », au bout de la rangee (SoftInventory) : une icone
+   seule de 34 px, fantome, calee sur le texte des onglets par un retrait bas
+   de 3 px ; elle prend la couleur d'accent au survol. */
+.fiche-onglets .fiche-onglets-commandes { margin-left: auto; align-self: flex-end; padding-bottom: 3px; }
+.fiche-onglets .fiche-onglets-commandes .btn-icone { padding: 8px; border-radius: 8px; }
+.fiche-onglets .fiche-onglets-commandes .btn-icone:hover { color: var(--primary); }
+
+/* ---- Modification sur place (edition.js, barre(sur_place=True)) ----
+   En LECTURE, une fiche ne montre que des valeurs : tout formulaire d'envoi
+   des onglets (rattacher, retirer, déposer), les liens qui
+   ouvrent un formulaire dans la liste, les boutons qui en déplient un, et ce
+   que le gabarit marque [data-edition-seule], disparaissent. Les formulaires
+   [data-edition-visible] (l'onglet Détails, les services cochés, le report
+   d'une alerte) restent, les deux premiers grisés
+   par leur <fieldset disabled>. Le crayon ajoute .en-edition à <main> : tout
+   revient. Le CSS agit seul, sans attendre le script : pas d'éclair au chargement. */
+main:has([data-onglets][data-edition]):not(.en-edition) .fiche-volets :is(
+    form[method="post" i]:not([data-edition-visible]),
+    [data-formulaire-inline],
+    [data-bs-toggle="collapse"],
+    [data-bs-toggle="modal"],
+    [data-edition-seule]) { display: none !important; }
+/* Le formulaire verrouillé : ni pied (Annuler / Enregistrer), ni croix sur les
+   puces, ni champ de recherche, ni boutons d'ajout — des valeurs, sans gestes. */
+fieldset.edition-verrou[disabled] :is(.form-pied, .puce button, .puces-champ, .marches-actions,
+    [data-qa-open], .help-toggle) { display: none !important; }
+fieldset.edition-verrou[disabled] .form-control,
+fieldset.edition-verrou[disabled] .form-select { background-color: var(--inset); }
+/* Le crayon enfoncé, tant que la fiche est en modification : il suffit à le dire. */
+main.en-edition .fiche-onglets .js-edition { color: var(--primary); background: rgba(79, 70, 229, 0.12); }
+
+/* Une couleur par onglet, la meme d'une fiche a l'autre : les documents sont
+   bleus partout, les contrats orange partout (comme dans le menu). */
+#ong-detail     { --ong-icon: #4f46e5; } /* indigo-600 */
+#ong-elements   { --ong-icon: #7c3aed; } /* violet-600 */
+/* Les liaisons en vert, l'onglet comme sa carte dans la Synthese (.ico-vert) ;
+   les devis en vert fonce, pour ne pas s'y confondre. */
+#ong-liaisons,
+.ico-onglet--liaisons { --ong-icon: #059669; } /* emerald-600 */
+#ong-contrats,
+.ico-onglet--contrats { --ong-icon: #f97316; } /* orange-500 */
+#ong-devis      { --ong-icon: #166534; } /* green-800 */
+#ong-suivi      { --ong-icon: #eab308; } /* yellow-500 */
+#ong-documents,
+#ong-docs       { --ong-icon: #0284c7; } /* sky-600 */
+.ico-onglet--rgpd { --ong-icon: #e11d48; } /* rose-600 */
+#ong-historique { --ong-icon: #d97706; } /* amber-600 */
+#ong-logiciels  { --ong-icon: #eab308; } /* yellow-500 */
+#ong-contacts,
+.ico-onglet--contacts { --ong-icon: #db2777; } /* pink-600 */
+[data-theme="dark"] #ong-detail     { --ong-icon: #818cf8; }
+[data-theme="dark"] #ong-elements   { --ong-icon: #a78bfa; }
+[data-theme="dark"] #ong-liaisons,
+[data-theme="dark"] .ico-onglet--liaisons { --ong-icon: #34d399; }
+[data-theme="dark"] #ong-contrats,
+[data-theme="dark"] .ico-onglet--contrats { --ong-icon: #fb923c; }
+[data-theme="dark"] #ong-devis      { --ong-icon: #4ade80; }
+[data-theme="dark"] #ong-suivi      { --ong-icon: #facc15; }
+[data-theme="dark"] #ong-documents,
+[data-theme="dark"] #ong-docs       { --ong-icon: #38bdf8; }
+[data-theme="dark"] .ico-onglet--rgpd { --ong-icon: #fb7185; }
+[data-theme="dark"] #ong-historique { --ong-icon: #fbbf24; }
+[data-theme="dark"] #ong-logiciels  { --ong-icon: #facc15; }
+[data-theme="dark"] #ong-contacts,
+[data-theme="dark"] .ico-onglet--contacts { --ong-icon: #f472b6; }
+
+/* La pastille de comptage : zero se dit, il ne se tait pas. Une pastille grise
+   a zero signifie « on a regarde, il n'y en a pas » ; pas de pastille du tout
+   signifierait que la chose ne se compte pas. */
+.fiche-onglet-nb {
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(var(--sec-indigo), 0.12);
+    color: rgb(var(--sec-indigo));
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+}
+.fiche-onglet-nb.est-vide {
+    background: var(--border);
+    color: var(--text-muted);
+}
+.fiche-volets > .tab-pane { outline: none; }
+/* Voile le temps qu'onglets.js ouvre l'onglet de l'ancre (base.html). */
+.onglet-a-rouvrir .fiche-volets { visibility: hidden; }
+
+/* ==========================================================================
+   PAGINATION
+   Trois colonnes : le compte a gauche, les fleches exactement au centre, la
+   troisieme vide. Une fleche inactive reste rendue (estompee) pour que la
+   largeur ne bouge pas d'une page a l'autre.
+   ========================================================================== */
+.pagination-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-top: 8px;
+}
+.pagination-info {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+.pagination-nav { display: flex; align-items: center; gap: 4px; justify-self: center; }
+.pagination-nav .pagination-info { padding: 0 8px; }
+.pagination-nav .btn.disabled { opacity: 0.4; }
+/* Troisieme colonne de la barre : le selecteur de lignes par page, cale a droite. */
+.pagination-droite { justify-self: end; }
+/* Le selecteur de lignes par page se fond dans la barre : meme 12 px et meme
+   gris que les compteurs qui l'entourent, boite plus basse. Selecteur appuye :
+   les regles generales des .form-select, plus loin dans le fichier, l'emportaient. */
+.pagination-bar .pagination-droite .form-select.pagination-perpage {
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 2px 24px 2px 8px;
+    line-height: 18px;
+    height: auto;
+    background-size: 12px 8px;
+}
+
+/* ==========================================================================
+   BARRE DE LISTE : recherche a icone (224 px), segments de type, pastilles
+   d'etat, et a droite filtres / colonnes -- sur UNE ligne, la meme partout
+   (voir _liste.html).
+   ========================================================================== */
+.list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-bottom: 12px;
+}
+.list-toolbar-pills { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.list-toolbar-pills > .status-filter-bar { margin: 0 !important; }
+.list-toolbar-right { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+/* Actions de ligne : revelees au survol (ou au clavier), la colonne reste
+   etroite. Sur un ecran tactile, pas de survol : elles restent visibles. */
+.table .col-actions { width: 1%; white-space: nowrap; text-align: right; }
+.row-actions { display: inline-flex; gap: 4px; opacity: 0; transition: opacity 0.12s ease; }
+tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
+@media (hover: none) { .row-actions { opacity: 1; } }
+
+/* Une cellule sur deux lignes : la valeur, puis le complement en petit. */
+.cell2 { display: flex; flex-direction: column; gap: 1px; line-height: 1.3; }
+.cell2 small { font-size: 0.78rem; color: var(--muted); }
+.cell2 .delai { font-size: 0.78rem; }
+.list-toolbar-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+.list-search { position: relative; flex-shrink: 0; }
+.list-search > :is(i, svg.lucide) {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--faint);
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+.list-search > .form-control { width: 224px; padding-left: 36px; }
+@media (max-width: 575.98px) { .list-search > .form-control { width: 100%; } }
+
+/* Fenetres modales : conteneur 16 px, ombre marquee, voile a 40 %. */
+.modal-content {
+    background: var(--surface);
+    color: var(--body);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+}
+.modal-backdrop.show { opacity: 0.4; }
+.modal-header, .modal-footer { border-color: var(--line); }
+.modal-title { font-size: 1rem; font-weight: 600; color: var(--strong); }
+
+/* Menus deroulants (CSV, actions) : meme dessin que le menu utilisateur. */
+.dropdown-menu {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    padding: 4px;
+    font-size: 0.875rem;
+}
+.dropdown-item { border-radius: 6px; padding: 6px 8px; color: var(--body); }
+.dropdown-item:hover, .dropdown-item:focus { background: var(--inset); color: var(--strong); }
+/* L'entrée unique du menu d'une fiche (_fiche.html, entete) : pas de « ⋯ »
+   pour un seul choix, l'entrée elle-même en bouton à icône — l'aspect de
+   .btn.btn-outline-secondary.btn-icon — son libellé au survol (title). */
+.menu-seul { list-style: none; margin: 0; padding: 0; display: flex; }
+.menu-seul form { margin: 0; }
+.menu-seul .dropdown-item {
+    display: inline-flex; align-items: center; width: auto; height: 30px;
+    padding: 4px 8px; line-height: 20px; font-size: 0.875rem;
+    border: 1px solid var(--sub); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--body); box-shadow: var(--shadow-sm);
+}
+.menu-seul .dropdown-item:hover, .menu-seul .dropdown-item:focus { background: var(--surface); border-color: var(--primary); color: var(--strong); }
+.menu-seul .dropdown-item svg.lucide { margin-right: 0 !important; }
+.menu-seul .menu-libelle { display: none; }
+.dropdown-divider { border-color: var(--line); }
+
+/* Titres de section hors carte (h5/h6 gras dans le contenu) : micro-capitales. */
+.main-content h5.fw-bold { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+
+@media (max-width: 991.98px) {
+    .main-content { padding: 12px 16px; }
+}
+
+/* Cellule « aucun element » d'un tableau : estompee, aeree, sans cadre. */
+.table td[colspan].text-center { padding: 24px 20px; color: var(--faint); font-size: 0.875rem; }
+
+/* Des cartes qui n'en font qu'une (onglets Documents et Liaisons d'un logiciel) : collees, les coins arrondis aux seules extremites, un filet
+   entre deux. Les cartes viennent de gabarits partages, qui restent des
+   cartes ailleurs. */
+.cartes-collees { margin-bottom: 16px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.cartes-collees > .data-card { margin-bottom: 0 !important; box-shadow: none; }
+/* :first-of-type / :last-of-type et non :first-child / :last-child : un
+   gabarit inclus peut laisser un <script> apres sa carte. */
+.cartes-collees > .data-card:not(:first-of-type) { border-top-left-radius: 0; border-top-right-radius: 0; border-top: 0; }
+.cartes-collees > .data-card:not(:last-of-type) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+
+/* Carte Editeur d'un logiciel : le nom en titre, avec sa casse (le titre de
+   carte est en capitales) ; portail, telephone et courriels sur deux colonnes
+   des que chacune a 160 px (la carte en fait 341), sinon une. Des colonnes de
+   texte et non une grille : elles se remplissent l'une apres l'autre (portail
+   et telephone a gauche, les courriels a droite), l'ordre d'une seule colonne. */
+.editeur-titre a { min-width: 0; color: inherit; text-decoration: none; }
+.editeur-titre a:hover { color: var(--primary); }
+.editeur-coordonnees { columns: 2 160px; column-gap: 12px; }
+.editeur-coordonnees > li { break-inside: avoid; }
+
+/* Onglet Contacts d'un logiciel (software/_contacts.html), comme dans
+   SoftInventory : trois colonnes, une tuile d'icone de 32 px par ligne,
+   l'intitule en petites capitales, la valeur dessous ; un filet entre le
+   support et les contacts nommes. Une colonne sous 576 px. */
+.contacts-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; }
+.contact-ligne { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.contact-ligne--large { grid-column: span 2; }
+.contact-ico { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 32px; height: 32px; margin-top: 2px; border-radius: 8px; background: var(--inset); color: var(--muted); }
+.contact-ligne dt { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: normal; color: var(--muted); }
+.contact-ligne dd { margin: 0; font-size: 0.875rem; color: var(--text); }
+.contact-vide { color: var(--faint); }
+.contacts-filet { grid-column: 1 / -1; border-top: 1px solid var(--line); margin: 4px 0; }
+.contact-aucun { padding: 24px; border: 1px dashed var(--line); border-radius: var(--radius-lg); text-align: center; font-size: 0.875rem; color: var(--faint); }
+@media (max-width: 575.98px) {
+    .contacts-grille { grid-template-columns: 1fr; }
+    .contact-ligne--large { grid-column: auto; }
+}
+
+/* Les cartes du rail (Contrats en cours, Certificats) : le nom de l'element a
+   .875em, la ligne de detail (echeance, montant) a 12px. */
+.contrats-resume { font-size: inherit; }
+.contrats-resume li > div:first-child > a { font-size: .875em; }
+.contrats-resume li > .text-muted { font-size: 12px; }
