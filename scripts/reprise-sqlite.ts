@@ -284,7 +284,8 @@ async function copierConfig(db: Database.Database): Promise<void> {
     const secret = Boolean(r.is_secret) || SECRETS.has(r.key);
     if (secret && value) {
       try {
-        value = encryptSecret(SECRET_KEY ? fernetDecrypt(value, SECRET_KEY) : "");
+        if (!SECRET_KEY) throw new Error("SENTINELLE_SECRET_KEY absente");
+        value = encryptSecret(fernetDecrypt(value, SECRET_KEY));
         dechiffres += 1;
       } catch (e) {
         echecs += 1;
