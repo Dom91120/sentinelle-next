@@ -57,3 +57,10 @@
     }
   });
 })();
+
+// [data-soumettre-au-changement] : la case cochée envoie aussitôt son formulaire
+// (remplace l'ancien onchange="this.form.requestSubmit()", interdit par la CSP).
+document.addEventListener('change', function (e) {
+    var t = e.target.closest && e.target.closest('[data-soumettre-au-changement]');
+    if (t && t.form) t.form.requestSubmit();
+});
