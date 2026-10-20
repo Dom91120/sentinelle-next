@@ -167,9 +167,15 @@ export function EquipmentSelect({
 }
 
 /** `_inventory_nav.html` */
-export function InventoryNav({ active }: { active: "serveurs" | "reseau" }) {
+export function InventoryNav({
+  active,
+  className = "mb-2",
+}: {
+  active: "serveurs" | "reseau";
+  className?: string;
+}) {
   return (
-    <div className="seg-tabs mb-2">
+    <div className={`seg-tabs${className ? ` ${className}` : ""}`}>
       <a className={`seg-tab${active === "serveurs" ? " active" : ""}`} href="/inventory">
         <Icone bi="bi-hdd-stack" taille="1em" classes="me-1" />
         Serveurs

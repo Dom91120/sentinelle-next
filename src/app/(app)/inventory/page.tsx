@@ -281,8 +281,6 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
         ) : null}
       </div>
 
-      <InventoryNav active={famille as "serveurs" | "reseau"} />
-
       <form method="GET" id="invFilters">
         <input type="hidden" name="kind" value={kind} />
         <input type="hidden" name="famille" value={famille} />
@@ -290,24 +288,28 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
         <input type="hidden" name="dir" value={direction} />
         {perPageParam ? <input type="hidden" name="per_page" value={perPageParam} /> : null}
         <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-          <div className="seg-tabs">
-            {natures.length > 1 ? (
-              <>
-                <a className={`seg-tab${!kind ? " active" : ""}`} href={lien({ famille, q })}>
-                  Tous <span className="seg-tab-count">{totalCounts}</span>
-                </a>
-                {natures.map((val) => (
-                  <a
-                    key={val}
-                    className={`seg-tab${kind === val ? " active" : ""}`}
-                    href={lien({ famille, kind: val, q })}
-                  >
-                    {EQUIPMENT_KIND_LABELS[val]}{" "}
-                    <span className="seg-tab-count">{counts[val]}</span>
+          {/* La famille (Serveurs / Réseau) et ses natures, ensemble, sur la ligne de la recherche. */}
+          <div className="d-flex align-items-center flex-wrap gap-2">
+            <InventoryNav active={famille as "serveurs" | "reseau"} className="" />
+            <div className="seg-tabs">
+              {natures.length > 1 ? (
+                <>
+                  <a className={`seg-tab${!kind ? " active" : ""}`} href={lien({ famille, q })}>
+                    Tous <span className="seg-tab-count">{totalCounts}</span>
                   </a>
-                ))}
-              </>
-            ) : null}
+                  {natures.map((val) => (
+                    <a
+                      key={val}
+                      className={`seg-tab${kind === val ? " active" : ""}`}
+                      href={lien({ famille, kind: val, q })}
+                    >
+                      {EQUIPMENT_KIND_LABELS[val]}{" "}
+                      <span className="seg-tab-count">{counts[val]}</span>
+                    </a>
+                  ))}
+                </>
+              ) : null}
+            </div>
           </div>
           <div className="flex-grow-1 justify-content-end d-flex flex-wrap align-items-center gap-2">
             <div className="list-search">
