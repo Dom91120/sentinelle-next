@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Activite,
@@ -21,6 +22,17 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** updates/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.systemUpdate.findUnique({ where: { id }, select: { name: true } });
+  return { title: fiche ? `${fiche.name} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function UpdateDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("updates");
   const id = idDeRoute((await params).id);
@@ -42,7 +54,6 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
   const sousTitre = `${TYPE_LABELS[update.systemType ?? ""] ?? update.systemType ?? ""}${update.currentVersion ? ` · version ${update.currentVersion}` : ""}`;
   return (
     <>
-      <title>{`${update.name} - Sentinelle`}</title>
       <Entete
         titre={update.name}
         sousTitre={sousTitre}

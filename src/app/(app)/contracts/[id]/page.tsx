@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Documents } from "@/components/documents";
 import {
@@ -35,6 +36,17 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** contracts/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.contract.findUnique({ where: { id }, select: { name: true } });
+  return { title: fiche ? `${fiche.name} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function ContractDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("contracts");
   const id = idDeRoute((await params).id);
@@ -71,7 +83,6 @@ export default async function ContractDetail({ params }: { params: Promise<{ id:
   const equipements = contract.equipments.map((l) => l.equipment);
   return (
     <>
-      <title>{`${contract.name} - Sentinelle`}</title>
       <Entete
         titre={contract.name}
         sousTitre={sousTitre}

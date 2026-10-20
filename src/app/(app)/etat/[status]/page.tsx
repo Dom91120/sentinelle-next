@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Icone } from "@/components/icones";
 import { STATUS_LABELS } from "@/lib/libelles";
@@ -6,6 +7,19 @@ import { chargerTout } from "@/server/donnees";
 import { contextePage } from "@/server/page";
 
 /** by_status.html : vue transversale par statut (/etat/<status>). */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ status: string }>;
+}): Promise<Metadata> {
+  const { status } = await params;
+  const label = STATUS_LABELS[status as keyof typeof STATUS_LABELS];
+  return { title: label ? `${label} - Sentinelle` : "Sentinelle" };
+}
+
+const parId = <T extends { id: number }>(rows: T[]) => [...rows].sort((a, b) => a.id - b.id);
+
 export default async function ByStatus({ params }: { params: Promise<{ status: string }> }) {
   const page = await contextePage();
   const { status } = await params;
@@ -17,7 +31,7 @@ export default async function ByStatus({ params }: { params: Promise<{ status: s
     [
       "accounts",
       "Comptes",
-      tout.accounts.map((o) => ({
+      parId(tout.accounts).map((o) => ({
         id: o.id,
         status: o.status,
         nom: `${o.serviceName} (${o.username})`,
@@ -27,62 +41,67 @@ export default async function ByStatus({ params }: { params: Promise<{ status: s
     [
       "certificates",
       "Certificats",
-      tout.certificates.map((o) => ({ id: o.id, status: o.status, nom: certificateLabel(o) })),
+      parId(tout.certificates).map((o) => ({
+        id: o.id,
+        status: o.status,
+        nom: certificateLabel(o),
+      })),
       "certificates",
     ],
     [
       "domains",
       "Domaines",
-      tout.domains.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      parId(tout.domains).map((o) => ({ id: o.id, status: o.status, nom: o.name })),
       "domains",
     ],
     [
       "backups",
       "Sauvegardes",
-      tout.backups.map((o) => ({ id: o.id, status: o.status, nom: o.serviceName })),
+      parId(tout.backups).map((o) => ({ id: o.id, status: o.status, nom: o.serviceName })),
       "backups",
     ],
     [
       "tests",
       "Tests",
-      tout.tests.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      parId(tout.tests).map((o) => ({ id: o.id, status: o.status, nom: o.name })),
       "tests",
     ],
     [
       "reviews",
       "Revue de droits",
-      tout.reviews.map((o) => ({ id: o.id, status: o.status, nom: o.application })),
+      parId(tout.reviews).map((o) => ({ id: o.id, status: o.status, nom: o.application })),
       "reviews",
     ],
     [
       "updates",
       "Mises à jour",
-      tout.updates.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      parId(tout.updates).map((o) => ({ id: o.id, status: o.status, nom: o.name })),
       "updates",
     ],
     [
       "inventory",
       "Matériel",
-      tout.equipments.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      parId(tout.equipments).map((o) => ({ id: o.id, status: o.status, nom: o.name })),
       "inventory",
     ],
     [
       "software",
       "Logiciels",
-      tout.software.map((o) => ({ id: o.id, status: o.status, nom: o.name })),
+      parId(tout.software).map((o) => ({ id: o.id, status: o.status, nom: o.name })),
       "inventory/logiciels",
     ],
   ];
-  const items: { cat: string; name: string; url: string }[] = [];
+  const items: { cat: string; name: string; url: string; id: number }[] = [];
   for (const [cat, lbl, rows, prefix] of sources) {
     if (!user.canView(cat)) continue;
     for (const o of rows)
-      if (o.status === status) items.push({ cat: lbl, name: o.nom, url: `/${prefix}/${o.id}` });
+      if (o.status === status)
+        items.push({ cat: lbl, name: o.nom, url: `/${prefix}/${o.id}`, id: o.id });
   }
-  items.sort((a, b) => a.cat.localeCompare(b.cat));
+  // `items.sort(key=lambda x: x['cat'])` : tri stable sur le libellé, l'ordre d'id en second.
+  items.sort((a, b) => (a.cat < b.cat ? -1 : a.cat > b.cat ? 1 : a.id - b.id));
   return (
     <>
-      <title>{`${label} - Sentinelle`}</title>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 className="page-title">

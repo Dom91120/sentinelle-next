@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BoutonModal, Entete, FaitBloc, Faits, ModalAction } from "@/components/fiche";
 import { Icone } from "@/components/icones";
@@ -20,6 +21,17 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** backups/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.backup.findUnique({ where: { id }, select: { serviceName: true } });
+  return { title: fiche ? `${fiche.serviceName} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function BackupDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("backups");
   const id = idDeRoute((await params).id);
@@ -91,7 +103,7 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
             <span
               className={rate >= 95 ? "text-success" : rate >= 80 ? "text-warning" : "text-danger"}
             >
-              {rate} %
+              {rate.toFixed(1)} %
             </span>
           ) : (
             <span className="text-muted">—</span>
@@ -102,7 +114,6 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
   );
   return (
     <>
-      <title>{`${backup.serviceName} - Sentinelle`}</title>
       <Entete
         titre={backup.serviceName}
         sousTitre={sousTitre}

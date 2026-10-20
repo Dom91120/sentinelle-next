@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Activite,
@@ -20,6 +21,20 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** reviews/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.accessReview.findUnique({
+    where: { id },
+    select: { application: true },
+  });
+  return { title: fiche ? `${fiche.application} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function ReviewDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("reviews");
   const id = idDeRoute((await params).id);
@@ -40,7 +55,6 @@ export default async function ReviewDetail({ params }: { params: Promise<{ id: s
   const sousTitre = `Revue de droits${review.responsible ? ` · ${review.responsible}` : ""}${review.frequencyDays ? ` · tous les ${review.frequencyDays} j` : ""}`;
   return (
     <>
-      <title>{`${review.application} - Sentinelle`}</title>
       <Entete
         titre={review.application}
         sousTitre={sousTitre}

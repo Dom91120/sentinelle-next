@@ -76,7 +76,7 @@ export async function chargerComptes(seuils?: Seuils): Promise<AvecStatut<Accoun
   const s = seuils ?? (await contexteStatuts()).seuils;
   const rows = await prisma.account.findMany({
     where: { isActive: true },
-    orderBy: { nextPasswordChange: "asc" },
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
   });
   return rows.map((a) => ({ ...a, status: accountStatus(a, s) }));
 }
@@ -89,7 +89,7 @@ export async function chargerCertificats(
   if (!categoryEnabledIn(ctx.settings, "certificates")) return [];
   const rows = await prisma.certificate.findMany({
     where: { isActive: true },
-    orderBy: { expiryDate: "asc" },
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { certUsage: true, support: true, supplier: true },
   });
   return rows.map((c) => ({ ...c, status: certificateStatus(c, ctx.seuils) }));
@@ -106,7 +106,7 @@ export async function chargerDomaines(
   const s = seuils ?? (await contexteStatuts()).seuils;
   const rows = await prisma.domain.findMany({
     where: { isActive: true },
-    orderBy: [{ expiryDate: { sort: "asc", nulls: "last" } }],
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { registrarSupplier: true },
   });
   return rows.map((d) => ({ ...d, status: domainStatus(d, s) }));
@@ -115,7 +115,7 @@ export async function chargerDomaines(
 export async function chargerSauvegardes(): Promise<AvecStatut<BackupComplet>[]> {
   const rows = await prisma.backup.findMany({
     where: { isActive: true },
-    orderBy: { serviceName: "asc" },
+    orderBy: { id: "asc" }, // `Backup.query.filter_by(is_active=True).all()` : l'ordre d'insertion
     include: { checks: { orderBy: { checkDate: "desc" } } },
   });
   return rows.map((b) => ({ ...b, status: backupComputedStatus(b, b.checks) }));
@@ -127,7 +127,7 @@ export async function chargerTests(
   const s = seuils ?? (await contexteStatuts()).seuils;
   const rows = await prisma.testTask.findMany({
     where: { isActive: true },
-    orderBy: { nextDue: "asc" },
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { software: true },
   });
   return rows.map((t) => ({ ...t, brut: t.status, status: testComputedStatus(t, s) }));
@@ -139,7 +139,7 @@ export async function chargerRevues(
   const s = seuils ?? (await contexteStatuts()).seuils;
   const rows = await prisma.accessReview.findMany({
     where: { isActive: true },
-    orderBy: { nextReview: "asc" },
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { software: true },
   });
   return rows.map((r) => ({ ...r, brut: r.status, status: reviewComputedStatus(r, s) }));
@@ -152,7 +152,7 @@ export async function chargerMisesAJour(): Promise<
 > {
   const rows = await prisma.systemUpdate.findMany({
     where: { isActive: true },
-    orderBy: { name: "asc" },
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { equipment: true, software: true },
   });
   return rows.map((u) => ({ ...u, brut: u.status, status: updateStatusColor(u) }));
@@ -167,7 +167,7 @@ export async function chargerEquipements(
   const [rows, backups, cyc] = await Promise.all([
     prisma.equipment.findMany({
       where: { isActive: true },
-      orderBy: { name: "asc" },
+      orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
       include: { supplier: true },
     }),
     prisma.backup.findMany({
@@ -194,7 +194,7 @@ export async function chargerEquipements(
 export async function chargerLogiciels(): Promise<AvecStatut<SoftwareComplet>[]> {
   const rows = await prisma.software.findMany({
     where: { isActive: true },
-    orderBy: { name: "asc" },
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { systemUpdates: { where: { isActive: true } }, supplier: true },
   });
   return rows.map((s) => ({ ...s, status: softwareComputedStatus(s, s.systemUpdates) }));
@@ -204,7 +204,7 @@ export async function chargerContrats(seuils?: Seuils): Promise<AvecStatut<Contr
   const s = seuils ?? (await contexteStatuts()).seuils;
   const rows = await prisma.contract.findMany({
     where: { isActive: true },
-    orderBy: { endDate: "asc" },
+    orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { kindRef: true, supplier: true },
   });
   return rows.map((c) => ({ ...c, status: contractStatus(c, s) }));

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Documents } from "@/components/documents";
 import {
@@ -26,6 +27,20 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** certificates/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.certificate.findUnique({
+    where: { id },
+    select: { serviceName: true },
+  });
+  return { title: fiche ? `${fiche.serviceName} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function CertificateDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("certificates");
   const id = idDeRoute((await params).id);
@@ -93,7 +108,6 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
     : null;
   return (
     <>
-      <title>{`${cert.serviceName} - Sentinelle`}</title>
       <Entete
         titre={cert.serviceName}
         sousTitre={sousTitre}

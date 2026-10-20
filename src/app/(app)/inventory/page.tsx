@@ -153,6 +153,8 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
   if (!(famille in EQUIPMENT_FAMILIES)) famille = "serveurs";
   const natures = EQUIPMENT_FAMILIES[famille];
   const tous = await chargerEquipements();
+  // `_actifs()` : order_by(Equipment.name), ordre binaire de SQLite.
+  tous.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
   let items = tous.filter((e) => equipmentFamily(e.kind || "vm") === famille);
   const q = str(params, "q");
   let kind = str(params, "kind");

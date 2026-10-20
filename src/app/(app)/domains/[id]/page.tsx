@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Activite,
@@ -22,6 +23,17 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** domains/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.domain.findUnique({ where: { id }, select: { name: true } });
+  return { title: fiche ? `${fiche.name} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function DomainDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("domains");
   const id = idDeRoute((await params).id);
@@ -90,7 +102,6 @@ export default async function DomainDetail({ params }: { params: Promise<{ id: s
   ];
   return (
     <>
-      <title>{`${domain.name} - Sentinelle`}</title>
       <Entete
         titre={domain.name}
         sousTitre={sousTitre}

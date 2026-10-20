@@ -576,14 +576,14 @@ function ContactLu({
         facultatif
         titre={nom ? undefined : `Téléphone ${qui}`}
       >
-        <Tel numero={numero} />
+        {numero ? <Tel numero={numero} /> : null}
       </LuBloc>
       <LuBloc
         label={nom ? "Courriel" : `Mail ${court}`}
         facultatif
         titre={nom ? undefined : `Courriel ${qui}`}
       >
-        <Mail adresse={adresse} />
+        {adresse ? <Mail adresse={adresse} /> : null}
       </LuBloc>
     </div>
   );
@@ -611,12 +611,8 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
         </Rangee>
         <Rangee>
           <Lu label="Interlocuteur" valeur={s.contactName} />
-          <LuBloc label="Courriel">
-            <Mail adresse={s.email} />
-          </LuBloc>
-          <LuBloc label="Téléphone">
-            <Tel numero={s.phone} />
-          </LuBloc>
+          <LuBloc label="Courriel">{s.email ? <Mail adresse={s.email} /> : null}</LuBloc>
+          <LuBloc label="Téléphone">{s.phone ? <Tel numero={s.phone} /> : null}</LuBloc>
         </Rangee>
         <Rangee>
           <LuBloc label="Adresse" pleine>
@@ -642,11 +638,9 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
               </a>
             ) : null}
           </LuBloc>
-          <LuBloc label="Hotline">
-            <Tel numero={s.supportPhone} />
-          </LuBloc>
+          <LuBloc label="Hotline">{s.supportPhone ? <Tel numero={s.supportPhone} /> : null}</LuBloc>
           <LuBloc label="Courriel">
-            <Mail adresse={s.supportEmail} />
+            {s.supportEmail ? <Mail adresse={s.supportEmail} /> : null}
           </LuBloc>
         </Rangee>
         <Rangee>

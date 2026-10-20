@@ -347,7 +347,9 @@ describe("marchés", () => {
       /<fieldset class="edition-verrou" data-edition-verrou(?:="[^"]*")? disabled(?:="")?>/,
     );
     const fragment = (await c.get(`/contracts/${ct.id}/edit?inline=1`)).text;
-    expect(fragment).toMatch(/class="formulaire marche-saisie" data-edition-visible(?:="[^"]*")?>/);
+    expect(fragment).toMatch(
+      /<form[^>]*class="formulaire marche-saisie"[^>]*data-edition-visible(?:="[^"]*")?[^>]*>/,
+    );
   });
 
   it("le formulaire se rend seul dans une liste", async () => {

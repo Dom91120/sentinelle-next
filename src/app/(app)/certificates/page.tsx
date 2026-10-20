@@ -25,6 +25,12 @@ export default async function CertificatesList({ searchParams }: { searchParams:
   const kindParam = String(params.kind ?? "").trim();
   const kind = kindParam in CERT_KIND_LABELS ? kindParam : "";
   const tous = await chargerCertificats();
+  // Certificate.expiry_date.asc() (NULL en tête, comme SQLite), puis par statut (tri stable).
+  tous.sort(
+    (a, b) =>
+      (a.expiryDate?.getTime() ?? Number.NEGATIVE_INFINITY) -
+      (b.expiryDate?.getTime() ?? Number.NEGATIVE_INFINITY),
+  );
   const services = new Map(
     (await prisma.userService.findMany({ select: { id: true, name: true } })).map((s) => [
       s.id,

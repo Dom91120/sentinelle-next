@@ -92,8 +92,12 @@ export function Rangee({ children }: { children: React.ReactNode }) {
   return <div className="lu-rangee">{children}</div>;
 }
 
+/** Un enfant React « vide » : rien ne sera rendu (comme un bloc `{% call %}` Jinja sans contenu). */
 function vide(v: unknown): boolean {
-  return v === null || v === undefined || v === "" || v === false;
+  if (v === null || v === undefined || v === false || v === true) return true;
+  if (typeof v === "string") return v.trim() === "";
+  if (Array.isArray(v)) return v.every(vide);
+  return false;
 }
 
 /** `lu(label, valeur, large, titre, pleine, facultatif, texte)` */

@@ -131,7 +131,7 @@ export default async function BackupsList({ searchParams }: { searchParams: Para
                           <span
                             className={`fw-bold ${rate >= 95 ? "text-success" : rate >= 80 ? "text-warning" : "text-danger"}`}
                           >
-                            {rate} %
+                            {rate.toFixed(1)} %
                           </span>
                         ) : (
                           <span className="text-muted">—</span>

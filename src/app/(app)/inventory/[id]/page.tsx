@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CarteFournisseur, Entete, Fait, FaitBloc, Faits, TitreSection } from "@/components/fiche";
 import { Icone } from "@/components/icones";
@@ -22,6 +23,17 @@ import { idDeRoute } from "@/server/guards";
 import { contexteModule, voisinsDe } from "@/server/module";
 
 /** inventory/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.equipment.findUnique({ where: { id }, select: { name: true } });
+  return { title: fiche ? `${fiche.name} - Inventaire` : "Inventaire" };
+}
+
 export default async function InventoryDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("inventory");
   const id = idDeRoute((await params).id);
@@ -75,7 +87,6 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
   const showAccts = user.canView("accounts") && item.accounts.length > 0;
   return (
     <>
-      <title>{`${item.name} - Inventaire`}</title>
       <Entete
         titre={item.name}
         sousTitre={sousTitre}

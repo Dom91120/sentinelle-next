@@ -115,7 +115,11 @@ export function dateCourte(d: Date | null | undefined): string {
   return `${dd}/${mm}/${d.getUTCFullYear()}`;
 }
 
-/** « 17/09/2026 14:05 » (équivalent de strftime('%d/%m/%Y %H:%M')), en heure de Paris. */
+/**
+ * « 17/09/2026 14:05 » (équivalent de strftime('%d/%m/%Y %H:%M')). Sentinelle stocke des
+ * datetimes UTC naïfs et les affiche sans conversion : on fait pareil (UTC), pour que les
+ * deux applications montrent la même heure.
+ */
 export function dateHeure(d: Date | null | undefined): string {
   if (!d) return "";
   return new Intl.DateTimeFormat("fr-FR", {
@@ -124,7 +128,7 @@ export function dateHeure(d: Date | null | undefined): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "Europe/Paris",
+    timeZone: "UTC",
   })
     .format(d)
     .replace(",", "");

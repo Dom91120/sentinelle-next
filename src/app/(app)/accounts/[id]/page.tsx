@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Activite,
@@ -22,6 +23,17 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** accounts/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.account.findUnique({ where: { id }, select: { serviceName: true } });
+  return { title: fiche ? `${fiche.serviceName} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function AccountDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("accounts");
   const id = idDeRoute((await params).id);
@@ -43,7 +55,6 @@ export default async function AccountDetail({ params }: { params: Promise<{ id: 
   const today = isoDate(aujourdhui());
   return (
     <>
-      <title>{`${account.serviceName} - Sentinelle`}</title>
       <Entete
         titre={account.serviceName}
         sousTitre={

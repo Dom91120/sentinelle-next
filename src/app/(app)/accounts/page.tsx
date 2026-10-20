@@ -17,6 +17,12 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let accounts = await chargerComptes();
+  // Account.next_password_change.asc() (NULL en tête, comme SQLite), puis par statut (tri stable).
+  accounts.sort(
+    (a, b) =>
+      (a.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY) -
+      (b.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY),
+  );
   accounts = textSearch(accounts, q, ["serviceName", "username", "url", "description"]);
   accounts.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "accounts.list");

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Documents } from "@/components/documents";
 import { CarteEditeur, Champ, Entete, TitreSection } from "@/components/fiche";
@@ -52,6 +53,17 @@ function euros(n: number): string {
 }
 
 /** software/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.software.findUnique({ where: { id }, select: { name: true } });
+  return { title: fiche ? `${fiche.name} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function SoftwareDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("software");
   const id = idDeRoute((await params).id);
@@ -69,7 +81,7 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
       accessReviews: { where: { isActive: true } },
       accounts: { where: { isActive: true } },
       equipments: { include: { equipment: true } },
-      userServices: { include: { userService: true } },
+      userServices: { include: { userService: true }, orderBy: { userServiceId: "asc" } },
       linksOut: { include: { target: true } },
       linksIn: { include: { source: true } },
       shares: { orderBy: { label: "asc" } },
@@ -203,7 +215,6 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
   const colGauche = sup || marchesEnCours.length || nbLiaisons ? "col-lg-9" : "col-12";
   return (
     <>
-      <title>{`${item.name} - Sentinelle`}</title>
       <Entete
         titre={titre}
         sousTitre={sousTitre}
@@ -845,22 +856,6 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
           </>
         ) : null}
 
-        {docsOn ? (
-          <Volet cible="documents">
-            <div className="cartes-collees">
-              <Documents
-                parentKind="software"
-                parentId={id}
-                permission="software"
-                user={user}
-                csrf={csrf}
-                title="Documents"
-              />
-              <Partages item={item} partages={item.shares} user={user} csrf={csrf} nonce={nonce} />
-            </div>
-          </Volet>
-        ) : null}
-
         <Volet cible="suivi">
           <div className="cartes-collees">
             <div className="data-card">
@@ -1081,6 +1076,22 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
             ) : null}
           </div>
         </Volet>
+
+        {docsOn ? (
+          <Volet cible="documents">
+            <div className="cartes-collees">
+              <Documents
+                parentKind="software"
+                parentId={id}
+                permission="software"
+                user={user}
+                csrf={csrf}
+                title="Documents"
+              />
+              <Partages item={item} partages={item.shares} user={user} csrf={csrf} nonce={nonce} />
+            </div>
+          </Volet>
+        ) : null}
       </Volets>
 
       {user.canEdit("inventory") ? <QaModalServer csrf={csrf} /> : null}

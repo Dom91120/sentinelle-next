@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Activite,
@@ -22,6 +23,17 @@ import { contexteModule, voisinsDe } from "@/server/module";
 import { getActiveSnooze } from "@/server/snooze";
 
 /** tests/detail.html */
+/** Le titre de l'onglet, comme le `{% block title %}` du gabarit Jinja. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const id = idDeRoute((await params).id);
+  const fiche = await prisma.testTask.findUnique({ where: { id }, select: { name: true } });
+  return { title: fiche ? `${fiche.name} - Sentinelle` : "Sentinelle" };
+}
+
 export default async function TestDetail({ params }: { params: Promise<{ id: string }> }) {
   const page = await contexteModule("tests");
   const id = idDeRoute((await params).id);
@@ -40,7 +52,6 @@ export default async function TestDetail({ params }: { params: Promise<{ id: str
   const sousTitre = `Test récurrent${typeLabel ? ` · ${typeLabel}` : ""}${test.frequencyDays ? ` · tous les ${test.frequencyDays} j` : ""}`;
   return (
     <>
-      <title>{`${test.name} - Sentinelle`}</title>
       <Entete
         titre={test.name}
         sousTitre={sousTitre}

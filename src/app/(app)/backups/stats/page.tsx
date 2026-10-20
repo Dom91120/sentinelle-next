@@ -112,13 +112,13 @@ export default async function BackupsStats() {
                 <div className="text-center">
                   <small className="text-muted d-block">Taux 30j</small>
                   <span className={`fw-bold ${taux(item.rate30)}`}>
-                    {item.rate30 !== null ? `${item.rate30}%` : "-"}
+                    {item.rate30 !== null ? `${item.rate30.toFixed(1)}%` : "-"}
                   </span>
                 </div>
                 <div className="text-center">
                   <small className="text-muted d-block">Taux 7j</small>
                   <span className={`fw-bold ${taux(item.rate7)}`}>
-                    {item.rate7 !== null ? `${item.rate7}%` : "-"}
+                    {item.rate7 !== null ? `${item.rate7.toFixed(1)}%` : "-"}
                   </span>
                 </div>
                 <div className="text-center">

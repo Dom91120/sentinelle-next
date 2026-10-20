@@ -24,6 +24,8 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
   const q = String(params.q ?? "").trim();
   const host = String(params.host ?? "").trim();
   const tous = await chargerLogiciels();
+  // Software.query.filter_by(is_active=True).order_by(Software.name) : ordre binaire de SQLite.
+  tous.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
   const totalAll = tous.length;
   const match: Record<string, (s: (typeof tous)[number]) => boolean> = {
     docker: (s) => s.isDocker,
@@ -45,6 +47,7 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
     }),
     prisma.softwareService.findMany({
       where: { softwareId: { in: ids } },
+      orderBy: { userServiceId: "asc" },
       include: { userService: { select: { name: true } } },
     }),
   ]);
