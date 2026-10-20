@@ -62,7 +62,13 @@ export function ConfirmModal({ csrf, nonce }: { csrf: string; nonce?: string }) 
       <form method="POST" id="form-supprimer" className="d-none" aria-hidden="true">
         <input type="hidden" name="csrf_token" value={csrf} />
       </form>
-      <div className="modal fade" id="confirmModal" tabIndex={-1} aria-hidden="true">
+      <div
+        className="modal fade"
+        id="confirmModal"
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{ "--bs-modal-width": "550px" } as React.CSSProperties}
+      >
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header border-0 pb-0">
