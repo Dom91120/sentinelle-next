@@ -6,7 +6,7 @@
 import { Icone, Lucide } from "@/components/icones";
 import { ConfirmModal, ScriptsPage, ToastNotifications } from "@/components/scripts";
 import { compte } from "@/lib/libelles";
-import { ADMINISTRATION, DOMAINES, entreeActive, filAriane } from "@/lib/navigation";
+import { ADMINISTRATION, DOMAINES, entreeActive } from "@/lib/navigation";
 import type { Flash } from "@/server/flash";
 import type { CurrentUser } from "@/server/guards";
 
@@ -68,7 +68,6 @@ export function Shell({
   extraJs,
 }: ShellProps) {
   const [domActif, entreeActif] = entreeActive(pathname);
-  const fil = filAriane(pathname);
   const adminVisible = user.isAdmin || user.canView("alerts");
   const adminOuvert = domActif?.key === "administration";
   return (
@@ -244,24 +243,6 @@ export function Shell({
 
       <main className="main-content" id="main-content">
         <FlashMessages flashes={flashes} nonce={nonce} />
-        {fil.length ? (
-          <nav className="fil-ariane" aria-label="Fil d'Ariane">
-            {fil.map(([label, url], i) => (
-              <span key={i}>
-                {i > 0 ? (
-                  <span className="fil-sep" aria-hidden="true">
-                    ›
-                  </span>
-                ) : null}
-                {url ? (
-                  <a href={url}>{label}</a>
-                ) : (
-                  <span className={i === fil.length - 1 ? "fil-actuel" : undefined}>{label}</span>
-                )}
-              </span>
-            ))}
-          </nav>
-        ) : null}
         {children}
       </main>
 

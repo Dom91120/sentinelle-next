@@ -440,23 +440,3 @@ export function entreeActive(pathname: string): [NavDomaine | null, NavEntry | n
   }
   return meilleur ?? [null, null];
 }
-
-export type FilAriane = [string, string | null][];
-
-/** Le fil d'Ariane de la page courante : [(libellé, url|null), ...]. Vide sur le tableau de bord. */
-export function filAriane(pathname: string): FilAriane {
-  const p = pathname.replace(/\/+$/, "") || "/";
-  const [dom, entree] = entreeActive(p);
-  if (!dom) return [];
-  if (p === "/") return [];
-  const fil: FilAriane = [[dom.label, null]];
-  if (entree === null) {
-    const orph = Object.entries(ORPHELINS).find(([k]) => p === k || p.startsWith(`${k}/`));
-    fil.push([orph ? orph[1][1] : "", null]);
-  } else if (entree.href !== p) {
-    fil.push([entree.label, entree.href]);
-  } else {
-    fil.push([entree.label, null]);
-  }
-  return fil;
-}
