@@ -206,7 +206,7 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
         <input type="hidden" name="csrf_token" value={csrf} />
 
         <div className="data-card mb-3">
-          <Carte titre="Identité" bi="info" couleur="indigo">
+          <Carte titre="Logiciel" bi="bi-window-stack" couleur="indigo">
             <div className="grille grille-identite">
               <div>
                 <label className="form-label small mb-1" htmlFor="swNom">
@@ -370,7 +370,8 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
               </div>
             </div>
 
-            <div>
+            {/* Même respiration (8 px) que les grilles : la partie technique suit. */}
+            <div className="mb-2">
               <label className="form-label small mb-1" htmlFor="swDescriptif">
                 Descriptif
               </label>
@@ -383,9 +384,6 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 defaultValue={v(item?.description)}
               />
             </div>
-          </Carte>
-
-          <Carte titre="Technique" bi="settings" couleur="sky">
             <div className="grille grille-technique">
               <div>
                 <label className="form-label small mb-1" htmlFor="swHebergement">
@@ -1099,7 +1097,7 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
       className="data-card mb-3 synthese synthese--cases"
       style={{ "--lu-intitule": "80px" } as React.CSSProperties}
     >
-      <Rubrique titre="Identité" bi="info" couleur="indigo">
+      <Rubrique titre="Logiciel" bi="bi-window-stack" couleur="indigo">
         <Rangee>
           <Lu label="Version" valeur={item.version} />
           <LuBloc label="Éditeur">
@@ -1152,9 +1150,6 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
         <Rangee>
           <Lu label="Descriptif" valeur={item.description} pleine texte />
         </Rangee>
-      </Rubrique>
-
-      <Rubrique titre="Technique" bi="settings" couleur="sky">
         <Rangee>
           <Lu label="Hébergement" valeur={hostingLabel(item)} />
           <Lu label="Technologie" valeur={item.technology ? item.technology.label : null} />

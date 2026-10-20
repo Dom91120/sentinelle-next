@@ -632,7 +632,8 @@ describe("logiciels", () => {
     });
     let html = (await c.get(`/inventory/logiciels/${sw.id}`)).text;
     expect(html).toContain('class="data-card mb-3 synthese synthese--cases"');
-    expect(html).toContain("Technique");
+    expect(html).toContain("Logiciel</h6>");
+    expect(html).not.toContain("Technique</h6>");
     expect(html).toContain("Docker");
     expect(html).toContain("À compléter");
     expect(html).not.toContain('data-manque="Version"');
