@@ -4,7 +4,8 @@
  * (si activé) un bind LDAP. Un utilisateur AD valide est provisionné
  * automatiquement avec le rôle par défaut configuré.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { Client, type ClientOptions } from "ldapts";
 import type { AppSettings } from "@/server/config-store";
 import { journal } from "@/server/log";
@@ -38,10 +39,18 @@ export function buildServer(cfg: AppSettings): Serveur {
   if (useSsl) {
     const tls: Record<string, unknown> = { rejectUnauthorized: cfg.LDAP_VALIDATE_CERT !== false };
     if (cfg.LDAP_CA_CERT) {
-      try {
-        tls.ca = [readFileSync(cfg.LDAP_CA_CERT)];
-      } catch (e) {
-        journal.avert("ldap", "Certificat CA illisible", { chemin: cfg.LDAP_CA_CERT, erreur: e });
+      // Le chemin enregistré peut venir d'un autre déploiement (/app/sentinelle/instance/… de
+      // l'application Flask) : à défaut, le fichier déposé par Préférences dans instance/ fait foi.
+      const candidats = [cfg.LDAP_CA_CERT, path.join(process.cwd(), "instance", "ldap_ca.pem")];
+      const lu = candidats.find((c) => existsSync(c));
+      if (lu) {
+        try {
+          tls.ca = [readFileSync(lu)];
+        } catch (e) {
+          journal.avert("ldap", "Certificat CA illisible", { chemin: lu, erreur: e });
+        }
+      } else {
+        journal.avert("ldap", "Certificat CA introuvable", { chemins: candidats });
       }
     }
     options.tlsOptions = tls;
