@@ -379,7 +379,7 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 name="description"
                 id="swDescriptif"
                 className="form-control form-control-sm"
-                rows={4}
+                rows={3}
                 placeholder="Périmètre fonctionnel, dépendances, particularités…"
                 defaultValue={v(item?.description)}
               />
