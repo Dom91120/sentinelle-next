@@ -1720,45 +1720,123 @@ export function Partages({
         {partages.length ? (
           <ul className="list-unstyled mb-0 dossiers-liste">
             {partages.map((p, i) => (
-              <li
-                key={p.id}
-                className={`d-flex align-items-start gap-2 py-2${i === 0 ? "" : " border-top"}`}
-              >
-                <Lucide nom="folder-open" taille={16} classes="doc-ico flex-shrink-0" />
-                <div className="min-w-0 flex-grow-1">
-                  <div className="d-flex align-items-center gap-2 min-w-0">
-                    <code className="dossier-chemin js-chemin">{p.path}</code>
+              <li key={p.id} className={`py-2${i === 0 ? "" : " border-top"}`}>
+                <div className="d-flex align-items-start gap-2">
+                  <Lucide nom="folder-open" taille={16} classes="doc-ico flex-shrink-0" />
+                  <div className="min-w-0 flex-grow-1">
+                    <div className="d-flex align-items-center gap-2 min-w-0">
+                      <code className="dossier-chemin js-chemin">{p.path}</code>
+                      <button
+                        type="button"
+                        className="doc-dl js-copier flex-shrink-0"
+                        title={`Copier ${p.path}`}
+                        aria-label={`Copier le chemin ${p.path}`}
+                      >
+                        <Lucide nom="copy" taille={14} />
+                      </button>
+                    </div>
+                    <div className="doc-sous">
+                      {p.label ? `${p.label} · ` : ""}À coller dans la barre d'adresse de
+                      l'Explorateur.
+                    </div>
+                  </div>
+                  {peutEditer ? (
                     <button
                       type="button"
-                      className="doc-dl js-copier flex-shrink-0"
-                      title={`Copier ${p.path}`}
-                      aria-label={`Copier le chemin ${p.path}`}
+                      className="btn btn-sm btn-ghost btn-icone flex-shrink-0"
+                      data-bs-toggle="collapse"
+                      data-bs-target={`#partageEdit${p.id}`}
+                      title="Modifier le dossier"
+                      aria-label="Modifier le dossier"
                     >
-                      <Lucide nom="copy" taille={14} />
+                      <Lucide nom="pencil" taille={16} />
                     </button>
-                  </div>
-                  <div className="doc-sous">
-                    {p.label ? `${p.label} · ` : ""}À coller dans la barre d'adresse de
-                    l'Explorateur.
-                  </div>
+                  ) : null}
+                  {peutSupprimer ? (
+                    <form
+                      method="POST"
+                      action={`/inventory/logiciels/shares/${p.id}/delete`}
+                      className="flex-shrink-0"
+                    >
+                      <input type="hidden" name="csrf_token" value={csrf} />
+                      <button
+                        type="submit"
+                        className="btn btn-sm btn-ghost btn-icone btn-ghost-danger"
+                        title="Retirer le dossier"
+                        aria-label="Retirer le dossier"
+                        data-confirm="Retirer ce dossier ?"
+                      >
+                        <Lucide nom="trash-2" taille={16} />
+                      </button>
+                    </form>
+                  ) : null}
                 </div>
-                {peutSupprimer ? (
-                  <form
-                    method="POST"
-                    action={`/inventory/logiciels/shares/${p.id}/delete`}
-                    className="flex-shrink-0"
-                  >
-                    <input type="hidden" name="csrf_token" value={csrf} />
-                    <button
-                      type="submit"
-                      className="btn btn-sm btn-ghost btn-icone btn-ghost-danger"
-                      title="Retirer le dossier"
-                      aria-label="Retirer le dossier"
-                      data-confirm="Retirer ce dossier ?"
+                {peutEditer ? (
+                  <div className="collapse doc-edit-volet" id={`partageEdit${p.id}`}>
+                    <form
+                      method="POST"
+                      action={`/inventory/logiciels/shares/${p.id}/edit`}
+                      className="doc-edit p-2 rounded border bg-body-tertiary"
                     >
-                      <Lucide nom="trash-2" taille={16} />
-                    </button>
-                  </form>
+                      <input type="hidden" name="csrf_token" value={csrf} />
+                      <div className="row g-2 align-items-end">
+                        <div className="col-md-3">
+                          <label
+                            className="form-label fw-medium small mb-1"
+                            htmlFor={`partageLabel${p.id}`}
+                          >
+                            Libellé
+                          </label>
+                          <input
+                            type="text"
+                            name="label"
+                            id={`partageLabel${p.id}`}
+                            className="form-control form-control-sm"
+                            defaultValue={p.label ?? ""}
+                            maxLength={128}
+                            placeholder="Installeurs, Documentation…"
+                          />
+                        </div>
+                        <div className="col">
+                          <label
+                            className="form-label fw-medium small mb-1"
+                            htmlFor={`partageChemin${p.id}`}
+                          >
+                            Chemin *
+                          </label>
+                          <input
+                            type="text"
+                            name="path"
+                            id={`partageChemin${p.id}`}
+                            className="form-control form-control-sm"
+                            defaultValue={p.path}
+                            maxLength={512}
+                            required
+                          />
+                        </div>
+                        <div className="col-auto d-flex gap-1">
+                          <button
+                            type="submit"
+                            className="btn btn-sm btn-ghost btn-icone btn-valider"
+                            title="Enregistrer"
+                            aria-label="Enregistrer"
+                          >
+                            <Lucide nom="check" taille={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-ghost btn-icone btn-annuler"
+                            title="Annuler"
+                            aria-label="Annuler"
+                            data-bs-toggle="collapse"
+                            data-bs-target={`#partageEdit${p.id}`}
+                          >
+                            <Lucide nom="x" taille={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
                 ) : null}
               </li>
             ))}

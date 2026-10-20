@@ -222,6 +222,33 @@ describe("dossiers du partage réseau", () => {
     expect(await prisma.softwareShare.count()).toBe(1);
   });
 
+  it("le libellé et le chemin d'un dossier se corrigent en place", async () => {
+    const c = await clientAdmin();
+    const sw = await prisma.software.create({ data: { name: "GLPI" } });
+    const p = await prisma.softwareShare.create({
+      data: { softwareId: sw.id, path: "\\\\srv\\ancien", label: "Avant" },
+    });
+    const html = (await c.get(`/inventory/logiciels/${sw.id}`)).text;
+    expect(html).toContain(`id="partageEdit${p.id}"`);
+    expect(html).toContain(`action="/inventory/logiciels/shares/${p.id}/edit"`);
+    const r = await c.post(`/inventory/logiciels/shares/${p.id}/edit`, {
+      label: "Après",
+      path: "\\\\srv\\nouveau",
+    });
+    expect(r.status).toBe(303);
+    const apres = await prisma.softwareShare.findUniqueOrThrow({ where: { id: p.id } });
+    expect(apres.path).toBe("\\\\srv\\nouveau");
+    expect(apres.label).toBe("Après");
+    // Un chemin vide, ou déjà pris par un autre dossier de la fiche, est refusé.
+    await prisma.softwareShare.create({ data: { softwareId: sw.id, path: "\\\\srv\\autre" } });
+    await c.post(`/inventory/logiciels/shares/${p.id}/edit`, { path: "\\\\srv\\autre" });
+    await c.post(`/inventory/logiciels/shares/${p.id}/edit`, { path: "" });
+    expect((await prisma.softwareShare.findUniqueOrThrow({ where: { id: p.id } })).path).toBe(
+      "\\\\srv\\nouveau",
+    );
+    expect(await prisma.softwareShare.count()).toBe(2);
+  });
+
   it("un dossier sans chemin est refusé", async () => {
     const c = await clientAdmin();
     const sw = await prisma.software.create({ data: { name: "GLPI" } });
