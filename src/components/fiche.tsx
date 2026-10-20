@@ -60,6 +60,8 @@ export type EnteteProps = {
   voisins?: Voisins | null;
   base?: string;
   bandeau?: React.ReactNode;
+  /** Une ligne de texte sous les boutons, alignée à droite (l'éditeur d'un logiciel…). */
+  sousActions?: React.ReactNode;
 };
 
 function estSeparateur(n: React.ReactNode): boolean {
@@ -78,6 +80,7 @@ export function Entete({
   voisins,
   base = "",
   bandeau,
+  sousActions,
 }: EnteteProps) {
   const entrees = menu.filter(
     (m) => m !== null && m !== undefined && m !== false && !estSeparateur(m),
@@ -122,6 +125,7 @@ export function Entete({
             ) : null}
           </div>
         ) : null}
+        {sousActions ? <p className="page-subtitle text-end w-100 mb-0">{sousActions}</p> : null}
       </div>
     </div>
   );

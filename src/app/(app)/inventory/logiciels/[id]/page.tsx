@@ -171,25 +171,26 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
   const nbLiaisons = (features.links ? flux.length : 0) + equipments.length + userServices.length;
   const over = softwareOverLicence(item);
   const sup = item.supplier;
-  const sousTitre = (
+  // L'éditeur se lit à droite, sous les boutons de navigation ; le sous-titre garde le reste.
+  const sousTitre = [
+    item.version ? `v${item.version}` : null,
+    lifecycleLabel(item).toLowerCase(),
+    `${hostingLabel(item).toLowerCase()}${item.isDocker ? " (Docker)" : ""}`,
+    item.criticality ? `criticité ${criticalityLabel(item).toLowerCase()}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const editeur = item.internalDev ? (
+    "Développement interne"
+  ) : sup ? (
     <>
-      {item.internalDev ? (
-        "Développement interne"
-      ) : sup ? (
-        <>
-          Édité par{" "}
-          <a href={`/suppliers/${item.supplierId}`} className="fw-medium text-decoration-none">
-            {sup.name}
-          </a>
-        </>
-      ) : (
-        "Éditeur inconnu"
-      )}
-      {item.version ? ` · v${item.version}` : ""} · {lifecycleLabel(item).toLowerCase()} ·{" "}
-      {hostingLabel(item).toLowerCase()}
-      {item.isDocker ? " (Docker)" : ""}
-      {item.criticality ? ` · criticité ${criticalityLabel(item).toLowerCase()}` : ""}
+      Édité par{" "}
+      <a href={`/suppliers/${item.supplierId}`} className="fw-medium text-decoration-none">
+        {sup.name}
+      </a>
     </>
+  ) : (
+    "Éditeur inconnu"
   );
   const titre = (
     <>
@@ -221,6 +222,7 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
         statut={statut}
         voisins={voisins}
         base="/inventory/logiciels"
+        sousActions={editeur}
       />
 
       {over ? (
