@@ -1,3 +1,4 @@
+import { ScriptDiffere } from "@/components/scripts";
 import { Icone } from "@/components/icones";
 import { DelaiBadge, StatusBadge } from "@/components/macros";
 import { compte, dateCourte, dateLongue } from "@/lib/libelles";
@@ -369,8 +370,7 @@ function WidgetBody({ k, d, csrf, canEdit, nonce }: { k: string; d: DashboardDat
             <div id="urgentEmpty" className="text-center py-3 text-muted d-none">
               Aucun élément dans cette catégorie.
             </div>
-            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script inline statique. */}
-            <script nonce={nonce} dangerouslySetInnerHTML={{ __html: URGENT_FILTER_JS }} />
+            <ScriptDiffere code={URGENT_FILTER_JS} nonce={nonce} />
           </>
         ) : (
           <div className="text-center py-4 text-muted">
@@ -538,9 +538,8 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {d.dashboardCustom ? <script src="/js/dashboard-custom.js" nonce={page.nonce} /> : null}
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script inline statique. */}
-      <script nonce={page.nonce} dangerouslySetInnerHTML={{ __html: TOOLTIP_JS }} />
+      {d.dashboardCustom ? <ScriptDiffere src="/js/dashboard-custom.js" nonce={page.nonce} /> : null}
+      <ScriptDiffere code={TOOLTIP_JS} nonce={page.nonce} />
     </>
   );
 }

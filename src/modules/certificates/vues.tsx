@@ -1,4 +1,5 @@
 /** Les gabarits des certificats (port de certificates/_form_corps.html et _synthese.html). */
+import { ScriptDiffere } from "@/components/scripts";
 import type { Certificate, Domain, Equipment, Referential, Supplier, UserService } from "@/generated/prisma/client";
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
 import { Icone } from "@/components/icones";
@@ -268,11 +269,9 @@ export function FormCorps({ certificate, kind, equipments, suppliers, services, 
         </form>
       </div>
 
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script inline statique. */}
-      <script nonce={nonce} dangerouslySetInnerHTML={{ __html: NATURE_JS }} />
-      <script src="/js/lookup_fill.js" nonce={nonce} />
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script inline statique. */}
-      <script nonce={nonce} dangerouslySetInnerHTML={{ __html: LOOKUP_JS }} />
+      <ScriptDiffere code={NATURE_JS} nonce={nonce} />
+      <ScriptDiffere src="/js/lookup_fill.js" nonce={nonce} />
+      <ScriptDiffere code={LOOKUP_JS} nonce={nonce} />
     </>
   );
 }

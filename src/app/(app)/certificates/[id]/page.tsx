@@ -3,6 +3,7 @@ import { Documents } from "@/components/documents";
 import { Activite, BandeauEcheance, BoutonModal, Entete, Historique, MenuLien, MenuPost, ModalAction } from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
+import { ScriptDiffere } from "@/components/scripts";
 import { CERT_VALIDITY_LABELS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { certificateHolderLabel, certificateMonitored, certificateStatus } from "@/lib/statuts";
@@ -130,8 +131,7 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
         </ModalAction>
       ) : null}
 
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: code de révocation sérialisé en JSON, dévoilé sur geste explicite. */}
-      {revealJs ? <script nonce={nonce} dangerouslySetInnerHTML={{ __html: revealJs }} /> : null}
+      {revealJs ? <ScriptDiffere code={revealJs} nonce={nonce} /> : null}
     </>
   );
 }

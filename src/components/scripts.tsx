@@ -1,4 +1,16 @@
+import { ChargeurScripts } from "@/components/chargeur-scripts";
 import { Icone } from "@/components/icones";
+
+/**
+ * Un script différé : rendu inerte (`type="text/x-differe"`), rejoué par
+ * `ChargeurScripts` après l'hydratation React. `rang` 1 = socle (base.html),
+ * 2 = scripts propres à la page, exécutés après le socle.
+ */
+export function ScriptDiffere({ src, code, nonce, rang = 2 }: { src?: string; code?: string; nonce?: string; rang?: 1 | 2 }) {
+  if (src) return <script type="text/x-differe" data-src={src} data-rang={rang} nonce={nonce} />;
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: code inline construit côté serveur, inerte jusqu'au rejeu.
+  return <script type="text/x-differe" data-rang={rang} nonce={nonce} dangerouslySetInnerHTML={{ __html: code ?? "" }} />;
+}
 
 /** Les scripts de base.html, dans le même ordre, avec le nonce CSP. */
 export function ScriptsPage({ nonce, extra }: { nonce?: string; extra?: React.ReactNode }) {
@@ -19,9 +31,10 @@ export function ScriptsPage({ nonce, extra }: { nonce?: string; extra?: React.Re
   return (
     <>
       {fichiers.map((src) => (
-        <script key={src} src={src} nonce={nonce} />
+        <ScriptDiffere key={src} src={src} nonce={nonce} rang={1} />
       ))}
       {extra}
+      <ChargeurScripts />
     </>
   );
 }
@@ -54,7 +67,7 @@ export function ConfirmModal({ csrf, nonce }: { csrf: string; nonce?: string }) 
           </div>
         </div>
       </div>
-      <script src="/js/confirm-modal.js" nonce={nonce} />
+      <ScriptDiffere src="/js/confirm-modal.js" nonce={nonce} rang={1} />
     </>
   );
 }
@@ -74,7 +87,7 @@ export function ToastNotifications({ nonce }: { nonce?: string }) {
           </div>
         </div>
       </div>
-      <script src="/js/toast-notifications.js" nonce={nonce} />
+      <ScriptDiffere src="/js/toast-notifications.js" nonce={nonce} rang={1} />
     </>
   );
 }
