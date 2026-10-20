@@ -1175,22 +1175,24 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
         </Rangee>
         <Rangee>
           <LuBloc label="Nature" facultatif>
+            {/* Icône seule, le libellé au survol (et pour les lecteurs d'écran). */}
             {item.isDocker ? (
-              <span className="badge-nature">
-                <i className="icon-docker me-1" />
-                Docker
+              <span className="badge-nature" title="Docker" aria-label="Docker">
+                <i className="icon-docker" />
               </span>
             ) : null}
             {item.internalDev ? (
-              <span className="badge-nature">
-                <Icone bi="bi-code-slash" taille="1em" classes="me-1" />
-                Développement interne
+              <span
+                className="badge-nature"
+                title="Développement interne"
+                aria-label="Développement interne"
+              >
+                <Icone bi="bi-code-slash" taille="1em" />
               </span>
             ) : null}
             {item.noServer ? (
-              <span className="badge-nature">
-                <Icone bi="bi-slash-circle" taille="1em" classes="me-1" />
-                Aucun serveur
+              <span className="badge-nature" title="Aucun serveur" aria-label="Aucun serveur">
+                <Icone bi="bi-slash-circle" taille="1em" />
               </span>
             ) : null}
           </LuBloc>
