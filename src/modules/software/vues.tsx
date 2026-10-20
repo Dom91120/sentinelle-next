@@ -369,21 +369,6 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 />
               </div>
             </div>
-
-            {/* Même respiration (8 px) que les grilles : la partie technique suit. */}
-            <div className="mb-2">
-              <label className="form-label small mb-1" htmlFor="swDescriptif">
-                Descriptif
-              </label>
-              <textarea
-                name="description"
-                id="swDescriptif"
-                className="form-control form-control-sm"
-                rows={3}
-                placeholder="Périmètre fonctionnel, dépendances, particularités…"
-                defaultValue={v(item?.description)}
-              />
-            </div>
             <div className="grille grille-technique">
               <div>
                 <label className="form-label small mb-1" htmlFor="swHebergement">
@@ -560,6 +545,20 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
               </div>
             </Carte>
           ) : null}
+
+          <Carte titre="Descriptif" bi="bi-journal-text" couleur="slate">
+            <label className="form-label small mb-1" htmlFor="swDescriptif">
+              Périmètre fonctionnel, dépendances, particularités
+            </label>
+            <textarea
+              name="description"
+              id="swDescriptif"
+              className="form-control form-control-sm"
+              rows={3}
+              placeholder="Périmètre fonctionnel, dépendances, particularités…"
+              defaultValue={v(item?.description)}
+            />
+          </Carte>
         </div>
 
         <PiedForm
@@ -1148,9 +1147,6 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
           </LuBloc>
         </Rangee>
         <Rangee>
-          <Lu label="Descriptif" valeur={item.description} pleine texte />
-        </Rangee>
-        <Rangee>
           <Lu label="Hébergement" valeur={hostingLabel(item)} />
           <Lu label="Technologie" valeur={item.technology ? item.technology.label : null} />
           <Lu label="Type licence" valeur={sourceTypeLabel(item)} />
@@ -1237,6 +1233,12 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
           ) : null}
         </Rubrique>
       ) : null}
+
+      <Rubrique titre="Descriptif" bi="bi-journal-text" couleur="slate">
+        <Rangee>
+          <Lu label="Descriptif" valeur={item.description} pleine texte />
+        </Rangee>
+      </Rubrique>
     </div>
   );
 }
