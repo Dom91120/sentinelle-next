@@ -11,9 +11,13 @@ export type Voisins = [Voisin | null, Voisin | null];
 /** (précédente, suivante) de la fiche `id` parmi `lignes` ({id, nom} des fiches actives). */
 export function voisinsParmi(lignes: Voisin[], id: number, settings: AppSettings): Voisins {
   if (!settings.FICHE_NAVIGATION) return [null, null];
+  // `order_by(func.lower(colonne), modele.id)` : lower() de SQLite ne touche que l'ASCII et
+  // l'ordre est celui des points de code, pas celui d'une locale.
+  const cle = (s: string) => s.replace(/[A-Z]/g, (c) => c.toLowerCase());
   const tri = [...lignes].sort((a, b) => {
-    const c = a.nom.toLowerCase().localeCompare(b.nom.toLowerCase(), "fr");
-    return c !== 0 ? c : a.id - b.id;
+    const x = cle(a.nom);
+    const y = cle(b.nom);
+    return x < y ? -1 : x > y ? 1 : a.id - b.id;
   });
   const i = tri.findIndex((l) => l.id === id);
   if (i === -1) return [null, null];
