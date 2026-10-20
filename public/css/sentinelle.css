@@ -3427,3 +3427,14 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
 .contrats-resume { font-size: inherit; }
 .contrats-resume li > div:first-child > a { font-size: .875em; }
 .contrats-resume li > .text-muted { font-size: 12px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Ajustements sentinelle-next (après le portage) : tout ce qui précède est
+   la copie de static/css/style.css de Sentinelle ; ce qui suit s'y ajoute.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Le sous-titre d'une fiche sur une seule ligne : il prend sa largeur naturelle au
+   lieu de se caler sur celle du titre (width: 0 + min-width) ; le bloc du titre peut
+   se réduire pour que les boutons restent à droite. */
+.fiche-entete-titre { flex: 0 1 auto; min-width: 0; }
+.fiche-entete .page-subtitle { width: auto; min-width: 0; }
