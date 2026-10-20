@@ -845,6 +845,22 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
           </>
         ) : null}
 
+        {docsOn ? (
+          <Volet cible="documents">
+            <div className="cartes-collees">
+              <Documents
+                parentKind="software"
+                parentId={id}
+                permission="software"
+                user={user}
+                csrf={csrf}
+                title="Documents"
+              />
+              <Partages item={item} partages={item.shares} user={user} csrf={csrf} nonce={nonce} />
+            </div>
+          </Volet>
+        ) : null}
+
         <Volet cible="suivi">
           <div className="cartes-collees">
             <div className="data-card">
@@ -1065,22 +1081,6 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
             ) : null}
           </div>
         </Volet>
-
-        {docsOn ? (
-          <Volet cible="documents">
-            <div className="cartes-collees">
-              <Documents
-                parentKind="software"
-                parentId={id}
-                permission="software"
-                user={user}
-                csrf={csrf}
-                title="Documents"
-              />
-              <Partages item={item} partages={item.shares} user={user} csrf={csrf} nonce={nonce} />
-            </div>
-          </Volet>
-        ) : null}
       </Volets>
 
       {user.canEdit("inventory") ? <QaModalServer csrf={csrf} /> : null}

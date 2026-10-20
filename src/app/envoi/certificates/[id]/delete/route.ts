@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db";
+import { require as requireFeature } from "@/server/features";
 import { requireDelete } from "@/server/guards";
 import { idDe, pasTrouve, redirigerAvecMessage, traiterFormulaire } from "@/server/http";
 import { invalidateNavCounts } from "@/server/nav";
@@ -8,6 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const id = idDe((await params).id);
   if (!id) return pasTrouve();
   return traiterFormulaire(req, async () => {
+    await requireFeature("certificates");
     const user = await requireDelete("certificates");
     const cert = await prisma.certificate.findUnique({ where: { id } });
     if (!cert) return pasTrouve();

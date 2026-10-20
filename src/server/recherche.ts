@@ -233,9 +233,11 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
         OR: [
           { name: like },
           { version: like },
+          { url: like },
           { responsible: like },
           { techResponsible: like },
           { description: like },
+          { supplier: { name: like } },
         ],
       },
       include: { supplier: true, systemUpdates: { where: { isActive: true } } },

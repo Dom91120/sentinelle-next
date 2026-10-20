@@ -43,7 +43,6 @@ export function ScriptsPage({ nonce, extra }: { nonce?: string; extra?: React.Re
     "/js/formulaire-inline.js",
     "/js/edition.js",
     "/js/texte-tronque.js",
-    "/js/synthese.js",
   ];
   return (
     <>

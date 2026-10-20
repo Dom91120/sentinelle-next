@@ -74,8 +74,15 @@ export class ClientTest {
       await r.arrayBuffer();
       return this.envoyer("GET", location, null, {}, true, sauts + 1);
     }
-    const text = await r.text();
+    let text = await r.text();
     const ct = r.headers.get("content-type") ?? "";
+    // Le HTML tel que le navigateur le montre : sans la charge RSC (`self.__next_f`)
+    // ni les séparateurs de texte de React (`<!-- -->`), que Jinja ne produisait pas.
+    if (ct.includes("text/html")) {
+      text = text
+        .replace(/<script[^>]*>self\.__next_f\.push[\s\S]*?<\/script>/g, "")
+        .replace(/<!-- -->/g, "");
+    }
     return {
       status: r.status,
       headers: r.headers,

@@ -1,9 +1,39 @@
 /**
  * La Synthèse d'une fiche (port de _synthese.html) : les rubriques dans UNE carte,
  * l'intitulé à gauche, la valeur en face. Un champ vide laisse un marqueur
- * `data-manque` ; la ligne « À compléter » est assemblée par synthese.js.
+ * `data-manque` ; la rubrique rassemble ces intitulés en une ligne « À compléter ».
  */
+import { isValidElement } from "react";
 import { Icone, Lucide } from "@/components/icones";
+
+/**
+ * Les intitulés des champs vides d'une rubrique, lus dans l'arbre des éléments
+ * (la macro Jinja les lisait dans le HTML rendu) : un `Lu` sans valeur, un
+ * `LuBloc` sans contenu, hors `facultatif`.
+ */
+function manquesDe(noeud: React.ReactNode): string[] {
+  const out: string[] = [];
+  const visiter = (n: React.ReactNode): void => {
+    if (n === null || n === undefined || typeof n !== "object") return;
+    if (Array.isArray(n)) {
+      for (const x of n) visiter(x);
+      return;
+    }
+    if (!isValidElement(n)) return;
+    const props = n.props as Record<string, unknown>;
+    if (n.type === Lu) {
+      if (vide(props.valeur) && !props.facultatif) out.push(String(props.label));
+      return;
+    }
+    if (n.type === LuBloc) {
+      if (vide(props.children) && !props.facultatif) out.push(String(props.label));
+      return;
+    }
+    visiter(props.children as React.ReactNode);
+  };
+  visiter(noeud);
+  return out;
+}
 
 export function Rubrique({
   titre,
@@ -27,6 +57,7 @@ export function Rubrique({
   else if (bi.startsWith("bi-"))
     icone = <Icone bi={bi} taille={14} classes={`ico ico-${couleur}`} />;
   else icone = <Lucide nom={bi} taille={14} classes={`ico ico-${couleur}`} />;
+  const manques = manquesDe(children);
   return (
     <>
       <div className="card-header-custom d-flex justify-content-between align-items-center">
@@ -39,10 +70,19 @@ export function Rubrique({
       <div className="p-3">
         <div
           className={`lu-grille${colonnes === 3 || colonnes === 4 ? ` lu-grille--${colonnes}` : ""}`}
-          data-manques
         >
           {children}
         </div>
+        {manques.length ? (
+          <div className="lu-manques">
+            <Lucide nom="pencil" taille={12} />À compléter :{" "}
+            {manques.map((m) => (
+              <span key={m} className="lu-manque">
+                {m}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </>
   );

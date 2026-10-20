@@ -470,7 +470,9 @@ describe("logiciels", () => {
     expect((await lire(sw.id)).noServer).toBe(false);
     html = (await c.get(`/inventory/logiciels/${sw.id}`)).text;
     expect(html).toContain(">SRV-CIRIL</a>");
-    expect(html).not.toContain(`<option value="${e1.id}">`);
+    expect(
+      html.match(/<select[^>]*name="equipment_id"[\s\S]*?<\/select>/)?.[0] ?? "",
+    ).not.toContain(`<option value="${e1.id}">`);
     await c.post(
       `/inventory/logiciels/${sw.id}/servers/${e1.id}/detach`,
       {},

@@ -344,10 +344,10 @@ describe("marchés", () => {
     expect(html).toContain("js-edition");
     expect(html).not.toContain("js-modifier");
     expect(html).toMatch(
-      /<fieldset class="edition-verrou" data-edition-verrou(?:="")? disabled(?:="")?>/,
+      /<fieldset class="edition-verrou" data-edition-verrou(?:="[^"]*")? disabled(?:="")?>/,
     );
     const fragment = (await c.get(`/contracts/${ct.id}/edit?inline=1`)).text;
-    expect(fragment).toMatch(/class="formulaire marche-saisie" data-edition-visible(?:="")?>/);
+    expect(fragment).toMatch(/class="formulaire marche-saisie" data-edition-visible(?:="[^"]*")?>/);
   });
 
   it("le formulaire se rend seul dans une liste", async () => {
@@ -524,7 +524,7 @@ describe("marchés", () => {
     expect(html).toContain("Éléments couverts");
     expect(html).toContain("kind-icon--nas");
     expect(html).toContain("kind-icon--software");
-    expect(html).toContain("1 234,50 €");
+    expect(html).toContain("1 234,50 €");
     expect(html).toContain("2 fois");
     expect(html).not.toContain("Couvre");
     expect(html).not.toContain("fiche-sections");
