@@ -3438,3 +3438,9 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
    se réduire pour que les boutons restent à droite. */
 .fiche-entete-titre { flex: 0 1 auto; min-width: 0; }
 .fiche-entete .page-subtitle { width: auto; min-width: 0; }
+
+/* Quand une ligne de texte suit les boutons de navigation (l'éditeur d'un logiciel),
+   la colonne de droite reproduit la colonne de gauche : des boutons de la hauteur du
+   titre (24 px), puis la ligne de texte à la hauteur du sous-titre. */
+.fiche-actions:has(> .page-subtitle) { gap: 0; justify-content: flex-start; }
+.fiche-actions:has(> .page-subtitle) .fiche-voisins .btn { height: 24px; line-height: 18px; }
