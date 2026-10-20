@@ -13,6 +13,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ quoteId
     const quote = await prisma.quote.findUnique({ where: { id: quoteId }, include: { consultation: true } });
     if (!quote) return pasTrouve();
     await prisma.quote.delete({ where: { id: quoteId } });
-    return redirigerAvecMessage(`/software/${quote.consultation.softwareId}`, "Devis supprimé", "success");
+    return redirigerAvecMessage(`/inventory/logiciels/${quote.consultation.softwareId}`, "Devis supprimé", "success");
   });
 }

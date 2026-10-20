@@ -137,7 +137,7 @@ export default async function ContractDetail({ params }: { params: Promise<{ id:
               {legacy ? (
                 <Lie titre="Couvre">
                   {logiciels.map((sw) => (
-                    <Lien key={`s${sw.id}`} url={`/software/${sw.id}`} icone="app-window" nom={sw.name} teinte="software" />
+                    <Lien key={`s${sw.id}`} url={`/inventory/logiciels/${sw.id}`} icone="app-window" nom={sw.name} teinte="software" />
                   ))}
                   {equipements.map((e) => (
                     <Lien key={`e${e.id}`} url={`/inventory/${e.id}`} icone={EQUIPMENT_KIND_ICONS[e.kind ?? "vm"] ?? "server"} nom={e.name} teinte={e.kind} />

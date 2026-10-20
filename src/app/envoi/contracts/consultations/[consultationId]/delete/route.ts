@@ -15,6 +15,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ consult
     if (!cons) return pasTrouve();
     await prisma.consultation.delete({ where: { id: consultationId } });
     await auditRecord("suppression consultation", cons.subject, "contrats", user.username);
-    return redirigerAvecMessage(`/software/${cons.softwareId}`, "Consultation supprimée", "success");
+    return redirigerAvecMessage(`/inventory/logiciels/${cons.softwareId}`, "Consultation supprimée", "success");
   });
 }

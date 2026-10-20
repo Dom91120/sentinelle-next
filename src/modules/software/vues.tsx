@@ -88,7 +88,7 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
   const v = (s: string | null | undefined) => s ?? "";
   return (
     <div className="form-seul">
-      <form method="POST" id="form-principal" className="formulaire logiciel-saisie" data-edition-visible action={item ? `/software/${item.id}/edit` : "/software/create"}>
+      <form method="POST" id="form-principal" className="formulaire logiciel-saisie" data-edition-visible action={item ? `/inventory/logiciels/${item.id}/edit` : "/inventory/logiciels/create"}>
         <input type="hidden" name="csrf_token" value={csrf} />
 
         <div className="data-card mb-3">
@@ -291,7 +291,7 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
           ) : null}
         </div>
 
-        <PiedForm retour={retour} libelle={item ? "Enregistrer" : "Ajouter"} supprimer={item && user.canDelete("software") ? `/software/${item.id}/delete` : null} confirmation="Supprimer ce logiciel ?" />
+        <PiedForm retour={retour} libelle={item ? "Enregistrer" : "Ajouter"} supprimer={item && user.canDelete("software") ? `/inventory/logiciels/${item.id}/delete` : null} confirmation="Supprimer ce logiciel ?" />
       </form>
     </div>
   );
@@ -302,7 +302,7 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
   const v = (s: string | null | undefined) => s ?? "";
   const curHost = item ? item.hosting : "on_premise";
   return (
-    <form method="POST" id="form-principal" className="formulaire" data-edition-visible action={item ? `/software/${item.id}/edit` : "/software/create"}>
+    <form method="POST" id="form-principal" className="formulaire" data-edition-visible action={item ? `/inventory/logiciels/${item.id}/edit` : "/inventory/logiciels/create"}>
       <input type="hidden" name="csrf_token" value={csrf} />
       <input type="hidden" name="contract_ids" value="" />
       <input type="hidden" name="user_service_ids" value="" />
@@ -553,7 +553,7 @@ export function FormCorpsAncien({ item, suppliers, contracts, equipments, techno
         </div>
       </Section>
 
-      <PiedForm retour={retour} libelle={item ? "Enregistrer" : "Ajouter"} supprimer={item && user.canDelete("software") ? `/software/${item.id}/delete` : null} confirmation="Supprimer ce logiciel ?" />
+      <PiedForm retour={retour} libelle={item ? "Enregistrer" : "Ajouter"} supprimer={item && user.canDelete("software") ? `/inventory/logiciels/${item.id}/delete` : null} confirmation="Supprimer ce logiciel ?" />
     </form>
   );
 }
@@ -848,7 +848,7 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                 <div className="d-flex align-items-center justify-content-between gap-3">
                   <span className="d-flex align-items-center gap-2 min-w-0">
                     <Lucide nom={FLUX_ICONE[sens]} taille={16} classes="flux-sens flex-shrink-0" />
-                    <a href={`/software/${autre.id}`} className="fw-medium text-decoration-none" title={`${FLUX_TITRE[sens]} ${autre.name}`}>
+                    <a href={`/inventory/logiciels/${autre.id}`} className="fw-medium text-decoration-none" title={`${FLUX_TITRE[sens]} ${autre.name}`}>
                       {autre.name}
                     </a>
                     {lien.description ? <span className="flux-desc text-truncate">— {lien.description}</span> : null}
@@ -861,7 +861,7 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                         </button>
                       ) : null}
                       {peutSupprimer ? (
-                        <form method="POST" action={`/software/links/${lien.id}/delete`}>
+                        <form method="POST" action={`/inventory/logiciels/links/${lien.id}/delete`}>
                           <input type="hidden" name="csrf_token" value={csrf} />
                           <input type="hidden" name="from_id" value={item.id} />
                           <button type="submit" className="btn btn-sm btn-ghost btn-icone btn-ghost-danger" title="Supprimer l'interconnexion" aria-label="Supprimer l'interconnexion" data-confirm={`Supprimer ce flux avec « ${autre.name} » ?`}>
@@ -874,7 +874,7 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
                 </div>
                 {peutEditer ? (
                   <div className="collapse" id={`fluxEdit${lien.id}`}>
-                    <form method="POST" action={`/software/links/${lien.id}/edit`} className="d-flex flex-wrap align-items-center gap-2 p-2 mt-1 rounded border bg-body-tertiary">
+                    <form method="POST" action={`/inventory/logiciels/links/${lien.id}/edit`} className="d-flex flex-wrap align-items-center gap-2 p-2 mt-1 rounded border bg-body-tertiary">
                       <input type="hidden" name="csrf_token" value={csrf} />
                       <input type="hidden" name="from_id" value={item.id} />
                       <input type="text" name="description" className="form-control form-control-sm flex-grow-1" style={{ maxWidth: "32rem" }} defaultValue={lien.description ?? ""} placeholder="Description du flux (ex : export paie mensuel)" />
@@ -892,7 +892,7 @@ export function FluxCarte({ item, flux, autres, user, csrf, nonce }: { item: Sof
         )}
         {peutEditer && autres.length ? (
           <>
-            <form method="POST" action={`/software/${item.id}/links/add`} className="d-flex flex-wrap align-items-center gap-2">
+            <form method="POST" action={`/inventory/logiciels/${item.id}/links/add`} className="d-flex flex-wrap align-items-center gap-2">
               <input type="hidden" name="csrf_token" value={csrf} />
               <div className="dropdown flux-sens-choix">
                 <input type="hidden" name="sens" value="vers" />
@@ -970,7 +970,7 @@ export function Partages({ item, partages, user, csrf, nonce }: { item: Software
 
       {peutEditer ? (
         <div className="collapse" id="nouveauPartage">
-          <form method="POST" action={`/software/${item.id}/shares/add`} className="p-3 border-bottom bg-body-tertiary">
+          <form method="POST" action={`/inventory/logiciels/${item.id}/shares/add`} className="p-3 border-bottom bg-body-tertiary">
             <input type="hidden" name="csrf_token" value={csrf} />
             <div className="row g-2 align-items-end">
               <div className="col-md-3">
@@ -1013,7 +1013,7 @@ export function Partages({ item, partages, user, csrf, nonce }: { item: Software
                   </div>
                 </div>
                 {peutSupprimer ? (
-                  <form method="POST" action={`/software/shares/${p.id}/delete`} className="flex-shrink-0">
+                  <form method="POST" action={`/inventory/logiciels/shares/${p.id}/delete`} className="flex-shrink-0">
                     <input type="hidden" name="csrf_token" value={csrf} />
                     <button type="submit" className="btn btn-sm btn-ghost btn-icone btn-ghost-danger" title="Retirer le dossier" aria-label="Retirer le dossier" data-confirm="Retirer ce dossier ?">
                       <Lucide nom="trash-2" taille={16} />

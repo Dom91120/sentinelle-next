@@ -91,7 +91,7 @@ export function Contrats({ item, marches, rattachables, docsParMarche, docCatego
   const peutEditer = user.canEdit("contracts");
   const peutModifierDoc = user.canEdit("contracts");
   const peutRetirerDoc = user.canDelete("contracts");
-  const retourIci = `/software/${item.id}#contrats`;
+  const retourIci = `/inventory/logiciels/${item.id}#contrats`;
   const cfg = user.settings;
   const n = rattachables.length;
   return (

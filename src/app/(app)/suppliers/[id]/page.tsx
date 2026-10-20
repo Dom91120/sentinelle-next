@@ -298,7 +298,7 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                     </div>
                     <div className="fiche-lies">
                       {software.map((sw) => (
-                        <Lien key={sw.id} url={`/software/${sw.id}`} icone="app-window" nom={sw.name} teinte="software" />
+                        <Lien key={sw.id} url={`/inventory/logiciels/${sw.id}`} icone="app-window" nom={sw.name} teinte="software" />
                       ))}
                     </div>
                   </div>
@@ -416,7 +416,7 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                     {software.map((sw) => (
                       <tr key={sw.id}>
                         <td>
-                          <a href={`/software/${sw.id}`} className="fw-medium text-decoration-none">
+                          <a href={`/inventory/logiciels/${sw.id}`} className="fw-medium text-decoration-none">
                             {sw.name}
                           </a>
                         </td>

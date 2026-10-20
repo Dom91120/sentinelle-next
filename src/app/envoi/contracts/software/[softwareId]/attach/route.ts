@@ -12,7 +12,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ softwar
     const user = await requireEdit("contracts");
     const sw = await prisma.software.findUnique({ where: { id: softwareId } });
     if (!sw) return pasTrouve();
-    const retour = `/software/${softwareId}`;
+    const retour = `/inventory/logiciels/${softwareId}`;
     const cid = parseInt_(form.get("contract_id"), null) ?? 0;
     const contrat = cid ? await prisma.contract.findUnique({ where: { id: cid } }) : null;
     if (!contrat || !contrat.isActive) return redirigerAvecMessage(retour, "Choisissez le marché à rattacher.", "danger");

@@ -13,7 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ consult
     await requireFeature("quotes");
     const cons = await prisma.consultation.findUnique({ where: { id: consultationId } });
     if (!cons) return pasTrouve();
-    const retour = `/software/${cons.softwareId}`;
+    const retour = `/inventory/logiciels/${cons.softwareId}`;
     const sid = parseInt_(form.get("supplier_id"), null);
     const nom = champ(form, "supplier_name");
     if (!sid && !nom) return redirigerAvecMessage(retour, "Indiquez le fournisseur qui a remis le devis.", "danger");

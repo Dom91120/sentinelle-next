@@ -17,6 +17,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ quoteId
     await prisma.quote.update({ where: { id: quoteId }, data: { selected: true } });
     const who = quote.supplier ? quote.supplier.name : quote.supplierName || "—";
     await auditRecord("devis retenu", `${quote.consultation.subject} : ${who}`, "contrats", user.username);
-    return redirigerAvecMessage(`/software/${quote.consultation.softwareId}`, "Devis marqué comme retenu", "success");
+    return redirigerAvecMessage(`/inventory/logiciels/${quote.consultation.softwareId}`, "Devis marqué comme retenu", "success");
   });
 }

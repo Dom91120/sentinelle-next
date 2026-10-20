@@ -13,7 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const user = await requireEdit("contracts");
     const [contrat, sw] = await Promise.all([prisma.contract.findUnique({ where: { id } }), prisma.software.findUnique({ where: { id: softwareId } })]);
     if (!contrat || !sw) return pasTrouve();
-    const retour = `/software/${softwareId}`;
+    const retour = `/inventory/logiciels/${softwareId}`;
     const lien = await prisma.contractSoftware.findUnique({ where: { contractId_softwareId: { contractId: id, softwareId } } });
     if (!lien) return redirection(retour);
     await prisma.contractSoftware.delete({ where: { contractId_softwareId: { contractId: id, softwareId } } });

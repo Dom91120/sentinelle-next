@@ -87,7 +87,7 @@ export function Synthese({ review }: { review: ReviewComplete }) {
         <Rangee>
           <LuBloc label="Logiciel">
             {review.software ? (
-              <a href={`/software/${review.softwareId}`}>{review.software.name}</a>
+              <a href={`/inventory/logiciels/${review.softwareId}`}>{review.software.name}</a>
             ) : (
               <span title="Hors inventaire des logiciels">
                 {review.application} <span className="text-muted fw-normal">(hors inventaire)</span>

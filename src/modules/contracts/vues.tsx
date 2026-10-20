@@ -281,7 +281,7 @@ export function FormCorps({ contract, logicielsChoisis, kindOptions, natureLabel
               <select name="covered_ids" id="contractCovered" className="form-select form-select-sm" multiple size={6} aria-label="Éléments couverts" data-sans-recherche="" defaultValue={choisis}>
                 <optgroup label="Logiciel" data-icone="app-window">
                   {softwareList.map((sw) => (
-                    <option key={sw.id} value={`software:${sw.id}`} data-kind="software" data-url={`/software/${sw.id}`}>
+                    <option key={sw.id} value={`software:${sw.id}`} data-kind="software" data-url={`/inventory/logiciels/${sw.id}`}>
                       {sw.name}
                     </option>
                   ))}
@@ -554,7 +554,7 @@ export function Synthese({ contract }: { contract: ContratComplet }) {
         {logiciels.length || equipements.length ? (
           <div className="pastilles">
             {logiciels.map((sw) => (
-              <Pastille key={`s${sw.id}`} url={`/software/${sw.id}`} nomIcone="app-window" nom={sw.name} teinte="software" titre="Logiciel" />
+              <Pastille key={`s${sw.id}`} url={`/inventory/logiciels/${sw.id}`} nomIcone="app-window" nom={sw.name} teinte="software" titre="Logiciel" />
             ))}
             {equipements.map((e) => (
               <Pastille key={`e${e.id}`} url={`/inventory/${e.id}`} nomIcone={EQUIPMENT_KIND_ICONS[e.kind ?? "vm"] ?? "server"} nom={e.name} teinte={e.kind || "vm"} titre={EQUIPMENT_KIND_LABELS[e.kind] ?? e.kind} />
@@ -616,7 +616,7 @@ export function TableauContrats({ contracts, today, total = true, filtrable = fa
         </td>
         <td className="small cell-couvre">
           {logiciels.map((sw) => (
-            <a key={`s${sw.id}`} href={`/software/${sw.id}`} className="d-block fw-medium text-decoration-none text-truncate">
+            <a key={`s${sw.id}`} href={`/inventory/logiciels/${sw.id}`} className="d-block fw-medium text-decoration-none text-truncate">
               <Lucide nom="app-window" taille={13} classes="me-1 kind-icon--software" />
               {sw.name}
             </a>

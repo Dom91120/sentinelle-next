@@ -192,7 +192,7 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
                 {installes.map((s) => (
                   <li className="mb-1" key={s.id}>
                     <span className={`badge-status badge-${softwareComputedStatus(s, s.systemUpdates)} me-1`} />
-                    <a href={`/software/${s.id}`}>{s.name}</a> {s.version ? <small className="text-muted">v{s.version}</small> : null}
+                    <a href={`/inventory/logiciels/${s.id}`}>{s.name}</a> {s.version ? <small className="text-muted">v{s.version}</small> : null}
                     {softwareIsSaas(s) ? <small className="text-muted"> (SaaS)</small> : null}
                   </li>
                 ))}

@@ -14,7 +14,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ softwar
     await requireFeature("quotes");
     const sw = await prisma.software.findUnique({ where: { id: softwareId } });
     if (!sw) return pasTrouve();
-    const retour = `/software/${softwareId}`;
+    const retour = `/inventory/logiciels/${softwareId}`;
     const subject = champ(form, "subject");
     if (!subject) return redirigerAvecMessage(retour, "Indiquez l'objet de la consultation.", "danger");
     const notes = form.get("notes");

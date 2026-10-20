@@ -160,7 +160,7 @@ export function Synthese({ update }: { update: UpdateComplete }) {
       {update.software || eq ? (
         <Rubrique titre="Concerne" bi="boxes" couleur="violet">
           <div className="pastilles">
-            {update.software ? <Pastille url={`/software/${update.software.id}`} nomIcone="app-window" nom={update.software.name} teinte="software" titre={`Logiciel concerné${update.software.version ? ` · v${update.software.version}` : ""}`} /> : null}
+            {update.software ? <Pastille url={`/inventory/logiciels/${update.software.id}`} nomIcone="app-window" nom={update.software.name} teinte="software" titre={`Logiciel concerné${update.software.version ? ` · v${update.software.version}` : ""}`} /> : null}
             {eq ? <Pastille url={`/inventory/${eq.id}`} nomIcone={EQUIPMENT_KIND_ICONS[eq.kind ?? "vm"] ?? "server"} nom={eq.name} teinte={eq.kind || "vm"} titre={`Équipement concerné · ${EQUIPMENT_KIND_LABELS[eq.kind ?? ""] ?? eq.kind ?? ""}`} /> : null}
           </div>
         </Rubrique>
