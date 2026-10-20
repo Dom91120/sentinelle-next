@@ -26,6 +26,10 @@ jobs:
   analyze:
     name: Analyse JavaScript / TypeScript
     runs-on: ubuntu-latest
+    # Le code scanning n'est pas disponible sur un dépôt PRIVÉ d'un compte utilisateur
+    # (il faut GitHub Advanced Security, ou un dépôt public) : l'analyse échouerait à
+    # l'envoi des résultats. Elle se réactive d'elle-même si le dépôt devient public.
+    if: ${{ !github.event.repository.private }}
     permissions:
       security-events: write
       contents: read

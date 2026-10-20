@@ -10,6 +10,11 @@ allowBuilds:
   puppeteer: true
   sharp: true
 
+# Exception au délai minimal de publication de pnpm : cette version corrige les avis
+# de sécurité (nodemailer, linkify-it) remontés par l'audit, on ne l'attend pas.
+minimumReleaseAgeExclude:
+  - mailparser@3.10.0
+
 # Versions minimales forcées sur des dépendances TRANSITIVES portant un avis de
 # sécurité (reprises de culturesa-next, même socle, mêmes raisons).
 overrides:
