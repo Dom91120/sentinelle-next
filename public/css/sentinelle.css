@@ -3444,3 +3444,7 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
    titre (24 px), puis la ligne de texte à la hauteur du sous-titre. */
 .fiche-actions:has(> .page-subtitle) { gap: 0; justify-content: flex-start; }
 .fiche-actions:has(> .page-subtitle) .fiche-voisins .btn { height: 24px; line-height: 18px; }
+
+/* Les badges de statut d'une synthèse (cycle de vie, authentification…) ont la taille
+   de celui du titre de la fiche (0.72 rem), pas les 12 px génériques d'une valeur. */
+.synthese .lu-valeur .badge-status { font-size: 0.72rem; }
