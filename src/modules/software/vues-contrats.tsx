@@ -526,7 +526,8 @@ export function Contrats({
           <div className="p-4 text-center text-muted">
             {item.noContractNote ? item.noContractNote : "Aucun marché rattaché à ce logiciel."}
             {peutEditer && n ? (
-              <div className="small mt-1">
+              // Visible seulement en mode modification, comme la liste déroulante qu'elle désigne.
+              <div className="small mt-1" data-edition-seule>
                 {n} marché{n > 1 ? "s" : ""} de l'éditeur ou sans logiciel{" "}
                 {n > 1 ? "attendent" : "attend"} d'être {n > 1 ? "rattachés" : "rattaché"},
                 ci-dessus.
