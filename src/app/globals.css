@@ -1,7 +1,11 @@
-/* Le socle charge Tailwind v4, mais sans son « preflight » : Bootstrap (reboot) et la
-   feuille de Sentinelle (public/css/sentinelle.css, copie de static/css/style.css,
-   liée dans le <head> APRÈS Bootstrap comme dans base.html) portent tout le style.
-   Les utilitaires Tailwind restent disponibles, dans une couche que les règles non
-   stratifiées de Bootstrap et de Sentinelle surclassent. */
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
+/* Le socle embarque Tailwind v4 (plugin PostCSS), mais cette application n'en charge
+   RIEN : Bootstrap et la feuille de Sentinelle (public/css/sentinelle.css, copie de
+   static/css/style.css, liée dans le <head> après Bootstrap comme dans base.html)
+   portent tout le style.
+
+   Pourquoi pas même les utilitaires : Tailwind et Bootstrap partagent des noms de
+   classes (collapse, container, col-6, table, border, transform, resize…). Chaque
+   classe Bootstrap présente dans le balisage faisait générer l'utilitaire Tailwind
+   homonyme, et là où Bootstrap ne fixe pas la même propriété, la règle Tailwind
+   s'appliquait : `.collapse { visibility: collapse }` laissait les zones dépliées
+   (dépôt d'une pièce sur un marché) vides. */
