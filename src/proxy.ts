@@ -58,8 +58,16 @@ export default function proxy(request: NextRequest) {
     !pathname.startsWith("/envoi/") &&
     !request.headers.has("next-action");
 
+  // Un formulaire chargé dans une liste (formulaire-inline.js, ?inline=1) se rend
+  // seul, sans la page autour : /fragment/... (un gestionnaire de route) répond.
+  const estFragment = request.method === "GET" && request.nextUrl.searchParams.get("inline") === "1" && /^\/contracts\/(create|\d+\/edit)$/.test(pathname);
+
   let response: NextResponse;
-  if (estFormulaire) {
+  if (estFragment) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/fragment${pathname}`;
+    response = NextResponse.rewrite(url, { request: { headers } });
+  } else if (estFormulaire) {
     const url = request.nextUrl.clone();
     url.pathname = `/envoi${pathname === "/" ? "" : pathname}`;
     response = NextResponse.rewrite(url, { request: { headers } });
