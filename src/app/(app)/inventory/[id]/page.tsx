@@ -78,7 +78,8 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
         (b.endDate?.getTime() ?? Number.POSITIVE_INFINITY),
     );
   const installes = item.softwareList.map((l) => l.software).filter((s) => s.isActive);
-  const sousTitre = `${kindLabel(item)}${item.environment ? ` · ${envLabel(item)}` : ""}${item.criticality ? ` · criticité ${item.criticality}` : ""}${item.ipAddress ? ` · ${item.ipAddress}` : ""}`;
+  // Sans l'adresse IP : le bandeau de faits la porte déjà, juste à côté.
+  const sousTitre = `${kindLabel(item)}${item.environment ? ` · ${envLabel(item)}` : ""}${item.criticality ? ` · criticité ${item.criticality}` : ""}`;
   const porteReseau = ["vm", "physical", "nas", "storage", "network"].includes(item.kind);
   const showCerts = user.canView("certificates") && item.certificates.length > 0;
   const showBkps = user.canView("backups") && item.backups.length > 0;
