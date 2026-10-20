@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
-import { flash } from "@/server/flash";
+import { redirigerAvecFlashDepuisRendu } from "@/server/flash";
 import { contextePage } from "@/server/page";
 
 /**
@@ -14,11 +13,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (user.settings.REQUIRE_2FA_ADMIN && user.isAdmin && !user.hasTwoFactor) {
     const allowed = ["/profile", "/logout", "/2fa", "/login"];
     if (!allowed.includes(page.pathname)) {
-      await flash(
+      redirigerAvecFlashDepuisRendu(
+        "/profile",
         "Sécurité : activez la double authentification pour continuer (obligatoire pour les comptes administrateur).",
         "warning",
       );
-      redirect("/profile");
     }
   }
   return (

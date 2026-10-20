@@ -125,7 +125,7 @@ export async function deleteBackup(cfg: AppSettings, name: string): Promise<void
   await fs.unlink(chemin);
 }
 
-async function rotate(cfg: AppSettings, directory: string): Promise<void> {
+export async function rotate(cfg: AppSettings, directory: string): Promise<void> {
   const keep = Number(cfg.BACKUP_DB_KEEP) || 14;
   const noms = (await fs.readdir(directory))
     .filter((n) => BACKUP_NAME_RE.test(n))

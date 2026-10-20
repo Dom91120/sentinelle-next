@@ -223,3 +223,26 @@ Logique métier des modèles (à porter en TypeScript pur, `src/lib/statuts.ts` 
 ## Reste à faire
 
 (rempli en fin de chantier)
+
+État au 20/10/2026 (arrêt sur limite d'usage, chantier en cours) :
+
+- Porté : socle, schéma Prisma, reprise SQLite, authentification (login, 2FA, profil, O365), tous les
+  modules de données, alertes, recherche, corbeille, agenda/ICS, tendances, utilisateurs/rôles/audit,
+  préférences (toutes les actions), connecteurs (Sesame, chatIA, webhooks), référentiels, pièces jointes,
+  CSV, PDF (fiches et bilan via Puppeteer), export complet (pg_dump), API (assets, chatIA, annuaire),
+  tâches planifiées (`/api/cron/tous` + minuteur de dev).
+- Tests : 110 tests unitaires (`pnpm test`) et un banc d'intégration sur base PostgreSQL de test
+  (`pnpm test:integration`, serveur Next lancé sur :3100, voir `tests/setup/`), 36 fichiers portés
+  depuis pytest. Un premier passage complet donnait 102/104 ; le dernier passage (après correction du
+  fragment inline et des redirections avec message) n'a pas été dépouillé : le relancer et corriger les
+  assertions HTML qui diffèrent entre Jinja et React (`selected=""`, `&#x27;`).
+- Non portés, avec raison : `test_migration_certificat` (reconstruction SQLite), `test_migration_pieces`,
+  parties « base ancienne » de `test_contracts_suppliers` / `test_software` / `test_marches` (colonnes et
+  tables héritées : la reprise est faite une fois par `scripts/reprise-sqlite.ts`), `test_templates`
+  (compilation Jinja : sans objet), tests LDAP joués via un annuaire simulé (`SENTINELLE_TEST_LDAP_ACCEPT`).
+- Écarts assumés : `pg_dump` requis pour la base dans l'export complet et les sauvegardes
+  (absent du PATH sur le poste de développement : l'archive part sans la base) ; sauvegardes au format
+  `.dump` ; la page Sauvegardes du jour affiche la date en français ; l'enrôlement 2FA en attente se voit
+  sur le profil avec un bouton « Annuler » ; les 4 secrets Fernet sont à ressaisir dans Préférences.
+- Reste : `pnpm build` (non lancé sur cette session), vérification côte à côte écran par écran avec
+  Sentinelle (:5000), cocher les lignes de cet inventaire, limiteur de requêtes (Flask-Limiter) non porté.

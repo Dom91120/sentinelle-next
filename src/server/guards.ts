@@ -15,7 +15,7 @@ import { auth } from "@/server/auth";
 import { type AppSettings, getSettings } from "@/server/config-store";
 import { prisma } from "@/server/db";
 import { categoryEnabledIn } from "@/server/features";
-import { flash } from "@/server/flash";
+import { redirigerAvecFlashDepuisRendu } from "@/server/flash";
 
 const TOUCH_THROTTLE_MS = 60_000;
 
@@ -158,8 +158,7 @@ export async function requireUser(): Promise<CurrentUser> {
 async function deny(
   message = "Vous n'avez pas les droits pour effectuer cette action.",
 ): Promise<never> {
-  await flash(message, "danger");
-  redirect("/");
+  redirigerAvecFlashDepuisRendu("/", message, "danger");
 }
 
 /** `view_guard(category)` : bloque la lecture d'une catégorie non autorisée. */

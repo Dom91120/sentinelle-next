@@ -49,3 +49,4 @@ docs/AUDIT-SECURITE.md
 
 # Liste des personnes réelles à flouter sur les captures (scripts/capture-blur-list.ts)
 .capture-blur.json
+.next-test

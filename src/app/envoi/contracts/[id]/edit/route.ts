@@ -1,3 +1,4 @@
+import { fragmentContrat } from "@/app/fragment/contracts/route-commun";
 import { dateCourte } from "@/lib/libelles";
 import { depuisFormulaire, poserCouverts } from "@/modules/contracts/server";
 import { prisma } from "@/server/db";
@@ -14,6 +15,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const contract = await prisma.contract.findUnique({ where: { id } });
     if (!contract) return pasTrouve();
     const { data, couverts } = await depuisFormulaire(form);
+    if (!data.name && new URL(req.url).searchParams.get("inline") === "1")
+      return fragmentContrat(req, id, { erreur: "Le nom du contrat est obligatoire." });
     if (!data.name)
       return redirigerAvecMessage(
         `/contracts/${id}/edit`,

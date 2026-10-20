@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Indispensable pour l'image Docker minimale (cf. Dockerfile)
   output: "standalone",
+  // Les tests d'intégration lancent un second serveur sur la même arborescence :
+  // il construit dans `.next-test` pour ne pas marcher sur le serveur de développement.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   reactStrictMode: true,
   poweredByHeader: false,
   // Driver Postgres de Prisma 7 (pg : require dynamique), Puppeteer (PDF) et le

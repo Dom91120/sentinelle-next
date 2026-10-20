@@ -91,7 +91,7 @@ export async function fetchDomainInfo(
 
 const CRTSH_URL = "https://crt.sh/";
 
-function cleanDomainCt(value: string | null | undefined): string {
+export function cleanDomainCt(value: string | null | undefined): string {
   let v = (value ?? "").trim().toLowerCase();
   if (v.includes("://")) v = v.split("://", 2)[1];
   v = v.split("/", 1)[0].split(":", 1)[0];
@@ -105,7 +105,7 @@ function parseDt(value: unknown): Date | null {
   return Number.isNaN(dt.getTime()) ? null : dt;
 }
 
-function parseJour(value: unknown): Date | null {
+export function parseJour(value: unknown): Date | null {
   const dt = parseDt(value);
   return dt ? new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate())) : null;
 }
@@ -121,7 +121,7 @@ export type CtCert = {
   entryTimestamp: Date | null;
 };
 
-function normalize(row: Record<string, unknown>): CtCert | null {
+export function normalizeCt(row: Record<string, unknown>): CtCert | null {
   const cid = Number.parseInt(String(row?.id ?? ""), 10);
   if (!Number.isInteger(cid)) return null;
   const s = (v: unknown, n: number) =>
@@ -162,7 +162,7 @@ export async function fetchCtCertificates(
   }
   const byId = new Map<number, CtCert>();
   for (const row of rows ?? []) {
-    const cert = normalize(row);
+    const cert = normalizeCt(row);
     if (cert) byId.set(cert.crtshId, cert);
   }
   return [...byId.keys()].sort((a, b) => a - b).map((k) => byId.get(k) as CtCert);

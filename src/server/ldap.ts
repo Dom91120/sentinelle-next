@@ -162,6 +162,18 @@ export async function ldapAuthenticate(
   username: string,
   password: string,
 ): Promise<LdapInfo | null> {
+  // Mode test : un annuaire simulé, réglé en base (« user:mdp,user2:mdp2 »), pour les
+  // tests d'intégration qui jouaient `monkeypatch` sur ldap_authenticate.
+  if (process.env.SENTINELLE_TEST) {
+    const accepte = String(cfg.SENTINELLE_TEST_LDAP_ACCEPT ?? "")
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    if (accepte.length)
+      return accepte.includes(`${username}:${password}`)
+        ? { email: null, display_name: null }
+        : null;
+  }
   if (!ldapEnabled(cfg) || !username || !password) return null;
   const domain = cfg.LDAP_DOMAIN || "";
   const template = cfg.LDAP_USER_DN_TEMPLATE || "";

@@ -5,6 +5,7 @@
  * suivante, puis effacés par le composant client qui les affiche.
  */
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export type FlashCategory = "success" | "danger" | "warning" | "info";
 export type Flash = [FlashCategory, string];
@@ -58,4 +59,18 @@ export async function readFlashes(): Promise<Flash[]> {
 export async function clearFlashes(): Promise<void> {
   const jar = await cookies();
   if (jar.get(COOKIE)) jar.delete(COOKIE);
+}
+
+/**
+ * Depuis un RENDU (page, layout, garde), le cookie ne peut pas s'écrire : on passe
+ * par la route /message, qui pose le flash puis redirige. `vers` est un chemin
+ * relatif de l'application (jamais une adresse externe).
+ */
+export function redirigerAvecFlashDepuisRendu(
+  vers: string,
+  message: string,
+  category: FlashCategory | string = "info",
+): never {
+  const chemin = vers.startsWith("/") && !vers.startsWith("//") ? vers : "/";
+  redirect(`/message?vers=${chemin}&c=${normaliser(category)}&m=${encodeURIComponent(message)}`);
 }

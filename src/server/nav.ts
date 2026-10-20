@@ -9,7 +9,7 @@ import { chargerTout } from "@/server/donnees";
 import type { CurrentUser } from "@/server/guards";
 import { activeSnoozeKeys } from "@/server/snooze";
 
-const TTL_MS = 60_000;
+const TTL_MS = process.env.SENTINELLE_TEST ? 0 : 60_000;
 type Cache = { at: number; danger: Record<string, number>; trash: Record<string, number> };
 let cache: Cache | null = null;
 

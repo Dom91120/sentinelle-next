@@ -168,6 +168,17 @@ export function resolveCardLayout(
   return [[...saved, ...available.filter((k) => !seen.has(k))], hidden];
 }
 
+/** L'ordre des vignettes (masquées comprises) : l'ordre enregistré, puis les vignettes nouvelles. */
+export function resolveCardOrder(
+  user: { dashboardPrefs: string | null },
+  available: string[],
+): string[] {
+  const availSet = new Set(available);
+  const saved = (loadPrefs(user).cards ?? []).filter((k) => availSet.has(k));
+  const seen = new Set(saved);
+  return [...saved, ...available.filter((k) => !seen.has(k))];
+}
+
 export function resolveWidgetSpans(user: {
   dashboardPrefs: string | null;
 }): Record<string, number> {

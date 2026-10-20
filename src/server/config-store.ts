@@ -319,8 +319,34 @@ export function serialize(key: string, value: unknown): string {
 
 // Cache en mémoire de processus : rechargé à la première lecture, invalidé à
 // chaque écriture, et au plus toutes les 60 s (plusieurs instances).
-const CACHE_TTL_MS = 60_000;
+// En mode test (SENTINELLE_TEST), aucun cache : chaque écriture se voit à la requête suivante.
+const CACHE_TTL_MS = process.env.SENTINELLE_TEST ? 0 : 60_000;
 let cache: { at: number; settings: AppSettings } | null = null;
+
+/**
+ * En mode test (SENTINELLE_TEST), les réglages « environnement seul » peuvent aussi
+ * être posés en base : les tests d'intégration les règlent comme `app.config[...]`
+ * de Flask, sans relancer le serveur. Hors test, l'environnement reste seul maître.
+ */
+const TEST_OVERRIDABLE: Record<string, "bool" | "int" | "str"> = {
+  REQUIRE_2FA_ADMIN: "bool",
+  TRUST_PROXY: "bool",
+  LOGIN_MAX_ATTEMPTS: "int",
+  LOGIN_LOCKOUT_MINUTES: "int",
+  PASSWORD_MIN_LENGTH: "int",
+  OS_STALE_DAYS: "int",
+  APP_BASE_URL: "str",
+  BACKUP_INBOX_DIR: "str",
+  BACKUP_DB_DIR: "str",
+  SENTINELLE_TEST_LDAP_ACCEPT: "str",
+};
+
+function castTest(key: string, raw: string): unknown {
+  const t = TEST_OVERRIDABLE[key];
+  if (t === "bool") return ["true", "1", "yes", "on"].includes(raw.toLowerCase());
+  if (t === "int") return Number.parseInt(raw, 10) || 0;
+  return raw;
+}
 
 /** Applique les réglages stockés en base sur les défauts de l'environnement. */
 async function load(): Promise<AppSettings> {
@@ -328,9 +354,10 @@ async function load(): Promise<AppSettings> {
   try {
     const rows = await prisma.appConfig.findMany();
     for (const row of rows) {
-      if (!MANAGED.has(row.key)) continue;
+      const testSeul = Boolean(process.env.SENTINELLE_TEST) && row.key in TEST_OVERRIDABLE;
+      if (!MANAGED.has(row.key) && !testSeul) continue;
       const raw = row.isSecret ? decryptSecret(row.value ?? "") : (row.value ?? "");
-      const v = cast(row.key, raw);
+      const v = testSeul && !MANAGED.has(row.key) ? castTest(row.key, raw) : cast(row.key, raw);
       if (TRIPLET_KEYS.has(row.key) && v === null) continue;
       settings[row.key] = v;
     }

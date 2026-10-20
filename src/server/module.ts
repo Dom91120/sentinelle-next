@@ -2,11 +2,11 @@
  * Le contexte d'une page de module : `contextePage()` + `view_guard(categorie)`
  * (+ `features.require` pour un module débrayable, lecture comprise).
  */
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { PermissionCategory } from "@/lib/constantes";
 import { prisma } from "@/server/db";
 import { enabledIn, type FeatureName, MODULE_CATEGORIES } from "@/server/features";
-import { flash } from "@/server/flash";
+import { redirigerAvecFlashDepuisRendu } from "@/server/flash";
 import { contextePage, type Page } from "@/server/page";
 import type { Voisins } from "@/server/voisins";
 import { voisinsParmi } from "@/server/voisins";
@@ -17,8 +17,7 @@ export async function contexteModule(category: PermissionCategory): Promise<Page
     if (cat === category && !enabledIn(page.user.settings, name as FeatureName)) notFound();
   }
   if (!page.user.canView(category)) {
-    await flash("Acces non autorise a cette section.", "danger");
-    redirect("/");
+    redirigerAvecFlashDepuisRendu("/", "Acces non autorise a cette section.", "danger");
   }
   return page;
 }

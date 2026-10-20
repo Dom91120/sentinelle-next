@@ -18,7 +18,10 @@
     "db:studio": "prisma studio",
     "db:init": "tsx prisma/seed-init.ts",
     "db:reprise": "tsx scripts/reprise-sqlite.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:all": "pnpm test && pnpm test:integration",
+    "db:test": "prisma migrate deploy"
   },
   "dependencies": {
     "@azure/msal-node": "^3.6.3",

@@ -39,7 +39,7 @@ import { isSnoozed } from "@/server/snooze";
 
 const JOUR = 86_400_000;
 
-async function checkPasswords(tout: Tout): Promise<void> {
+export async function checkPasswords(tout: Tout): Promise<void> {
   const today = aujourdhui();
   const thresholds = seuil(tout.seuils, "THRESHOLD_EXPIRY");
   for (const account of tout.accounts) {
@@ -60,7 +60,7 @@ async function checkPasswords(tout: Tout): Promise<void> {
   }
 }
 
-async function checkCertificates(tout: Tout): Promise<void> {
+export async function checkCertificates(tout: Tout): Promise<void> {
   if (!enabledIn(tout.settings, "certificates")) return; // module coupé dans les Préférences : plus d'alerte
   const today = aujourdhui();
   const thresholds = seuil(tout.seuils, "THRESHOLD_EXPIRY");
@@ -82,7 +82,7 @@ async function checkCertificates(tout: Tout): Promise<void> {
   }
 }
 
-async function checkBackups(tout: Tout): Promise<void> {
+export async function checkBackups(tout: Tout): Promise<void> {
   const today = aujourdhui();
   for (const backup of tout.backups) {
     if (backup.status !== "danger") continue;
@@ -110,7 +110,7 @@ async function checkBackups(tout: Tout): Promise<void> {
   }
 }
 
-async function checkTests(tout: Tout): Promise<void> {
+export async function checkTests(tout: Tout): Promise<void> {
   const today = aujourdhui();
   const thresholds = seuil(tout.seuils, "THRESHOLD_TASK");
   for (const test of tout.tests) {
@@ -136,7 +136,7 @@ async function checkTests(tout: Tout): Promise<void> {
   }
 }
 
-async function checkDomains(tout: Tout): Promise<void> {
+export async function checkDomains(tout: Tout): Promise<void> {
   const today = aujourdhui();
   const thresholds = seuil(tout.seuils, "THRESHOLD_DOMAIN");
   for (const domain of tout.domains) {
@@ -151,7 +151,7 @@ async function checkDomains(tout: Tout): Promise<void> {
 }
 
 /** Alerte sur les contrats dont la date limite d'action approche (échéance - préavis de résiliation). */
-async function checkContracts(tout: Tout): Promise<void> {
+export async function checkContracts(tout: Tout): Promise<void> {
   const today = aujourdhui();
   const thresholds = seuil(tout.seuils, "THRESHOLD_CONTRACT");
   for (const contract of tout.contracts) {
@@ -195,7 +195,7 @@ async function syncAdPasswords(cfg: AppSettings): Promise<void> {
   }
 }
 
-async function checkReviews(tout: Tout): Promise<void> {
+export async function checkReviews(tout: Tout): Promise<void> {
   const today = aujourdhui();
   const thresholds = seuil(tout.seuils, "THRESHOLD_TASK");
   for (const review of tout.reviews) {
@@ -226,7 +226,7 @@ async function checkReviews(tout: Tout): Promise<void> {
   }
 }
 
-async function checkUpdates(tout: Tout): Promise<void> {
+export async function checkUpdates(tout: Tout): Promise<void> {
   for (const upd of tout.updates) {
     if (upd.brut !== "critical" || (await isSnoozed("update", upd.id))) continue;
     const body = `Une mise a jour critique est en attente:\n\nElement: ${upd.name}\nVersion actuelle: ${upd.currentVersion || "N/A"}\nDerniere version: ${upd.latestVersion || "N/A"}\n`;
@@ -244,7 +244,7 @@ function osUpdateStale(
   return Math.floor((today.getTime() - e.osLastUpdate.getTime()) / JOUR) > limit;
 }
 
-async function checkInventory(tout: Tout): Promise<void> {
+export async function checkInventory(tout: Tout): Promise<void> {
   const today = aujourdhui();
   const thresholds = seuil(tout.seuils, "THRESHOLD_WARRANTY");
   const isMonday = today.getUTCDay() === 1;
