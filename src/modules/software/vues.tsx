@@ -486,10 +486,8 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 />
               </div>
             </div>
-          </Carte>
 
-          {gdpr ? (
-            <Carte titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
+            {gdpr ? (
               <div className="grille grille-rgpd">
                 <div className="d-flex align-items-end">
                   <div className="form-check mb-1">
@@ -543,8 +541,8 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                   />
                 </div>
               </div>
-            </Carte>
-          ) : null}
+            ) : null}
+          </Carte>
 
           <Carte titre="Descriptif" bi="bi-journal-text" couleur="slate">
             <label className="form-label small mb-1" htmlFor="swDescriptif">
@@ -1200,43 +1198,43 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
             ) : null}
           </LuBloc>
         </Rangee>
-      </Rubrique>
 
-      {gdpr ? (
-        <Rubrique titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
-          <Rangee>
-            <Lu
-              label="RGPD"
-              valeur={item.gdprPersonalData ? "Traitées" : "Aucune donnée personnelle"}
-              pleine={!item.gdprPersonalData}
-              titre="Données personnelles"
-            />
-            {item.gdprPersonalData ? (
-              <>
-                <Lu label="Catégorie" valeur={item.gdprCategories} />
-                <Lu label="Réf. registre" valeur={item.gdprRegistryRef} />
-                <Lu label="Localisation" valeur={gdprLocationLabel(item)} />
-              </>
-            ) : null}
-          </Rangee>
-          {item.gdprPersonalData && sup && (sup.dpoContact || sup.dpoEmail) ? (
+        {gdpr ? (
+          <>
             <Rangee>
-              <Lu label="DPO éditeur" valeur={sup.dpoContact} titre="DPO de l'éditeur" />
-              <LuBloc label="Courriel DPO">
-                {sup.dpoEmail ? (
-                  <a href={`mailto:${sup.dpoEmail}`} className="text-truncate d-block">
-                    {sup.dpoEmail}
-                  </a>
-                ) : null}
-              </LuBloc>
+              <Lu
+                label="RGPD"
+                valeur={item.gdprPersonalData ? "Traitées" : "Aucune donnée personnelle"}
+                pleine={!item.gdprPersonalData}
+                titre="Données personnelles"
+              />
+              {item.gdprPersonalData ? (
+                <>
+                  <Lu label="Catégorie" valeur={item.gdprCategories} />
+                  <Lu label="Réf. registre" valeur={item.gdprRegistryRef} />
+                  <Lu label="Localisation" valeur={gdprLocationLabel(item)} />
+                </>
+              ) : null}
             </Rangee>
-          ) : null}
-        </Rubrique>
-      ) : null}
+            {item.gdprPersonalData && sup && (sup.dpoContact || sup.dpoEmail) ? (
+              <Rangee>
+                <Lu label="DPO éditeur" valeur={sup.dpoContact} titre="DPO de l'éditeur" />
+                <LuBloc label="Courriel DPO">
+                  {sup.dpoEmail ? (
+                    <a href={`mailto:${sup.dpoEmail}`} className="text-truncate d-block">
+                      {sup.dpoEmail}
+                    </a>
+                  ) : null}
+                </LuBloc>
+              </Rangee>
+            ) : null}
+          </>
+        ) : null}
+      </Rubrique>
 
       <Rubrique titre="Descriptif" bi="bi-journal-text" couleur="slate">
         <Rangee>
-          <Lu label="Descriptif" valeur={item.description} pleine texte />
+          <Lu label="Descriptif" valeur={item.description} pleine texte sansLabel />
         </Rangee>
       </Rubrique>
     </div>

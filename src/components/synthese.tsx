@@ -109,6 +109,7 @@ export function Lu({
   pleine = false,
   facultatif = false,
   texte = false,
+  sansLabel = false,
 }: {
   label: string;
   valeur: React.ReactNode;
@@ -117,16 +118,22 @@ export function Lu({
   pleine?: boolean;
   facultatif?: boolean;
   texte?: boolean;
+  /** Pas d'intitulé devant la valeur (le titre de la rubrique le dit déjà) ; `label` sert à « À compléter ». */
+  sansLabel?: boolean;
 }) {
   if (vide(valeur)) return facultatif ? null : <span hidden data-manque={label} />;
   return (
     <div
       className={`lu${large ? " lu--large" : ""}${pleine ? " lu--pleine" : ""}${texte ? " lu--texte" : ""}`}
     >
-      <span className="lu-label" title={titre}>
-        {label}
+      {sansLabel ? null : (
+        <span className="lu-label" title={titre}>
+          {label}
+        </span>
+      )}
+      <span className="lu-valeur" style={sansLabel ? { gridColumn: "1 / -1" } : undefined}>
+        {valeur}
       </span>
-      <span className="lu-valeur">{valeur}</span>
     </div>
   );
 }
