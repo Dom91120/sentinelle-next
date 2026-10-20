@@ -348,8 +348,10 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
                 type="button"
                 data-bs-toggle="dropdown"
                 data-bs-auto-close="outside"
+                title="Colonnes"
+                aria-label="Colonnes"
               >
-                <Icone bi="bi-layout-three-columns" taille="1em" classes="me-1" /> Colonnes
+                <Icone bi="bi-layout-three-columns" taille="1em" />
               </button>
               <div
                 className="dropdown-menu dropdown-menu-end p-2"
