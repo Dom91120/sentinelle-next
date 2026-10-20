@@ -68,11 +68,12 @@ export function ConfirmModal({ csrf, nonce }: { csrf: string; nonce?: string }) 
             <div className="modal-header border-0 pb-0">
               <button type="button" className="btn-close" data-bs-dismiss="modal" />
             </div>
-            <div className="modal-body text-center py-2 px-4">
+            {/* L'icône à gauche, le message à sa droite sur la même ligne. */}
+            <div className="modal-body d-flex align-items-center gap-3 text-start py-2 px-4">
               <Icone
                 bi="bi-exclamation-triangle-fill"
                 taille="1em"
-                classes="text-warning fs-1 d-block mb-3"
+                classes="text-warning fs-1 flex-shrink-0"
               />
               <p id="confirmModalText" className="mb-0 fs-6" />
             </div>
