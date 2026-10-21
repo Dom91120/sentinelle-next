@@ -49,33 +49,6 @@ export function kindLabel(s: { kind: string | null }): string {
 }
 
 /** `_fill` : les champs d'un fournisseur depuis le formulaire. */
-/**
- * Les champs de l'onglet Contacts : l'assistance (portail, hotline, courriel, n° client,
- * horaires) et les quatre contacts (commercial 1 et 2, administratif, DPO).
- */
-const CONTACT_PREFIXES = ["commercial", "commercial2", "admin", "dpo"];
-const ASSISTANCE_FIELDS = [
-  "support_url",
-  "support_phone",
-  "support_email",
-  "customer_ref",
-  "hours",
-  "hours2",
-];
-const CONTACT_FIELDS = TEXT_FIELDS.filter(
-  ([nom]) =>
-    ASSISTANCE_FIELDS.includes(nom) || CONTACT_PREFIXES.some((p) => nom.startsWith(`${p}_`)),
-);
-
-function porteDesContacts(f: FormData): boolean {
-  return CONTACT_FIELDS.some(([nom]) => f.has(nom));
-}
-
-/**
- * Le formulaire principal (Détails). Les contacts ne sont repris que si le formulaire les
- * porte (ancien formulaire, création par l'API) : l'onglet Contacts a le sien, et une
- * fiche enregistrée depuis Détails ne doit pas les effacer.
- */
 export function depuisFormulaire(f: FormData): Prisma.SupplierUncheckedUpdateInput {
   const kind = f.get("kind");
   const data: Prisma.SupplierUncheckedUpdateInput = {
@@ -83,19 +56,9 @@ export function depuisFormulaire(f: FormData): Prisma.SupplierUncheckedUpdateInp
     kind: typeof kind === "string" && kind ? kind : "provider",
     notes: typeof f.get("notes") === "string" && f.get("notes") ? (f.get("notes") as string) : null,
   };
-  const avecContacts = porteDesContacts(f);
-  for (const [nom, col] of TEXT_FIELDS) {
-    if (!avecContacts && CONTACT_FIELDS.some(([n]) => n === nom)) continue;
+  for (const [nom, col] of TEXT_FIELDS)
     (data as Record<string, unknown>)[col] = champOuNull(f, nom);
-  }
   return data;
-}
-
-/** Le formulaire de l'onglet Contacts : l'assistance et les contacts, rien d'autre. */
-export function contactsDepuisFormulaire(f: FormData): Prisma.SupplierUncheckedUpdateInput {
-  const data: Record<string, unknown> = {};
-  for (const [nom, col] of CONTACT_FIELDS) data[col] = champOuNull(f, nom);
-  return data as Prisma.SupplierUncheckedUpdateInput;
 }
 
 export function hasContacts(s: {

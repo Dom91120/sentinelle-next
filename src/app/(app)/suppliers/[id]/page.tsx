@@ -25,7 +25,7 @@ import { TableauContrats } from "@/modules/contracts/vues";
 import { hostingLabel } from "@/modules/software/server";
 import { Contacts } from "@/modules/software/vues";
 import { kindLabel } from "@/modules/suppliers/server";
-import { FormContacts, FormulaireFournisseur, Synthese } from "@/modules/suppliers/vues";
+import { FormulaireFournisseur, Synthese } from "@/modules/suppliers/vues";
 import { seuilsDe } from "@/server/config-store";
 import { prisma } from "@/server/db";
 import { documentsEnabled, forParent } from "@/server/documents";
@@ -136,7 +136,6 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
       >
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}
-        <Onglet cible="contacts" libelle="Contacts" icone="bi-person-lines-fill" />
         <Onglet
           cible="contrats"
           libelle="Contrats"
@@ -330,6 +329,8 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                   </div>
                 </div>
               )}
+              {/* Ancien formulaire : le bloc des contacts (celui d'un logiciel) suit les faits. */}
+              {legacy ? <Contacts sup={supplier} /> : null}
             </div>
             {rail ? (
               <div className="col-lg-3">
@@ -493,18 +494,6 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
             </fieldset>
           </Volet>
         ) : null}
-
-        <Volet cible="contacts">
-          {/* Le même bloc que l'onglet Contacts d'un logiciel (SoftInventory) : assistance, puis contacts. */}
-          <div data-edition-cache>
-            <Contacts sup={supplier} />
-          </div>
-          {peutEditer && !legacy ? (
-            <fieldset className="edition-verrou" data-edition-verrou disabled>
-              <FormContacts supplier={supplier} csrf={csrf} />
-            </fieldset>
-          ) : null}
-        </Volet>
 
         <Volet cible="documents">
           <Documents

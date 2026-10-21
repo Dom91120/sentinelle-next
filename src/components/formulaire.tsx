@@ -56,9 +56,9 @@ export function PiedForm({
           <Icone bi="bi-trash" taille="1em" classes="me-1" /> Supprimer
         </button>
       ) : null}
-      <span className="form-pied-note text-muted small">
-        <span className="text-danger">*</span> champ obligatoire
-      </span>
+      {/* Plus de mention « champ obligatoire » : l'astérisque des intitulés suffit. Le
+          ressort reste, pour garder Annuler / Enregistrer à droite. */}
+      <span className="form-pied-note" aria-hidden="true" />
       <a href={retour} className="btn btn-outline-secondary js-retour">
         Annuler
       </a>

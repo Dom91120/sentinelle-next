@@ -587,9 +587,7 @@ export function FormCorps({
 
           {inline ? (
             <div className="d-flex align-items-center justify-content-end gap-2">
-              <span className="text-muted small me-auto">
-                <span className="text-danger">*</span> champ obligatoire
-              </span>
+              <span className="me-auto" aria-hidden="true" />
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary"
