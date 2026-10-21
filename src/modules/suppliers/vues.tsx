@@ -590,7 +590,7 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
 
       {/* Entre l'identité et les notes : le même bloc que l'onglet Contacts d'un logiciel
           (SoftInventory), assistance puis contacts. */}
-      <Contacts sup={s} />
+      <Contacts sup={s} titre="Contacts" />
 
       <div
         className="data-card mb-3 synthese synthese--cases"

@@ -1295,7 +1295,8 @@ export function supplierHasContacts(s: Supplier): boolean {
   ].some(Boolean);
 }
 
-export function Contacts({ sup }: { sup: Supplier | null }) {
+/** `titre` : sur la fiche du fournisseur lui-même, « Contacts » suffit (le nom est déjà en titre de page). */
+export function Contacts({ sup, titre }: { sup: Supplier | null; titre?: string }) {
   if (!sup)
     return (
       <div className="contact-aucun">
@@ -1312,7 +1313,7 @@ export function Contacts({ sup }: { sup: Supplier | null }) {
       <div className="card-header-custom">
         <h6 className="fw-bold fiche-titre fiche-titre--rose mb-0">
           <Lucide nom="contact-round" taille={14} classes="ico-onglet ico-onglet--contacts" />
-          Contacts — {sup.name}
+          {titre ?? `Contacts — ${sup.name}`}
         </h6>
       </div>
       <div className="p-3">
