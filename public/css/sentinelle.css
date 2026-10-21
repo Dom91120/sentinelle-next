@@ -3451,7 +3451,8 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
 
 /* Le sous-titre d'une page de liste (et du tableau de bord) prend le style de celui
    d'une fiche : 0.74 rem, interligne serré, collé au titre. */
-.page-header .page-subtitle { margin-top: -1px; font-size: 0.74rem; line-height: 1.25; }
+.page-header .page-subtitle,
+div:has(> div > .page-title) .page-subtitle { margin-top: -1px; font-size: 0.74rem; line-height: 1.25; }
 
 /* Les boutons d'un en-tête de page (Check quotidien, Exporter, Nouvelle sauvegarde,
    Vider la corbeille, Personnaliser…) une taille en dessous : celle de .btn-sm, comme
