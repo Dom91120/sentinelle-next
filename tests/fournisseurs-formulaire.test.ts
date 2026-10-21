@@ -182,14 +182,15 @@ describe("fournisseurs", () => {
         dpoEmail: "dpo@a.fr",
       },
     });
-    // Le bloc de la synthèse est celui de l'onglet Contacts d'un logiciel : mêmes intitulés,
-    // « Non renseigné » pour une case vide, le second commercial seulement s'il existe.
+    // Le bloc de la synthèse est celui de l'onglet Contacts d'un logiciel, réduit aux lignes
+    // renseignées : pas de « Non renseigné », pas de second commercial s'il n'existe pas.
     const s = (await c.get(`/suppliers/${sup.id}`)).text.split('id="vol-details"', 2)[0];
     expect(s).toContain("Tél commercial");
     expect(s).toContain("01 00 00 00 01");
     expect(s).toContain("Mail DPO");
     expect(s).toContain("dpo@a.fr");
-    expect(s).toContain("Non renseigné");
+    expect(s).not.toContain("Non renseigné");
+    expect(s).not.toContain("Mail commercial");
     expect(s).not.toContain("Contact commercial 2");
   });
 

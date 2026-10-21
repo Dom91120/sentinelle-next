@@ -158,6 +158,10 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
               <Champ label="Code postal" name="postal_code" valeur={s?.postalCode} />
               <Champ label="Ville" name="city" valeur={s?.city} />
             </div>
+          </Rubrique>
+
+          {/* Le même intitulé que le bloc Contacts de la synthèse : l'assistance, puis les contacts. */}
+          <Rubrique titre="Contacts" bi="bi-person-lines-fill" couleur="rose" onglet="contacts">
             <div className="grille grille-3">
               <Champ
                 label="Tickets (URL)"
@@ -590,7 +594,7 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
 
       {/* Entre l'identité et les notes : le même bloc que l'onglet Contacts d'un logiciel
           (SoftInventory), assistance puis contacts. */}
-      <Contacts sup={s} titre="Contacts" />
+      <Contacts sup={s} titre="Contacts" seulementRenseigne />
 
       <div
         className="data-card mb-3 synthese synthese--cases"

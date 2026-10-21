@@ -1275,8 +1275,6 @@ function Ligne({
 }
 
 const Vide = () => <span className="contact-vide">Non renseigné</span>;
-const Mail = ({ a }: { a: string | null }) => (a ? <a href={`mailto:${a}`}>{a}</a> : <Vide />);
-const Telephone = ({ n }: { n: string | null }) => (n ? <Tel numero={n} /> : <Vide />);
 
 export function supplierHasContacts(s: Supplier): boolean {
   return [
@@ -1295,8 +1293,29 @@ export function supplierHasContacts(s: Supplier): boolean {
   ].some(Boolean);
 }
 
-/** `titre` : sur la fiche du fournisseur lui-même, « Contacts » suffit (le nom est déjà en titre de page). */
-export function Contacts({ sup, titre }: { sup: Supplier | null; titre?: string }) {
+type LigneContact = {
+  label: string;
+  icone: string;
+  large?: boolean;
+  /** null : rien de renseigné. */
+  valeur: React.ReactNode | null;
+};
+
+/**
+ * Le bloc des contacts d'un fournisseur (software/_contacts.html) : l'assistance, puis les
+ * contacts. `titre` : sur la fiche du fournisseur lui-même, « Contacts » suffit (le nom est
+ * déjà en titre de page). `seulementRenseigne` : n'affiche que les lignes qui ont une valeur,
+ * au lieu de « Non renseigné » partout.
+ */
+export function Contacts({
+  sup,
+  titre,
+  seulementRenseigne = false,
+}: {
+  sup: Supplier | null;
+  titre?: string;
+  seulementRenseigne?: boolean;
+}) {
   if (!sup)
     return (
       <div className="contact-aucun">
@@ -1308,6 +1327,58 @@ export function Contacts({ sup, titre }: { sup: Supplier | null; titre?: string 
   const mailSupport = sup.supportEmail || sup.email;
   const horaires = [sup.hours, sup.hours2].filter(Boolean).join(" · ");
   const second = sup.commercialContact2 || sup.commercialPhone2 || sup.commercialEmail2;
+  const tel = (n: string | null) => (n ? <Tel numero={n} /> : null);
+  const mail = (a: string | null) => (a ? <a href={`mailto:${a}`}>{a}</a> : null);
+  const assistance: LigneContact[] = [
+    {
+      label: "Portail de support",
+      icone: "life-buoy",
+      valeur: sup.supportUrl ? (
+        <a href={sup.supportUrl} target="_blank" rel="noopener">
+          {sup.supportUrl}
+        </a>
+      ) : null,
+    },
+    { label: "Tél du support", icone: "phone", valeur: tel(telSupport) },
+    { label: "Mail du support", icone: "mail", valeur: mail(mailSupport) },
+    { label: "N° de client", icone: "badge-check", valeur: sup.customerRef || null },
+    { label: "Horaires du support", icone: "clock", large: true, valeur: horaires || null },
+  ];
+  const contacts: LigneContact[] = [
+    { label: "Contact commercial", icone: "user", valeur: sup.commercialContact || null },
+    { label: "Tél commercial", icone: "phone", valeur: tel(sup.commercialPhone) },
+    { label: "Mail commercial", icone: "mail", valeur: mail(sup.commercialEmail) },
+    ...(second
+      ? [
+          { label: "Contact commercial 2", icone: "user", valeur: sup.commercialContact2 || null },
+          { label: "Tél commercial 2", icone: "phone", valeur: tel(sup.commercialPhone2) },
+          { label: "Mail commercial 2", icone: "mail", valeur: mail(sup.commercialEmail2) },
+        ]
+      : []),
+    { label: "Contact administratif", icone: "user", valeur: sup.adminContact || null },
+    { label: "Tél administratif", icone: "phone", valeur: tel(sup.adminPhone) },
+    { label: "Mail administratif", icone: "mail", valeur: mail(sup.adminEmail) },
+    { label: "DPO", icone: "user", valeur: sup.dpoContact || null },
+    { label: "Tél DPO", icone: "phone", valeur: tel(sup.dpoPhone) },
+    { label: "Mail DPO", icone: "mail", valeur: mail(sup.dpoEmail) },
+  ];
+  const garder = (l: LigneContact[]) =>
+    seulementRenseigne ? l.filter((x) => x.valeur !== null) : l;
+  const haut = garder(assistance);
+  const bas = garder(contacts);
+  const rien = !(
+    sup.supportUrl ||
+    telSupport ||
+    mailSupport ||
+    sup.customerRef ||
+    horaires ||
+    supplierHasContacts(sup)
+  );
+  const ligne = (l: LigneContact) => (
+    <Ligne key={l.label} label={l.label} icone={l.icone} large={l.large}>
+      {l.valeur ?? <Vide />}
+    </Ligne>
+  );
   return (
     <div className="data-card mb-3">
       <div className="card-header-custom">
@@ -1317,83 +1388,17 @@ export function Contacts({ sup, titre }: { sup: Supplier | null; titre?: string 
         </h6>
       </div>
       <div className="p-3">
-        {!(
-          sup.supportUrl ||
-          telSupport ||
-          mailSupport ||
-          sup.customerRef ||
-          horaires ||
-          supplierHasContacts(sup)
-        ) ? (
+        {rien ? (
           <div className="contact-aucun">
             Aucun contact n'est renseigné sur la fiche de « {sup.name} ».
           </div>
         ) : (
           <dl className="contacts-grille mb-0">
-            <Ligne label="Portail de support" icone="life-buoy">
-              {sup.supportUrl ? (
-                <a href={sup.supportUrl} target="_blank" rel="noopener">
-                  {sup.supportUrl}
-                </a>
-              ) : (
-                <Vide />
-              )}
-            </Ligne>
-            <Ligne label="Tél du support" icone="phone">
-              <Telephone n={telSupport} />
-            </Ligne>
-            <Ligne label="Mail du support" icone="mail">
-              <Mail a={mailSupport} />
-            </Ligne>
-            <Ligne label="N° de client" icone="badge-check">
-              {sup.customerRef || <Vide />}
-            </Ligne>
-            <Ligne label="Horaires du support" icone="clock" large>
-              {horaires || <Vide />}
-            </Ligne>
-
-            <div className="contacts-filet" aria-hidden="true" />
-
-            <Ligne label="Contact commercial" icone="user">
-              {sup.commercialContact || <Vide />}
-            </Ligne>
-            <Ligne label="Tél commercial" icone="phone">
-              <Telephone n={sup.commercialPhone} />
-            </Ligne>
-            <Ligne label="Mail commercial" icone="mail">
-              <Mail a={sup.commercialEmail} />
-            </Ligne>
-            {second ? (
-              <>
-                <Ligne label="Contact commercial 2" icone="user">
-                  {sup.commercialContact2 || <Vide />}
-                </Ligne>
-                <Ligne label="Tél commercial 2" icone="phone">
-                  <Telephone n={sup.commercialPhone2} />
-                </Ligne>
-                <Ligne label="Mail commercial 2" icone="mail">
-                  <Mail a={sup.commercialEmail2} />
-                </Ligne>
-              </>
+            {haut.map(ligne)}
+            {haut.length && bas.length ? (
+              <div className="contacts-filet" aria-hidden="true" />
             ) : null}
-            <Ligne label="Contact administratif" icone="user">
-              {sup.adminContact || <Vide />}
-            </Ligne>
-            <Ligne label="Tél administratif" icone="phone">
-              <Telephone n={sup.adminPhone} />
-            </Ligne>
-            <Ligne label="Mail administratif" icone="mail">
-              <Mail a={sup.adminEmail} />
-            </Ligne>
-            <Ligne label="DPO" icone="user">
-              {sup.dpoContact || <Vide />}
-            </Ligne>
-            <Ligne label="Tél DPO" icone="phone">
-              <Telephone n={sup.dpoPhone} />
-            </Ligne>
-            <Ligne label="Mail DPO" icone="mail">
-              <Mail a={sup.dpoEmail} />
-            </Ligne>
+            {bas.map(ligne)}
           </dl>
         )}
       </div>
