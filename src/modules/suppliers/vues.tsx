@@ -113,7 +113,7 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
         <input type="hidden" name="csrf_token" value={csrf} />
 
         <div className="data-card mb-3">
-          <Rubrique titre="Identité" bi="bi-building" couleur="indigo">
+          <Rubrique titre="Fournisseur" bi="bi-building" couleur="indigo">
             <div className="grille grille-identite">
               <Champ
                 label="Nom"
@@ -157,9 +157,6 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
               <Champ label="Code postal" name="postal_code" valeur={s?.postalCode} />
               <Champ label="Ville" name="city" valeur={s?.city} />
             </div>
-          </Rubrique>
-
-          <Rubrique titre="Assistance" bi="bi-life-preserver" couleur="sky">
             <div className="grille grille-3">
               <Champ
                 label="Tickets (URL)"
@@ -191,9 +188,6 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
                 placeholder="ex : samedi 8h-12h"
               />
             </div>
-          </Rubrique>
-
-          <Rubrique titre="Contacts" bi="bi-person-lines-fill" couleur="rose" onglet="contacts">
             <div className="grille grille-contact contact-entete" aria-hidden="true">
               <span />
               <span className="form-label small mb-0">Nom</span>
@@ -598,7 +592,7 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
       className="data-card mb-3 synthese synthese--cases"
       style={{ "--lu-intitule": "80px" } as React.CSSProperties}
     >
-      <Rubrique titre="Identité" bi="bi-building" couleur="indigo">
+      <Rubrique titre="Fournisseur" bi="bi-building" couleur="indigo">
         <Rangee>
           <Lu label="Type" valeur={kindLabel(s)} />
           <LuBloc label="Site Internet">
@@ -621,9 +615,6 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
               : null}
           </LuBloc>
         </Rangee>
-      </Rubrique>
-
-      <Rubrique titre="Assistance" bi="bi-life-preserver" couleur="sky">
         <Rangee>
           <LuBloc label="Tickets">
             {s.supportUrl ? (
@@ -648,9 +639,6 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
           <Lu label="Horaires" valeur={s.hours} />
           <Lu label="Horaires 2" valeur={s.hours2} titre="Horaires (2e ligne)" />
         </Rangee>
-      </Rubrique>
-
-      <Rubrique titre="Contacts" bi="bi-person-lines-fill" couleur="rose" onglet="contacts">
         <ContactLu
           role={c2 ? "Commercial 1" : "Commercial"}
           court={c2 ? "com. 1" : "com."}

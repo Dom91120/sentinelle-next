@@ -76,8 +76,9 @@ export function Rubrique({
         {manques.length ? (
           <div className="lu-manques">
             <Lucide nom="pencil" taille={12} />À compléter :{" "}
-            {manques.map((m) => (
-              <span key={m} className="lu-manque">
+            {manques.map((m, i) => (
+              // Deux champs d'une même rubrique peuvent porter le même intitulé (Courriel).
+              <span key={`${i}-${m}`} className="lu-manque">
                 {m}
               </span>
             ))}
