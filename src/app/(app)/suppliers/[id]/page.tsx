@@ -22,7 +22,6 @@ import {
   domainStatus,
 } from "@/lib/statuts";
 import { TableauContrats } from "@/modules/contracts/vues";
-import { hostingLabel } from "@/modules/software/server";
 import { Contacts } from "@/modules/software/vues";
 import { kindLabel } from "@/modules/suppliers/server";
 import { FormulaireFournisseur, Synthese } from "@/modules/suppliers/vues";
@@ -148,14 +147,6 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
             libelle="Documents"
             icone="bi-paperclip"
             compteur={pieces.length}
-          />
-        ) : null}
-        {software.length ? (
-          <Onglet
-            cible="logiciels"
-            libelle="Logiciels fournis"
-            icone="bi-window-stack"
-            compteur={software.length}
           />
         ) : null}
         {equipments.length ? (
@@ -461,13 +452,6 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                         Logiciels fournis{" "}
                         <span className="badge bg-secondary ms-1">{software.length}</span>
                       </h6>
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm text-nowrap"
-                        data-ouvrir-onglet="logiciels"
-                      >
-                        Tout voir
-                      </button>
                     </div>
                     <div className="fiche-lies">
                       {software.map((sw) => (
@@ -580,51 +564,6 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                             : "-"}
                         </td>
                         <td className="small">{e.criticality || "-"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </Volet>
-        ) : null}
-
-        {software.length ? (
-          <Volet cible="logiciels">
-            <div className="data-card mb-3">
-              <div className="card-header-custom">
-                <h6 className="fw-bold fiche-titre fiche-titre--violet mb-0">
-                  <Icone
-                    bi="bi-window-stack"
-                    taille={14}
-                    classes={`ico ico-${couleurIcone("bi-window-stack")}`}
-                  />
-                  Logiciels fournis{" "}
-                  <span className="badge bg-secondary ms-1">{software.length}</span>
-                </h6>
-              </div>
-              <div className="table-responsive">
-                <table className="table table-hover mb-0">
-                  <thead>
-                    <tr>
-                      <th>Nom</th>
-                      <th>Version</th>
-                      <th>Hébergement</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {software.map((sw) => (
-                      <tr key={sw.id}>
-                        <td>
-                          <a
-                            href={`/inventory/logiciels/${sw.id}`}
-                            className="fw-medium text-decoration-none"
-                          >
-                            {sw.name}
-                          </a>
-                        </td>
-                        <td className="small">{sw.version || "-"}</td>
-                        <td className="small">{hostingLabel(sw)}</td>
                       </tr>
                     ))}
                   </tbody>
