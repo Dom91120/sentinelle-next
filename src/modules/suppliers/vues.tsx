@@ -554,6 +554,7 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
       >
         <Rubrique titre="Fournisseur" bi="bi-building" couleur="indigo">
           <Rangee>
+            <Lu label="Nom" valeur={s.name} />
             <Lu label="Type" valeur={kindLabel(s)} />
             <LuBloc label="Site Internet">
               {s.website ? (

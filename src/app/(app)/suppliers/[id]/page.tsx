@@ -28,7 +28,7 @@ import { kindLabel } from "@/modules/suppliers/server";
 import { FormulaireFournisseur, Synthese } from "@/modules/suppliers/vues";
 import { seuilsDe } from "@/server/config-store";
 import { prisma } from "@/server/db";
-import { documentsEnabled, forParent } from "@/server/documents";
+import { documentsEnabled, forParent, hasFile } from "@/server/documents";
 import { idDeRoute } from "@/server/guards";
 import { contexteModule, voisinsDe } from "@/server/module";
 
@@ -414,6 +414,42 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  </div>
+                ) : null}
+                {docsOn && pieces.length ? (
+                  <div className="data-card mb-3">
+                    <div className="card-header-custom">
+                      <h6 className="fw-bold mb-0 d-flex align-items-center">
+                        <Icone
+                          bi="bi-paperclip"
+                          taille="1em"
+                          classes={`me-1 ico ico-${couleurIcone("bi-paperclip")}`}
+                        />
+                        Documents <span className="badge bg-secondary ms-1">{pieces.length}</span>
+                      </h6>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm text-nowrap"
+                        data-ouvrir-onglet="documents"
+                      >
+                        Tout voir
+                      </button>
+                    </div>
+                    <div className="fiche-lies">
+                      {pieces.slice(0, 6).map((d) => (
+                        <Lien
+                          key={d.id}
+                          url={hasFile(d) ? `/documents/${d.id}/download` : "#vol-documents"}
+                          icone="file-text"
+                          nom={d.filename}
+                          sous={
+                            [d.category?.label, d.createdAt ? dateCourte(d.createdAt) : null]
+                              .filter(Boolean)
+                              .join(" · ") || undefined
+                          }
+                        />
+                      ))}
                     </div>
                   </div>
                 ) : null}
