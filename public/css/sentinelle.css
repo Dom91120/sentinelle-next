@@ -3448,3 +3448,7 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
 /* Les badges de statut d'une synthèse (cycle de vie, authentification…) ont la taille
    de celui du titre de la fiche (0.72 rem), pas les 12 px génériques d'une valeur. */
 .synthese .lu-valeur .badge-status { font-size: 0.72rem; }
+
+/* Le sous-titre d'une page de liste (et du tableau de bord) prend le style de celui
+   d'une fiche : 0.74 rem, interligne serré, collé au titre. */
+.page-header .page-subtitle { margin-top: -1px; font-size: 0.74rem; line-height: 1.25; }
