@@ -3467,3 +3467,8 @@ div:has(> div > .page-title) .page-subtitle { margin-top: -1px; font-size: 0.74r
    principal (Marquer renouvelé, Mot de passe changé…) vient juste sous les flèches
    précédent / suivant, au lieu d'être repoussé en bas de l'en-tête. */
 .fiche-entete .fiche-actions { justify-content: flex-start; }
+
+/* Le titre d'une fiche coule comme du texte : le badge de statut suit le dernier mot,
+   même quand le titre tient sur deux lignes, au lieu de passer seul à la ligne. */
+.fiche-entete .page-title { display: block; }
+.fiche-entete .page-title .badge-status { margin-left: 4px; }
