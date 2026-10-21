@@ -148,11 +148,6 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
                 placeholder="https://…"
               />
             </div>
-            <div className="grille grille-3">
-              <Champ label="Interlocuteur" name="contact_name" valeur={s?.contactName} />
-              <Champ label="Courriel" name="email" valeur={s?.email} type="email" />
-              <Champ label="Standard" name="phone" valeur={s?.phone} />
-            </div>
             <div className="grille grille-adresse">
               <Champ label="Adresse" name="address" valeur={s?.address} />
               <Champ label="Code postal" name="postal_code" valeur={s?.postalCode} />
@@ -162,6 +157,11 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
 
           {/* Le même intitulé que le bloc Contacts de la synthèse : l'assistance, puis les contacts. */}
           <Rubrique titre="Contacts" bi="bi-person-lines-fill" couleur="rose" onglet="contacts">
+            <div className="grille grille-3">
+              <Champ label="Interlocuteur" name="contact_name" valeur={s?.contactName} />
+              <Champ label="Courriel" name="email" valeur={s?.email} type="email" />
+              <Champ label="Standard" name="phone" valeur={s?.phone} />
+            </div>
             <div className="grille grille-3">
               <Champ
                 label="Tickets (URL)"
@@ -538,15 +538,6 @@ export function FormCorpsAncien({ supplier, user, csrf, retour }: FormProps) {
   );
 }
 
-const Tel = ({ numero }: { numero: string | null }) =>
-  numero ? <a href={`tel:${numero.replace(/ /g, "")}`}>{numero}</a> : null;
-const Mail = ({ adresse }: { adresse: string | null }) =>
-  adresse ? (
-    <a href={`mailto:${adresse}`} className="text-truncate d-block">
-      {adresse}
-    </a>
-  ) : null;
-
 function sansProtocole(url: string): string {
   return url.replace("https://", "").replace("http://", "");
 }
@@ -576,11 +567,6 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
                 </a>
               ) : null}
             </LuBloc>
-          </Rangee>
-          <Rangee>
-            <Lu label="Interlocuteur" valeur={s.contactName} />
-            <LuBloc label="Courriel">{s.email ? <Mail adresse={s.email} /> : null}</LuBloc>
-            <LuBloc label="Téléphone">{s.phone ? <Tel numero={s.phone} /> : null}</LuBloc>
           </Rangee>
           <Rangee>
             <LuBloc label="Adresse" pleine>

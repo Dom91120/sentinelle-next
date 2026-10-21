@@ -1323,13 +1323,22 @@ export function Contacts({
         retrouver ici ses contacts.
       </div>
     );
-  const telSupport = sup.supportPhone || sup.phone;
-  const mailSupport = sup.supportEmail || sup.email;
+  // Sur la fiche du fournisseur (seulementRenseigne), l'interlocuteur, le standard et le
+  // courriel ont leurs propres lignes ; sur un logiciel, ils servent de repli au support.
+  const telSupport = sup.supportPhone || (seulementRenseigne ? null : sup.phone);
+  const mailSupport = sup.supportEmail || (seulementRenseigne ? null : sup.email);
   const horaires = [sup.hours, sup.hours2].filter(Boolean).join(" · ");
   const second = sup.commercialContact2 || sup.commercialPhone2 || sup.commercialEmail2;
   const tel = (n: string | null) => (n ? <Tel numero={n} /> : null);
   const mail = (a: string | null) => (a ? <a href={`mailto:${a}`}>{a}</a> : null);
   const assistance: LigneContact[] = [
+    ...(seulementRenseigne
+      ? [
+          { label: "Interlocuteur", icone: "user", valeur: sup.contactName || null },
+          { label: "Standard", icone: "phone", valeur: tel(sup.phone) },
+          { label: "Courriel", icone: "mail", valeur: mail(sup.email) },
+        ]
+      : []),
     {
       label: "Portail de support",
       icone: "life-buoy",
@@ -1372,6 +1381,7 @@ export function Contacts({
     mailSupport ||
     sup.customerRef ||
     horaires ||
+    (seulementRenseigne && (sup.contactName || sup.phone || sup.email)) ||
     supplierHasContacts(sup)
   );
   const ligne = (l: LigneContact) => (
