@@ -6,6 +6,10 @@ import { entre } from "./setup/html";
 
 beforeEach(resetDb);
 
+/** La lecture de l'onglet Contacts (avant son formulaire). */
+const contactsLus = (html: string) =>
+  html.split('id="vol-contacts"', 2)[1].split('id="form-contacts"', 2)[0];
+
 const CHAMPS: Record<string, string> = {
   name: "Arpège",
   kind: "provider",
@@ -43,13 +47,22 @@ describe("fournisseurs", () => {
   it("le nouveau formulaire porte tous les champs", async () => {
     const c = await clientAdmin();
     const sup = await prisma.supplier.create({ data: { name: "Arpège" } });
+    // Les champs de l'onglet Contacts (assistance et contacts) ne sont pas dans Détails.
+    const ONGLET = Object.keys(CHAMPS).filter((k) =>
+      /^(support_|customer_ref|hours|commercial|admin_|dpo_)/.test(k),
+    );
+    const DETAILS = Object.keys(CHAMPS).filter((k) => !ONGLET.includes(k));
     for (const url of [`/suppliers/${sup.id}/edit`, `/suppliers/${sup.id}`, "/suppliers/create"]) {
       const html = (await c.get(url)).text;
       expect(html, url).toContain("fournisseur-saisie");
-      for (const champ of Object.keys(CHAMPS))
-        expect(html, `${url} ${champ}`).toContain(`name="${champ}"`);
+      for (const champ of DETAILS) expect(html, `${url} ${champ}`).toContain(`name="${champ}"`);
       expect(html, url).not.toContain("form-section form-section--");
     }
+    const fiche = (await c.get(`/suppliers/${sup.id}`)).text;
+    const formContacts = fiche.split('id="form-contacts"', 2)[1];
+    for (const champ of ONGLET) expect(formContacts, champ).toContain(`name="${champ}"`);
+    for (const champ of ONGLET)
+      expect(fiche.split('id="form-contacts"', 2)[0], champ).not.toContain(`name="${champ}"`);
   });
 
   it("le nouveau formulaire enregistre et la synthèse relit", async () => {
@@ -64,9 +77,18 @@ describe("fournisseurs", () => {
     const html = (await c.get(`/suppliers/${sup.id}`)).text;
     const s = synthese(html);
     expect(s).toContain('class="data-card mb-3 synthese synthese--cases"');
-    for (const v of ["MOREAU", "factu@arpege.fr", "CLI-9"]) expect(s).toContain(v);
-    expect(html).not.toContain('id="ong-contacts"');
+    expect(s).toContain("Nantes");
+    // L'assistance et les contacts vivent dans leur onglet, pas dans la synthèse ni dans Détails.
+    for (const v of ["MOREAU", "factu@arpege.fr", "CLI-9"]) expect(s).not.toContain(v);
+    const contacts = html.split('id="vol-contacts"', 2)[1];
+    for (const v of ["MOREAU", "factu@arpege.fr", "CLI-9", "aide@arpege.fr"])
+      expect(contacts).toContain(v);
+    expect(contacts).toContain(`action="/suppliers/${sup.id}/contacts"`);
+    expect(html).toContain('id="ong-contacts"');
     expect(html).toContain('id="ong-details"');
+    expect(html.split('id="vol-details"', 2)[1].split('id="vol-contacts"', 2)[0]).not.toContain(
+      'name="commercial_contact"',
+    );
   });
 
   it("l'ancien formulaire des fournisseurs se choisit dans les préférences", async () => {
@@ -93,14 +115,42 @@ describe("fournisseurs", () => {
     expect(await reglage("SUPPLIER_FORM_LEGACY")).toBe(false);
   });
 
-  it("la synthèse tait les contacts vides", async () => {
+  it("l'onglet Contacts tait les contacts vides", async () => {
     const c = await clientAdmin();
     const a = await prisma.supplier.create({ data: { name: "A", dpoEmail: "dpo@a.fr" } });
     const b = await prisma.supplier.create({ data: { name: "B" } });
-    const s = (await c.get(`/suppliers/${a.id}`)).text.split('id="vol-details"', 2)[0];
+    const s = contactsLus((await c.get(`/suppliers/${a.id}`)).text);
     expect(s).toContain("dpo@a.fr");
-    expect(s).not.toContain("Commercial (second)");
-    expect((await c.get(`/suppliers/${b.id}`)).text).toContain("Aucun contact renseigné.");
+    expect(s).not.toContain("Contact commercial 2");
+    expect((await c.get(`/suppliers/${b.id}`)).text).toContain(
+      "Aucun contact n&#x27;est renseigné sur la fiche de « B »",
+    );
+  });
+
+  it("l'onglet Contacts enregistre les contacts sans toucher au reste", async () => {
+    const c = await clientAdmin();
+    const sup = await prisma.supplier.create({
+      data: { name: "Arpège", city: "Nantes", commercialContact: "DUPONT" },
+    });
+    // L'onglet porte l'assistance et les contacts : ce qu'il ne renvoie pas est effacé…
+    await c.post(`/suppliers/${sup.id}/contacts`, {
+      commercial2_contact: "MOREAU",
+      dpo_email: "dpo@arpege.fr",
+      customer_ref: "CLI-9",
+    });
+    let s = await prisma.supplier.findUniqueOrThrow({ where: { id: sup.id } });
+    expect(s.commercialContact2).toBe("MOREAU");
+    expect(s.dpoEmail).toBe("dpo@arpege.fr");
+    expect(s.customerRef).toBe("CLI-9");
+    expect(s.commercialContact).toBeNull();
+    // … mais pas ce qui relève de Détails.
+    expect(s.city).toBe("Nantes");
+    // Et Détails, qui ne porte plus ces champs, ne les efface pas.
+    await c.post(`/suppliers/${sup.id}/edit`, { name: "Arpège", city: "Rezé" });
+    s = await prisma.supplier.findUniqueOrThrow({ where: { id: sup.id } });
+    expect(s.city).toBe("Rezé");
+    expect(s.commercialContact2).toBe("MOREAU");
+    expect(s.customerRef).toBe("CLI-9");
   });
 
   it("le rail de la synthèse ne montre que ce qu'il a", async () => {
@@ -180,14 +230,18 @@ describe("fournisseurs", () => {
         dpoEmail: "dpo@a.fr",
       },
     });
-    const s = (await c.get(`/suppliers/${sup.id}`)).text.split('id="vol-details"', 2)[0];
-    expect(s).toContain('<span class="lu-label">Téléphone</span>');
-    expect(s).not.toContain("Tel com. 1");
-    expect(s).not.toContain("Tel commercial 1");
-    expect(s).toContain('<span class="lu-label" title="Courriel DPO">Mail DPO</span>');
+    // Le bloc est celui de l'onglet Contacts d'un logiciel : mêmes intitulés, « Non renseigné »
+    // pour un champ vide, le second commercial seulement s'il existe.
+    const s = contactsLus((await c.get(`/suppliers/${sup.id}`)).text);
+    expect(s).toContain("Tél commercial");
+    expect(s).toContain("01 00 00 00 01");
+    expect(s).toContain("Mail DPO");
+    expect(s).toContain("dpo@a.fr");
+    expect(s).toContain("Non renseigné");
+    expect(s).not.toContain("Contact commercial 2");
   });
 
-  it("un seul commercial perd son numéro", async () => {
+  it("le second commercial n'apparaît que renseigné", async () => {
     const c = await clientAdmin();
     const seul = await prisma.supplier.create({
       data: { name: "Seul", commercialContact2: "MOREAU" },
@@ -195,11 +249,12 @@ describe("fournisseurs", () => {
     const deux = await prisma.supplier.create({
       data: { name: "Deux", commercialContact: "DUPONT", commercialEmail2: "b@d.fr" },
     });
-    const s = (await c.get(`/suppliers/${seul.id}`)).text.split('id="vol-details"', 2)[0];
-    expect(s).toContain('<span class="lu-label">Commercial</span>');
-    expect(s).not.toContain("Commercial 2");
-    const dd = (await c.get(`/suppliers/${deux.id}`)).text.split('id="vol-details"', 2)[0];
-    expect(dd).toContain('<span class="lu-label">Commercial 1</span>');
-    expect(dd).toContain('<span class="lu-label" title="Courriel commercial 2">Mail com. 2</span>');
+    const s = contactsLus((await c.get(`/suppliers/${seul.id}`)).text);
+    expect(s).toContain("Contact commercial 2");
+    expect(s).toContain("MOREAU");
+    const dd = contactsLus((await c.get(`/suppliers/${deux.id}`)).text);
+    expect(dd).toContain("DUPONT");
+    expect(dd).toContain("Mail commercial 2");
+    expect(dd).toContain("b@d.fr");
   });
 });

@@ -4,7 +4,7 @@ import { PiedForm, Section } from "@/components/formulaire";
 import { Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
 import type { Supplier } from "@/generated/prisma/client";
 import { SUPPLIER_KIND_LABELS } from "@/lib/constantes";
-import { hasContacts, kindLabel } from "@/modules/suppliers/server";
+import { kindLabel } from "@/modules/suppliers/server";
 import type { CurrentUser } from "@/server/guards";
 
 export type FormProps = {
@@ -157,71 +157,6 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
               <Champ label="Code postal" name="postal_code" valeur={s?.postalCode} />
               <Champ label="Ville" name="city" valeur={s?.city} />
             </div>
-            <div className="grille grille-3">
-              <Champ
-                label="Tickets (URL)"
-                name="support_url"
-                valeur={s?.supportUrl}
-                type="url"
-                placeholder="https://support.exemple.fr"
-              />
-              <Champ label="Hotline" name="support_phone" valeur={s?.supportPhone} />
-              <Champ label="Courriel" name="support_email" valeur={s?.supportEmail} type="email" />
-            </div>
-            <div className="grille grille-3">
-              <Champ
-                label="N° client / identifiant support"
-                name="customer_ref"
-                valeur={s?.customerRef}
-                titre="Celui que l'éditeur redemande à chaque appel"
-              />
-              <Champ
-                label="Horaires"
-                name="hours"
-                valeur={s?.hours}
-                placeholder="ex : lundi au vendredi 8h-17h"
-              />
-              <Champ
-                label="Horaires (2e ligne)"
-                name="hours2"
-                valeur={s?.hours2}
-                placeholder="ex : samedi 8h-12h"
-              />
-            </div>
-            <div className="grille grille-contact contact-entete" aria-hidden="true">
-              <span />
-              <span className="form-label small mb-0">Nom</span>
-              <span className="form-label small mb-0">Téléphone</span>
-              <span className="form-label small mb-0">Courriel</span>
-            </div>
-            <Contact
-              role="Commercial 1"
-              prefix="commercial"
-              nom={s?.commercialContact}
-              tel={s?.commercialPhone}
-              mail={s?.commercialEmail}
-            />
-            <Contact
-              role="Commercial 2"
-              prefix="commercial2"
-              nom={s?.commercialContact2}
-              tel={s?.commercialPhone2}
-              mail={s?.commercialEmail2}
-            />
-            <Contact
-              role="Administratif"
-              prefix="admin"
-              nom={s?.adminContact}
-              tel={s?.adminPhone}
-              mail={s?.adminEmail}
-            />
-            <Contact
-              role="DPO"
-              prefix="dpo"
-              nom={s?.dpoContact}
-              tel={s?.dpoPhone}
-              mail={s?.dpoEmail}
-            />
           </Rubrique>
 
           <Rubrique titre="Notes" bi="bi-journal-text" couleur="slate">
@@ -243,6 +178,95 @@ export function FormCorps({ supplier: s, user, csrf, retour }: FormProps) {
           supprimer={s && user.canDelete("suppliers") ? `/suppliers/${s.id}/delete` : null}
           confirmation="Supprimer ce fournisseur ?"
         />
+      </form>
+    </div>
+  );
+}
+
+/** L'onglet Contacts : les quatre contacts, dans un formulaire à part (POST /suppliers/<id>/contacts). */
+export function FormContacts({ supplier: s, csrf }: { supplier: Supplier; csrf: string }) {
+  return (
+    <div className="form-seul">
+      <form
+        method="POST"
+        id="form-contacts"
+        className="formulaire fournisseur-saisie"
+        action={`/suppliers/${s.id}/contacts`}
+      >
+        <input type="hidden" name="csrf_token" value={csrf} />
+        <div className="data-card mb-3">
+          <Rubrique titre="Assistance" bi="bi-life-preserver" couleur="sky">
+            <div className="grille grille-3">
+              <Champ
+                label="Tickets (URL)"
+                name="support_url"
+                valeur={s.supportUrl}
+                type="url"
+                placeholder="https://support.exemple.fr"
+              />
+              <Champ label="Hotline" name="support_phone" valeur={s.supportPhone} />
+              <Champ label="Courriel" name="support_email" valeur={s.supportEmail} type="email" />
+            </div>
+            <div className="grille grille-3">
+              <Champ
+                label="N° client / identifiant support"
+                name="customer_ref"
+                valeur={s.customerRef}
+                titre="Celui que l'éditeur redemande à chaque appel"
+              />
+              <Champ
+                label="Horaires"
+                name="hours"
+                valeur={s.hours}
+                placeholder="ex : lundi au vendredi 8h-17h"
+              />
+              <Champ
+                label="Horaires (2e ligne)"
+                name="hours2"
+                valeur={s.hours2}
+                placeholder="ex : samedi 8h-12h"
+              />
+            </div>
+          </Rubrique>
+
+          <Rubrique titre="Contacts" bi="bi-person-lines-fill" couleur="rose" onglet="contacts">
+            <div className="grille grille-contact contact-entete" aria-hidden="true">
+              <span />
+              <span className="form-label small mb-0">Nom</span>
+              <span className="form-label small mb-0">Téléphone</span>
+              <span className="form-label small mb-0">Courriel</span>
+            </div>
+            <Contact
+              role="Commercial 1"
+              prefix="commercial"
+              nom={s.commercialContact}
+              tel={s.commercialPhone}
+              mail={s.commercialEmail}
+            />
+            <Contact
+              role="Commercial 2"
+              prefix="commercial2"
+              nom={s.commercialContact2}
+              tel={s.commercialPhone2}
+              mail={s.commercialEmail2}
+            />
+            <Contact
+              role="Administratif"
+              prefix="admin"
+              nom={s.adminContact}
+              tel={s.adminPhone}
+              mail={s.adminEmail}
+            />
+            <Contact
+              role="DPO"
+              prefix="dpo"
+              nom={s.dpoContact}
+              tel={s.dpoPhone}
+              mail={s.dpoEmail}
+            />
+          </Rubrique>
+        </div>
+        <PiedForm retour={`/suppliers/${s.id}#contacts`} libelle="Enregistrer" />
       </form>
     </div>
   );
@@ -547,46 +571,9 @@ function sansProtocole(url: string): string {
 }
 
 /** Un contact de la Synthèse : ses champs coulent dans la grille, chaque contact sur une nouvelle ligne. */
-function ContactLu({
-  role,
-  court,
-  nom,
-  numero,
-  adresse,
-}: {
-  role: string;
-  court: string;
-  nom: string | null;
-  numero: string | null;
-  adresse: string | null;
-}) {
-  if (!nom && !numero && !adresse) return null;
-  const qui = role === role.toUpperCase() ? role : role.toLowerCase();
-  return (
-    <div className="lu-rangee lu-rangee--ligne">
-      <Lu label={role} valeur={nom} facultatif />
-      <LuBloc
-        label={nom ? "Téléphone" : `Tel ${court}`}
-        facultatif
-        titre={nom ? undefined : `Téléphone ${qui}`}
-      >
-        {numero ? <Tel numero={numero} /> : null}
-      </LuBloc>
-      <LuBloc
-        label={nom ? "Courriel" : `Mail ${court}`}
-        facultatif
-        titre={nom ? undefined : `Courriel ${qui}`}
-      >
-        {adresse ? <Mail adresse={adresse} /> : null}
-      </LuBloc>
-    </div>
-  );
-}
 
 /** suppliers/_synthese.html */
 export function Synthese({ supplier: s }: { supplier: Supplier }) {
-  const c1 = s.commercialContact || s.commercialPhone || s.commercialEmail;
-  const c2 = s.commercialContact2 || s.commercialPhone2 || s.commercialEmail2;
   return (
     <div
       className="data-card mb-3 synthese synthese--cases"
@@ -615,61 +602,6 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
               : null}
           </LuBloc>
         </Rangee>
-        <Rangee>
-          <LuBloc label="Tickets">
-            {s.supportUrl ? (
-              <a
-                href={s.supportUrl}
-                target="_blank"
-                rel="noopener"
-                className="text-truncate d-block"
-                title={s.supportUrl}
-              >
-                {sansProtocole(s.supportUrl)}
-              </a>
-            ) : null}
-          </LuBloc>
-          <LuBloc label="Hotline">{s.supportPhone ? <Tel numero={s.supportPhone} /> : null}</LuBloc>
-          <LuBloc label="Courriel">
-            {s.supportEmail ? <Mail adresse={s.supportEmail} /> : null}
-          </LuBloc>
-        </Rangee>
-        <Rangee>
-          <Lu label="N° client" valeur={s.customerRef} titre="N° client / identifiant support" />
-          <Lu label="Horaires" valeur={s.hours} />
-          <Lu label="Horaires 2" valeur={s.hours2} titre="Horaires (2e ligne)" />
-        </Rangee>
-        <ContactLu
-          role={c2 ? "Commercial 1" : "Commercial"}
-          court={c2 ? "com. 1" : "com."}
-          nom={s.commercialContact}
-          numero={s.commercialPhone}
-          adresse={s.commercialEmail}
-        />
-        <ContactLu
-          role={c1 ? "Commercial 2" : "Commercial"}
-          court={c1 ? "com. 2" : "com."}
-          nom={s.commercialContact2}
-          numero={s.commercialPhone2}
-          adresse={s.commercialEmail2}
-        />
-        <ContactLu
-          role="Administratif"
-          court="admin."
-          nom={s.adminContact}
-          numero={s.adminPhone}
-          adresse={s.adminEmail}
-        />
-        <ContactLu
-          role="DPO"
-          court="DPO"
-          nom={s.dpoContact}
-          numero={s.dpoPhone}
-          adresse={s.dpoEmail}
-        />
-        {!hasContacts(s) ? (
-          <span className="lu-vide text-muted small">Aucun contact renseigné.</span>
-        ) : null}
       </Rubrique>
 
       <Rubrique titre="Notes" bi="bi-journal-text" couleur="slate">

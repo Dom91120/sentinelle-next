@@ -23,8 +23,9 @@ import {
 } from "@/lib/statuts";
 import { TableauContrats } from "@/modules/contracts/vues";
 import { hostingLabel } from "@/modules/software/server";
-import { hasContacts, kindLabel } from "@/modules/suppliers/server";
-import { FormulaireFournisseur, Synthese } from "@/modules/suppliers/vues";
+import { Contacts } from "@/modules/software/vues";
+import { kindLabel } from "@/modules/suppliers/server";
+import { FormContacts, FormulaireFournisseur, Synthese } from "@/modules/suppliers/vues";
 import { seuilsDe } from "@/server/config-store";
 import { prisma } from "@/server/db";
 import { documentsEnabled, forParent } from "@/server/documents";
@@ -35,38 +36,6 @@ function milliers(n: number): string {
   return Math.round(n)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
-
-function ContactFiche({
-  titre,
-  nom,
-  tel,
-  mail,
-}: {
-  titre: string;
-  nom: string | null;
-  tel: string | null;
-  mail: string | null;
-}) {
-  if (!nom && !tel && !mail) return null;
-  return (
-    <div className="fiche-champ">
-      <span className="fiche-label">{titre}</span>
-      {nom ? <span className="fw-medium">{nom}</span> : null}
-      {tel ? (
-        <a href={`tel:${tel.replace(/ /g, "")}`} className="d-block small text-decoration-none">
-          <Icone bi="bi-telephone" taille="1em" classes="me-1" />
-          {tel}
-        </a>
-      ) : null}
-      {mail ? (
-        <a href={`mailto:${mail}`} className="d-block small text-truncate">
-          <Icone bi="bi-envelope" taille="1em" classes="me-1" />
-          {mail}
-        </a>
-      ) : null}
-    </div>
-  );
 }
 
 /** suppliers/detail.html */
@@ -167,15 +136,13 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
       >
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}
+        <Onglet cible="contacts" libelle="Contacts" icone="bi-person-lines-fill" />
         <Onglet
           cible="contrats"
           libelle="Contrats"
           icone="bi-file-earmark-text"
           compteur={contracts.length}
         />
-        {legacy && hasContacts(supplier) ? (
-          <Onglet cible="contacts" libelle="Contacts" icone="bi-person-lines-fill" />
-        ) : null}
         {docsOn ? (
           <Onglet
             cible="documents"
@@ -528,43 +495,14 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
         ) : null}
 
         <Volet cible="contacts">
-          {hasContacts(supplier) ? (
-            <div className="data-card p-4 mb-3">
-              <h6 className="fw-bold fiche-titre fiche-titre--rose mb-3">
-                <Icone
-                  bi="bi-person-lines-fill"
-                  taille={14}
-                  classes={`ico ico-${couleurIcone("bi-person-lines-fill")}`}
-                />
-                Contacts
-              </h6>
-              <div className="fiche-grille">
-                <ContactFiche
-                  titre="Commercial"
-                  nom={supplier.commercialContact}
-                  tel={supplier.commercialPhone}
-                  mail={supplier.commercialEmail}
-                />
-                <ContactFiche
-                  titre="Commercial (second)"
-                  nom={supplier.commercialContact2}
-                  tel={supplier.commercialPhone2}
-                  mail={supplier.commercialEmail2}
-                />
-                <ContactFiche
-                  titre="Administratif / facturation"
-                  nom={supplier.adminContact}
-                  tel={supplier.adminPhone}
-                  mail={supplier.adminEmail}
-                />
-                <ContactFiche
-                  titre="DPO"
-                  nom={supplier.dpoContact}
-                  tel={supplier.dpoPhone}
-                  mail={supplier.dpoEmail}
-                />
-              </div>
-            </div>
+          {/* Le même bloc que l'onglet Contacts d'un logiciel (SoftInventory) : assistance, puis contacts. */}
+          <div data-edition-cache>
+            <Contacts sup={supplier} />
+          </div>
+          {peutEditer && !legacy ? (
+            <fieldset className="edition-verrou" data-edition-verrou disabled>
+              <FormContacts supplier={supplier} csrf={csrf} />
+            </fieldset>
           ) : null}
         </Volet>
 
