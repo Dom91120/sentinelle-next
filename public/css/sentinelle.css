@@ -3472,3 +3472,15 @@ div:has(> div > .page-title) .page-subtitle { margin-top: -1px; font-size: 0.74r
    même quand le titre tient sur deux lignes, au lieu de passer seul à la ligne. */
 .fiche-entete .page-title { display: block; }
 .fiche-entete .page-title .badge-status { margin-left: 4px; }
+
+/* Le bandeau d'échéance se centre sur la largeur du contenu, pas sur l'espace que lui
+   laisse le titre : trois colonnes égales (titre, bandeau, actions) à partir de 768 px. */
+@media (min-width: 768px) {
+  .fiche-entete:has(> .fiche-entete-bandeau) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: start;
+  }
+  .fiche-entete:has(> .fiche-entete-bandeau) > .fiche-entete-bandeau { justify-self: center; margin-left: 0; margin-right: 0; }
+  .fiche-entete:has(> .fiche-entete-bandeau) > .fiche-actions { justify-self: end; }
+}
