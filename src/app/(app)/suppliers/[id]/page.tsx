@@ -114,19 +114,7 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
   const mailSupport = supplier.supportEmail || supplier.email;
   return (
     <>
-      <Entete
-        titre={supplier.name}
-        sousTitre={sousTitre}
-        primaire={
-          user.canEdit("contracts") ? (
-            <a href="/contracts/create" className="btn btn-primary">
-              <Icone bi="bi-plus-lg" taille="1em" classes="me-1" /> Nouveau contrat
-            </a>
-          ) : null
-        }
-        voisins={voisins}
-        base="/suppliers"
-      />
+      <Entete titre={supplier.name} sousTitre={sousTitre} voisins={voisins} base="/suppliers" />
 
       <BarreOnglets
         id="ficheSupplier"
