@@ -77,7 +77,8 @@ export default async function ContractDetail({ params }: { params: Promise<{ id:
   ]);
   const statut = contractStatus(contract, seuilsDe(user.settings));
   const nature = natureLabel(contract);
-  const sousTitre = `${contractKindLabel(contract)}${nature ? ` · ${nature}` : ""}${contract.supplier ? ` · ${contract.supplier.name}` : ""}${contract.reference ? ` · réf. ${contract.reference}` : ""}`;
+  // Fournisseur et référence seulement : le type et la nature se lisent dans la synthèse.
+  const sousTitre = [contract.supplier?.name, contract.reference].filter(Boolean).join(" · ");
   const complement = `${contract.endDate ? `échéance ${dateCourte(contract.endDate)}` : ""}${contract.noticeDays ? ` · préavis de ${contract.noticeDays} j` : ""}${contract.autoRenew ? " · reconduction tacite" : ""}`;
   const logiciels = contract.software.map((l) => l.software);
   const equipements = contract.equipments.map((l) => l.equipment);
