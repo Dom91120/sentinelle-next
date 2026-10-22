@@ -71,7 +71,7 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
             Logiciels <span className="page-count">{p.total}</span>
           </h1>
           <p className="page-subtitle">
-            Applications métiers, hébergement, éditeur et mises à jour — {p.total} logiciel(s)
+            Applications métiers, hébergement, éditeur et mises à jour
           </p>
         </div>
         <div className="page-actions">
