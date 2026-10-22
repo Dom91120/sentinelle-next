@@ -170,7 +170,7 @@ function Nature({ item }: { item: Software | null }) {
         title="Fait et maintenu par la DSI : ni éditeur, ni support, ni contrat"
       >
         <Icone bi="bi-code-slash" taille="1em" classes="me-1" />
-        Développement interne
+        Dév. interne
       </label>
       <input
         type="checkbox"
@@ -1168,28 +1168,20 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
           <Lu label="Réf. technique" valeur={item.techResponsible} titre="Référent technique" />
         </Rangee>
         <Rangee>
-          <LuBloc label="Nature" facultatif>
-            {/* Icône seule, le libellé au survol (et pour les lecteurs d'écran). */}
-            {item.isDocker ? (
-              <span className="badge-nature" title="Docker" aria-label="Docker">
-                <i className="icon-docker" />
-              </span>
-            ) : null}
-            {item.internalDev ? (
-              <span
-                className="badge-nature"
-                title="Développement interne"
-                aria-label="Développement interne"
-              >
-                <Icone bi="bi-code-slash" taille="1em" />
-              </span>
-            ) : null}
-            {item.noServer ? (
-              <span className="badge-nature" title="Aucun serveur" aria-label="Aucun serveur">
-                <Icone bi="bi-slash-circle" taille="1em" />
-              </span>
-            ) : null}
-          </LuBloc>
+          {/* Les natures en texte, comme les autres valeurs (pas d'étiquette à icône). */}
+          <Lu
+            label="Nature"
+            facultatif
+            valeur={
+              [
+                item.isDocker ? "Docker" : null,
+                item.internalDev ? "Dév. interne" : null,
+                item.noServer ? "Aucun serveur" : null,
+              ]
+                .filter(Boolean)
+                .join(" · ") || null
+            }
+          />
           <LuBloc label="Mail technique" titre="Courriel du référent technique">
             {item.techResponsibleEmail ? (
               <a href={`mailto:${item.techResponsibleEmail}`} className="text-truncate d-block">
