@@ -651,7 +651,22 @@ svg.lucide { flex-shrink: 0; vertical-align: -0.18em; fill: none; stroke: curren
 .page-title .titre-lien svg.lucide { display: inline-block; }
 .page-title .titre-lien:hover { color: var(--primary); }
 /* Le compteur dans le titre (« Certificats 5 ») et le ? d'aide. */
-.page-count { margin-left: 6px; font-size: 1.05rem; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Le compte dans le titre d'une liste (Logiciels 85) : une pastille en aplat de la
+   couleur principale (celle du nom Sentinelle), texte blanc, calée au milieu du titre. */
+.page-count {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 9px;
+    border-radius: var(--radius-pill);
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0;
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+}
 .help-toggle {
     display: inline-flex; align-items: center; justify-content: center;
     width: 20px; height: 20px; margin-left: 8px; padding: 0;
