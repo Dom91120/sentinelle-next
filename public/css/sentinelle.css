@@ -3464,6 +3464,21 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
    de celui du titre de la fiche (0.72 rem), pas les 12 px génériques d'une valeur. */
 .synthese .lu-valeur .badge-status { font-size: 0.72rem; }
 
+/* Dans la grille d'une synthèse, un champ dont la valeur est un badge (Statut, Nature)
+   garde la hauteur des autres (24 px : 18 px d'intitulé + 3 px de marge haut et bas).
+   La valeur devient un flex de 18 px (pas de boîte de ligne, donc pas de creux sous un
+   badge posé sur la ligne de base), sans le .15em de marge basse d'une valeur texte ;
+   le badge tient dans ces 18 px, sans la marge sous une étiquette de nature. Intitulé et
+   valeur se centrent (pas d'alignement sur la ligne de base : une étiquette qui ne porte
+   qu'une icône n'en a pas et ferait descendre la valeur). */
+.lu:not(.lu--large):has(> .lu-valeur > :is(.badge-status, .badge-nature)) { align-items: center; }
+.lu:not(.lu--large) .lu-valeur:has(.badge-status, .badge-nature) { display: flex; flex-wrap: wrap; align-items: center; row-gap: 4px; min-height: 18px; padding-bottom: 0; }
+/* Une valeur qui enveloppe un lien tronqué (URL) : le .15em de marge basse est porté
+   par le lien, pas une seconde fois par la valeur (la ligne ferait 26 px au lieu de 24). */
+.lu:not(.lu--large) .lu-valeur:has(> .text-truncate) { padding-bottom: 0; }
+.lu:not(.lu--large) .lu-valeur .badge-status { padding-top: 1px; padding-bottom: 1px; line-height: 16px; }
+.lu:not(.lu--large) .lu-valeur .badge-nature { margin-bottom: 0; padding-top: 1px; padding-bottom: 1px; line-height: 14px; }
+
 /* Le sous-titre d'une page de liste (et du tableau de bord) prend le style de celui
    d'une fiche : 0.74 rem, interligne serré, collé au titre. */
 .page-header .page-subtitle,
