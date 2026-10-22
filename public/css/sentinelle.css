@@ -2997,9 +2997,9 @@ a.marche-doc-nom:hover { color: var(--primary); }
 .fiche-actions-ligne .btn { white-space: nowrap; }
 .fiche-actions .btn, .fiche-actions .menu-seul .dropdown-item { padding: 2px 10px; font-size: 0.8rem; line-height: 20px; height: 26px; }
 .fiche-actions .btn-icon, .fiche-actions .menu-seul .dropdown-item { padding-left: 6px; padding-right: 6px; }
-/* Le titre d'une fiche, un poil plus petit que celui d'une liste (1.35 rem
-   au lieu de 1.5), son badge de statut avec lui. */
-.fiche-entete .page-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1.35rem; line-height: 1.1; }
+/* Le titre d'une fiche, de la taille de celui d'une liste (1.5 rem) mais avec un
+   interligne serré ; son badge de statut garde sa petite taille (0.72 rem). */
+.fiche-entete .page-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1.5rem; line-height: 1.1; }
 .fiche-entete .page-title .badge-status { font-size: 0.72rem; vertical-align: middle; }
 /* Le sous-titre d'une fiche : plus petit que celui d'une liste, collé au titre. */
 /* Le sous-titre ne dépasse pas la largeur du titre (width: 0, il ne compte pas
@@ -3441,9 +3441,9 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
 
 /* Quand une ligne de texte suit les boutons de navigation (l'éditeur d'un logiciel),
    la colonne de droite reproduit la colonne de gauche : des boutons de la hauteur du
-   titre (24 px), puis la ligne de texte à la hauteur du sous-titre. */
+   titre (26 px, 1.5 rem × 1.1), puis la ligne de texte à la hauteur du sous-titre. */
 .fiche-actions:has(> .page-subtitle) { gap: 0; justify-content: flex-start; }
-.fiche-actions:has(> .page-subtitle) .fiche-voisins .btn { height: 24px; line-height: 18px; }
+.fiche-actions:has(> .page-subtitle) .fiche-voisins .btn { height: 26px; line-height: 20px; }
 
 /* Les badges de statut d'une synthèse (cycle de vie, authentification…) ont la taille
    de celui du titre de la fiche (0.72 rem), pas les 12 px génériques d'une valeur. */
