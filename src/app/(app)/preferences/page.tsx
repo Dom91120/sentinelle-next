@@ -1300,6 +1300,14 @@ export default async function PreferencesPage() {
                         <span className="text-muted">
                           {dateHeure(b.date)} · {b.sizeKb} Ko
                         </span>
+                        <a
+                          href={`/data/db-backup/${encodeURIComponent(b.name)}`}
+                          className="btn btn-sm btn-outline-primary py-0 px-1"
+                          title="Télécharger"
+                          aria-label="Télécharger"
+                        >
+                          <Icone bi="bi-download" taille="1em" />
+                        </a>
                         <form method="POST" action="/preferences">
                           <Csrf csrf={csrf} />
                           <input type="hidden" name="action" value="delete_db_backup" />

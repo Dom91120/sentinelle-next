@@ -114,12 +114,21 @@ export async function backupDatabase(cfg: AppSettings): Promise<string> {
   return dest;
 }
 
-/** Supprime une sauvegarde par son nom (garde anti-traversée). */
-export async function deleteBackup(cfg: AppSettings, name: string): Promise<void> {
-  if (!name || !BACKUP_NAME_RE.test(name)) throw new Error("Nom de sauvegarde invalide");
+/**
+ * Le chemin d'une sauvegarde d'après son nom, ou null si le nom n'a pas la forme
+ * attendue ou sortirait du dossier (garde anti-traversée). Ne vérifie pas l'existence.
+ */
+export function backupPath(cfg: AppSettings, name: string): string | null {
+  if (!name || !BACKUP_NAME_RE.test(name)) return null;
   const directory = path.resolve(backupDir(cfg));
   const chemin = path.resolve(directory, name);
-  if (path.dirname(chemin) !== directory) throw new Error("Chemin invalide");
+  return path.dirname(chemin) === directory ? chemin : null;
+}
+
+/** Supprime une sauvegarde par son nom. */
+export async function deleteBackup(cfg: AppSettings, name: string): Promise<void> {
+  const chemin = backupPath(cfg, name);
+  if (!chemin) throw new Error("Nom de sauvegarde invalide");
   try {
     await fs.access(chemin);
   } catch {
