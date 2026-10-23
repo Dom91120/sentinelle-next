@@ -34,6 +34,55 @@ const SECTION_JS = `(function () {
   });
 })();`;
 
+/* Les boutons d'export se mettent en attente au clic : l'archive se construit côté
+   serveur avant le premier octet (plus d'une minute avec les pièces jointes), et le
+   navigateur ne montre rien. Un jeton passé dans l'URL revient en cookie quand la
+   réponse arrive : les boutons reprennent leur libellé. */
+const EXPORT_JS = `(function () {
+  var liens = document.querySelectorAll('a[data-export-attente]');
+  if (!liens.length) return;
+  var occupe = false;
+  function cookie(nom) {
+    var parts = document.cookie.split('; ');
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].indexOf(nom + '=') === 0) return parts[i].slice(nom.length + 1);
+    }
+    return '';
+  }
+  function jeton() {
+    var s = '', a = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < 16; i++) s += a.charAt(Math.floor(Math.random() * a.length));
+    return s;
+  }
+  function etat(attente) {
+    occupe = attente;
+    liens.forEach(function (a) {
+      a.classList.toggle('btn-attente', attente);
+      a.setAttribute('aria-busy', attente ? 'true' : 'false');
+      var texte = a.querySelector('[data-texte]');
+      if (texte) texte.textContent = attente ? a.dataset.exportAttente : texte.dataset.texte;
+    });
+  }
+  liens.forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      if (occupe) { ev.preventDefault(); return; }
+      var t = jeton();
+      a.href = a.href + (a.href.indexOf('?') === -1 ? '?' : '&') + 't=' + t;
+      etat(true);
+      var debut = Date.now();
+      var minuteur = setInterval(function () {
+        var fini = cookie('export_pret') === t;
+        if (fini) document.cookie = 'export_pret=; Path=/; Max-Age=0; SameSite=Lax';
+        if (fini || Date.now() - debut > 15 * 60 * 1000) {
+          clearInterval(minuteur);
+          a.href = a.href.replace(/[?&]t=[a-z0-9]+$/, '');
+          etat(false);
+        }
+      }, 500);
+    });
+  });
+})();`;
+
 const ESTIMATION_JS = `(function () {
   var champ = document.getElementById('backupDbKeep');
   var sortie = document.getElementById('backupKeepEstimation');
@@ -1207,16 +1256,19 @@ export default async function PreferencesPage() {
                   <a
                     href="/data/export-full.zip"
                     className="btn btn-sm btn-outline-success"
-                    title="Archive ZIP (base + CSV + page HTML) pour clé USB"
+                    title="Archive ZIP (base + CSV + pièces jointes + page HTML) pour clé USB"
+                    data-export-attente="Préparation de l'archive…"
                   >
-                    <Icone bi="bi-usb-drive" taille="1em" classes="me-1" /> Export complet
+                    <Icone bi="bi-usb-drive" taille="1em" classes="me-1" />
+                    <span data-texte="Export complet">Export complet</span>
                   </a>
                   <a
                     href="/data/export-full.zip?sans_documents=1"
                     className="btn btn-sm btn-outline-secondary"
                     title="Même archive, sans les octets des pièces jointes : les fiches restent, leur contenu non"
+                    data-export-attente="Préparation…"
                   >
-                    allégé
+                    <span data-texte="allégé">allégé</span>
                   </a>
                 </div>
                 <form method="POST" action="/preferences">
@@ -1611,6 +1663,7 @@ export default async function PreferencesPage() {
 
       <ScriptDiffere code={SECTION_JS} nonce={nonce} />
       <ScriptDiffere code={ESTIMATION_JS} nonce={nonce} />
+      <ScriptDiffere code={EXPORT_JS} nonce={nonce} />
       <ScriptDiffere code={SOMMAIRE_JS} nonce={nonce} />
     </>
   );
