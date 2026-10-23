@@ -57,7 +57,7 @@ export function FormCorps({
             <RubriqueForm titre="Compte" icone="bi-key" couleur="indigo">
               <div className="row">
                 <div className="col-md-6 mb-3">
-                  <label className="form-label fw-medium">Service *</label>
+                  <label className="form-label fw-medium">Libellé *</label>
                   <input
                     type="text"
                     name="service_name"
@@ -246,6 +246,7 @@ export function Synthese({ account }: { account: AccountComplet }) {
           rubrique Compte, pas une rubrique à part. */}
       <Rubrique titre="Compte" bi="bi-key" couleur="indigo">
         <Rangee>
+          <Lu label="Libellé" valeur={account.serviceName} />
           <Lu label="Utilisateur" valeur={account.username} />
           <Lu label="URL / accès" valeur={account.url} />
         </Rangee>

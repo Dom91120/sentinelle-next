@@ -70,7 +70,7 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
           <table className="table table-hover mb-0 js-filterable">
             <thead>
               <tr>
-                <th>Service</th>
+                <th>Libellé</th>
                 <th>Utilisateur</th>
                 <th className="th-2l">
                   Prochain
