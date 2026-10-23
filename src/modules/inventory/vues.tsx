@@ -409,12 +409,20 @@ export function FormCorps({
                 </div>
               </div>
               <div className="row g-3 mb-3">
-                <Champ label="Rôle principal" name="role_principal" value={val("rolePrincipal")} />
+                {/* Rôle et services se partagent à parts égales la largeur que la colonne
+                    Outils (largeur de son contenu) leur laisse. */}
+                <Champ
+                  label="Rôle principal"
+                  name="role_principal"
+                  value={val("rolePrincipal")}
+                  col="col-md"
+                />
                 <Champ
                   label="Services utilisateurs"
                   name="user_services"
                   value={val("userServices")}
                   kinds={groupes.services}
+                  col="col-md"
                 />
                 {/* Les outils d'une VM : trois interrupteurs sur la ligne du rôle principal, à la
                     hauteur des champs, sous un intitulé comme les autres colonnes. */}
