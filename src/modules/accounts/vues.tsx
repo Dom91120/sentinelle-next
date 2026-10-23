@@ -7,7 +7,7 @@ import {
   QaModalSoftware,
   QaModalSupplier,
 } from "@/components/quick-add";
-import { Lu, Pastille, Rangee, Rubrique } from "@/components/synthese";
+import { Lu, LuBloc, Pastille, Rangee, Rubrique } from "@/components/synthese";
 import type { Account, Equipment, Software, Supplier } from "@/generated/prisma/client";
 import { EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 import { isoDate } from "@/lib/forms-util";
@@ -242,10 +242,45 @@ export function Synthese({ account }: { account: AccountComplet }) {
       className="data-card mb-3 synthese synthese--cases"
       style={{ "--lu-intitule": "80px" } as React.CSSProperties}
     >
+      {/* Les rattachements (logiciel, équipement, fournisseur) sont une ligne de la
+          rubrique Compte, pas une rubrique à part. */}
       <Rubrique titre="Compte" bi="bi-key" couleur="indigo">
         <Rangee>
           <Lu label="Utilisateur" valeur={account.username} />
           <Lu label="URL / accès" valeur={account.url} />
+        </Rangee>
+        <Rangee>
+          <LuBloc label="Rattaché à" pleine facultatif>
+            <div className="pastilles">
+              {account.software ? (
+                <Pastille
+                  url={`/inventory/logiciels/${account.softwareId}`}
+                  nomIcone="app-window"
+                  nom={account.software.name}
+                  teinte="software"
+                  titre="Logiciel"
+                />
+              ) : null}
+              {account.equipment ? (
+                <Pastille
+                  url={`/inventory/${account.equipmentId}`}
+                  nomIcone={EQUIPMENT_KIND_ICONS[account.equipment.kind] ?? "server"}
+                  nom={account.equipment.name}
+                  teinte={account.equipment.kind || "vm"}
+                  titre={EQUIPMENT_KIND_LABELS[account.equipment.kind] ?? account.equipment.kind}
+                />
+              ) : null}
+              {account.supplier ? (
+                <Pastille
+                  url={`/suppliers/${account.supplierId}`}
+                  nomIcone="building"
+                  nom={account.supplier.name}
+                  teinte="supplier"
+                  titre="Fournisseur"
+                />
+              ) : null}
+            </div>
+          </LuBloc>
         </Rangee>
       </Rubrique>
 
@@ -267,40 +302,6 @@ export function Synthese({ account }: { account: AccountComplet }) {
           />
         </Rangee>
       </Rubrique>
-
-      {account.software || account.equipment || account.supplier ? (
-        <Rubrique titre="Rattaché à" bi="boxes" couleur="violet">
-          <div className="pastilles">
-            {account.software ? (
-              <Pastille
-                url={`/inventory/logiciels/${account.softwareId}`}
-                nomIcone="app-window"
-                nom={account.software.name}
-                teinte="software"
-                titre="Logiciel"
-              />
-            ) : null}
-            {account.equipment ? (
-              <Pastille
-                url={`/inventory/${account.equipmentId}`}
-                nomIcone={EQUIPMENT_KIND_ICONS[account.equipment.kind] ?? "server"}
-                nom={account.equipment.name}
-                teinte={account.equipment.kind || "vm"}
-                titre={EQUIPMENT_KIND_LABELS[account.equipment.kind] ?? account.equipment.kind}
-              />
-            ) : null}
-            {account.supplier ? (
-              <Pastille
-                url={`/suppliers/${account.supplierId}`}
-                nomIcone="building"
-                nom={account.supplier.name}
-                teinte="supplier"
-                titre="Fournisseur"
-              />
-            ) : null}
-          </div>
-        </Rubrique>
-      ) : null}
 
       <Rubrique titre="Notes" bi="bi-journal-text" couleur="slate">
         <Rangee>
