@@ -59,6 +59,7 @@ function Champ({
   min,
   placeholder,
   title,
+  largeur,
 }: {
   label: string;
   name: string;
@@ -70,6 +71,8 @@ function Champ({
   min?: number;
   placeholder?: string;
   title?: string;
+  /** Classe de largeur de la saisie (l-go…), pour un champ étroit dans une colonne auto. */
+  largeur?: string;
 }) {
   const v = value === null || value === undefined ? "" : String(value);
   return (
@@ -80,7 +83,7 @@ function Champ({
       <input
         type={type}
         name={name}
-        className={`form-control${type === "date" ? " l-date" : ""}`}
+        className={`form-control${type === "date" ? " l-date" : ""}${largeur ? ` ${largeur}` : ""}`}
         defaultValue={v}
         step={step}
         min={min}
@@ -221,7 +224,8 @@ export function FormCorps({
                     name="vcpu"
                     value={val("vcpu")}
                     type="number"
-                    col="col-md-2"
+                    col="col-md-auto"
+                    largeur="l-go"
                   />
                   <Champ
                     label="RAM (Go)"
@@ -229,61 +233,48 @@ export function FormCorps({
                     value={val("ramGo")}
                     type="number"
                     step="any"
-                    col="col-md-2"
+                    col="col-md-auto"
+                    largeur="l-go"
+                  />
+                  <Champ
+                    label="HDD 1 (Go)"
+                    name="hdd1_go"
+                    value={val("hdd1Go")}
+                    type="number"
+                    step="any"
+                    col="col-md-auto"
+                    largeur="l-go"
+                  />
+                  <Champ
+                    label="HDD 2 (Go)"
+                    name="hdd2_go"
+                    value={val("hdd2Go")}
+                    type="number"
+                    step="any"
+                    col="col-md-auto"
+                    largeur="l-go"
+                  />
+                  <Champ
+                    label="HDD 3 (Go)"
+                    name="hdd3_go"
+                    value={val("hdd3Go")}
+                    type="number"
+                    step="any"
+                    col="col-md-auto"
+                    largeur="l-go"
                   />
                 </div>
               </div>
-              {/* Réseau et stockage sur une même ligne : adresse, masque et VLAN selon le
-                  type, puis les trois disques d'une VM ; chaque champ porte ses types. */}
+              {/* Réseau : adresse pour tout ce qui en a une, masque et VLAN selon le type. */}
               <div className="row g-3 mb-3">
                 <Champ
                   label="Adresse IP"
                   name="ip_address"
                   value={val("ipAddress")}
                   kinds={groupes.reseau}
-                  col="col-md-2"
                 />
-                <Champ
-                  label="Masque"
-                  name="netmask"
-                  value={val("netmask")}
-                  kinds={groupes.vlan}
-                  col="col-md-2"
-                />
-                <Champ
-                  label="VLAN"
-                  name="vlan"
-                  value={val("vlan")}
-                  kinds={groupes.vlan}
-                  col="col-md-2"
-                />
-                <Champ
-                  label="Stockage HDD 1 (Go)"
-                  name="hdd1_go"
-                  value={val("hdd1Go")}
-                  type="number"
-                  step="any"
-                  kinds={groupes.virtualisation}
-                  col="col-md-2"
-                />
-                <Champ
-                  label="Stockage HDD 2 (Go)"
-                  name="hdd2_go"
-                  value={val("hdd2Go")}
-                  type="number"
-                  step="any"
-                  kinds={groupes.virtualisation}
-                  col="col-md-2"
-                />
-                <Champ
-                  label="Stockage HDD 3 (Go)"
-                  name="hdd3_go"
-                  value={val("hdd3Go")}
-                  type="number"
-                  step="any"
-                  kinds={groupes.virtualisation}
-                  col="col-md-2"
-                />
+                <Champ label="Masque" name="netmask" value={val("netmask")} kinds={groupes.vlan} />
+                <Champ label="VLAN" name="vlan" value={val("vlan")} kinds={groupes.vlan} />
               </div>
               <div className="kind-section" data-kinds={groupes.materiel}>
                 <div className="row g-3 mb-3">

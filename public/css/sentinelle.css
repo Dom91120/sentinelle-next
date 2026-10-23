@@ -2468,7 +2468,9 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .fiche-saisie .form-control.l-version { width: calc(18ch + 22px); }
 /* Un montant : « 99 999,99 ». */
 .fiche-saisie .form-control.l-montant { width: calc(9ch + 22px); }
-@media (max-width: 767.98px) { .fiche-saisie .form-control:is(.l-date, .l-jours, .l-heure, .l-version, .l-montant), .fiche-saisie .form-select.l-contenu { width: 100%; } }
+/* Une capacité en Go ou un nombre de vCPU : cinq chiffres (« 65536 ») et les flèches. */
+.fiche-saisie .form-control.l-go { width: calc(5ch + 22px); padding-left: 6px; padding-right: 4px; }
+@media (max-width: 767.98px) { .fiche-saisie .form-control:is(.l-date, .l-jours, .l-heure, .l-version, .l-montant, .l-go), .fiche-saisie .form-select.l-contenu { width: 100%; } }
 /* Le ? d'aide tient dans la ligne de l'intitule (16 px) : a 20 px il etait
    rogne par l'intitule et descendait son champ sous celui du voisin. */
 .fiche-saisie .form-label .help-toggle { width: 16px; height: 16px; font-size: 0.65rem; vertical-align: top; }
