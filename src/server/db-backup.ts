@@ -3,7 +3,10 @@
  *
  * `pg_dump` au format « custom » (restaurable par `pg_restore`), horodaté, avec
  * rotation : on garde les BACKUP_DB_KEEP plus récents. Le binaire se règle par
- * PG_DUMP_BIN (défaut : `pg_dump` du PATH, celui du paquet postgresql-client).
+ * PG_DUMP_BIN (défaut : `pg_dump` du PATH, celui du paquet postgresql-client) ; il
+ * peut être une commande avec ses arguments (« docker exec sentinelle-pg pg_dump »).
+ * PG_DUMP_URL est l'URL de la base telle que pg_dump la voit quand il tourne ailleurs
+ * (dans le conteneur Postgres : localhost:5432) ; repli sur DATABASE_URL.
  */
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
@@ -65,7 +68,7 @@ export async function dumpVers(
   dest: string,
   opts: { sansDocuments?: boolean } = {},
 ): Promise<void> {
-  const url = process.env.DATABASE_URL;
+  const url = process.env.PG_DUMP_URL || process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL absent : impossible de sauvegarder la base.");
   const [bin, ...prefixe] = (process.env.PG_DUMP_BIN || "pg_dump").split(/\s+/).filter(Boolean);
   const args = [...prefixe, "--format=custom", "--no-owner", "--no-privileges"];

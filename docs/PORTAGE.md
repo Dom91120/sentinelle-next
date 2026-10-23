@@ -194,7 +194,7 @@ Logique métier des modèles (à porter en TypeScript pur, `src/lib/statuts.ts` 
 ## 8. Tâches planifiées (`scheduler.py` → `/api/cron/*` + `instrumentation.ts`)
 
 - [x] `scan_backup_inbox` (toutes les 30 min si BACKUP_INBOX_DIR)
-- [x] `backup_database` 01:00 (`db_backup.py` → `pg_dump --format=custom`, rétention BACKUP_DB_KEEP ; `pg_dump` doit être sur le PATH ou désigné par `PG_DUMP_BIN`)
+- [x] `backup_database` 01:00 (`db_backup.py` → `pg_dump --format=custom`, rétention BACKUP_DB_KEEP ; `pg_dump` doit être sur le PATH ou désigné par `PG_DUMP_BIN`, commande avec arguments admise, et `PG_DUMP_URL` donne l'URL vue par pg_dump s'il tourne ailleurs, par exemple dans le conteneur Postgres)
 - [x] `sync_ad_passwords` 06:00 (si LDAP)
 - [x] `check_ct_logs` 06:30 (`ct_monitor.py`, `ct_checker.py`)
 - [x] `refresh_eol_cache` 06:50 (`eol.py`)
