@@ -3473,6 +3473,10 @@ tr:hover .row-actions, tr:focus-within .row-actions { opacity: 1; }
    qu'une icône n'en a pas et ferait descendre la valeur). */
 .lu:not(.lu--large):has(> .lu-valeur > :is(.badge-status, .badge-nature, .badge)) { align-items: center; }
 .lu:not(.lu--large) .lu-valeur:has(.badge-status, .badge-nature, .badge) { display: flex; flex-wrap: wrap; align-items: center; row-gap: 4px; min-height: 18px; padding-bottom: 0; }
+/* Formulaire Matériel : les interrupteurs Supervision / Cyberwatch / Ninja One d'une VM
+   occupent une colonne de la ligne OS, à la hauteur d'un champ de saisie (26 px). */
+.fiche-saisie .form-outils { min-height: 26px; }
+
 /* Une valeur qui enveloppe un lien tronqué (URL) : le .15em de marge basse est porté
    par le lien, pas une seconde fois par la valeur (la ligne ferait 26 px au lieu de 24). */
 .lu:not(.lu--large) .lu-valeur:has(> .text-truncate) { padding-bottom: 0; }

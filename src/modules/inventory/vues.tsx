@@ -120,8 +120,11 @@ export function FormCorps({
           <input type="hidden" name="csrf_token" value={csrf} />
 
           <div className="data-card mb-3">
-            <RubriqueForm titre="Identification" icone="bi-tag" couleur="indigo">
-              <div className="row g-3">
+            {/* Une seule rubrique, comme « Logiciel » sur une fiche logiciel : les rangées des
+                anciennes rubriques s'enchaînent ; un bloc propre à certains types garde son
+                conteneur .kind-section (masqué par KIND_JS selon le type choisi). */}
+            <RubriqueForm titre="Matériel" icone="bi-hdd-stack" couleur="indigo">
+              <div className="row g-3 mb-3">
                 <div className="col-md-3">
                   <label className="form-label small fw-medium">Type *</label>
                   <select
@@ -178,10 +181,7 @@ export function FormCorps({
                   </select>
                 </div>
               </div>
-            </RubriqueForm>
-
-            <RubriqueForm titre="Système" icone="bi-cpu" couleur="sky">
-              <div className="row g-3">
+              <div className="row g-3 mb-3">
                 <Champ
                   label="OS"
                   name="os"
@@ -206,88 +206,65 @@ export function FormCorps({
                   placeholder="outil"
                 />
               </div>
-              <div className="row g-3 mb-2 kind-section" data-kinds={groupes.virtualisation}>
-                <div className="col-12 d-flex gap-4 flex-wrap">
-                  <div className="form-check form-switch">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      name="supervised"
-                      id="supervised"
-                      defaultChecked={Boolean(item?.supervised)}
-                    />
-                    <label className="form-check-label small" htmlFor="supervised">
-                      Supervision
-                    </label>
-                  </div>
-                  <div className="form-check form-switch">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      name="cyberwatch"
-                      id="cyberwatch"
-                      defaultChecked={Boolean(item?.cyberwatch)}
-                    />
-                    <label className="form-check-label small" htmlFor="cyberwatch">
-                      Cyberwatch
-                    </label>
-                  </div>
-                  <div className="form-check form-switch">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      name="ninja_one"
-                      id="ninja_one"
-                      defaultChecked={Boolean(item?.ninjaOne)}
-                    />
-                    <label className="form-check-label small" htmlFor="ninja_one">
-                      Ninja One
-                    </label>
-                  </div>
+              <div className="kind-section" data-kinds={groupes.virtualisation}>
+                <div className="row g-3 mb-3">
+                  <Champ label="Serveur hôte" name="host_server" value={val("hostServer")} />
+                  <Champ
+                    label="Hyperviseur"
+                    name="hypervisor"
+                    value={val("hypervisor")}
+                    col="col-md-2"
+                    placeholder="VMware/HV"
+                  />
+                  <Champ
+                    label="vCPU"
+                    name="vcpu"
+                    value={val("vcpu")}
+                    type="number"
+                    col="col-md-2"
+                  />
+                  <Champ
+                    label="RAM (Go)"
+                    name="ram_go"
+                    value={val("ramGo")}
+                    type="number"
+                    step="any"
+                    col="col-md-2"
+                  />
                 </div>
               </div>
-            </RubriqueForm>
-
-            <RubriqueForm titre="Réseau" icone="bi-diagram-3" couleur="teal" kinds={groupes.reseau}>
-              <div className="row g-3">
-                <Champ label="Adresse IP" name="ip_address" value={val("ipAddress")} />
-                <Champ label="Masque" name="netmask" value={val("netmask")} kinds={groupes.vlan} />
-                <Champ label="VLAN" name="vlan" value={val("vlan")} kinds={groupes.vlan} />
-              </div>
-            </RubriqueForm>
-
-            <RubriqueForm
-              titre="Hôte & ressources"
-              icone="bi-pc-display"
-              couleur="violet"
-              kinds={groupes.virtualisation}
-            >
-              <div className="row g-3">
-                <Champ label="Serveur hôte" name="host_server" value={val("hostServer")} />
+              {/* Réseau et stockage sur une même ligne : adresse, masque et VLAN selon le
+                  type, puis les trois disques d'une VM ; chaque champ porte ses types. */}
+              <div className="row g-3 mb-3">
                 <Champ
-                  label="Hyperviseur"
-                  name="hypervisor"
-                  value={val("hypervisor")}
-                  col="col-md-2"
-                  placeholder="VMware/HV"
-                />
-                <Champ label="vCPU" name="vcpu" value={val("vcpu")} type="number" col="col-md-2" />
-                <Champ
-                  label="RAM (Go)"
-                  name="ram_go"
-                  value={val("ramGo")}
-                  type="number"
-                  step="any"
+                  label="Adresse IP"
+                  name="ip_address"
+                  value={val("ipAddress")}
+                  kinds={groupes.reseau}
                   col="col-md-2"
                 />
-              </div>
-              <div className="row g-3 mb-2">
+                <Champ
+                  label="Masque"
+                  name="netmask"
+                  value={val("netmask")}
+                  kinds={groupes.vlan}
+                  col="col-md-2"
+                />
+                <Champ
+                  label="VLAN"
+                  name="vlan"
+                  value={val("vlan")}
+                  kinds={groupes.vlan}
+                  col="col-md-2"
+                />
                 <Champ
                   label="Stockage HDD 1 (Go)"
                   name="hdd1_go"
                   value={val("hdd1Go")}
                   type="number"
                   step="any"
+                  kinds={groupes.virtualisation}
+                  col="col-md-2"
                 />
                 <Champ
                   label="Stockage HDD 2 (Go)"
@@ -295,6 +272,8 @@ export function FormCorps({
                   value={val("hdd2Go")}
                   type="number"
                   step="any"
+                  kinds={groupes.virtualisation}
+                  col="col-md-2"
                 />
                 <Champ
                   label="Stockage HDD 3 (Go)"
@@ -302,147 +281,134 @@ export function FormCorps({
                   value={val("hdd3Go")}
                   type="number"
                   step="any"
+                  kinds={groupes.virtualisation}
+                  col="col-md-2"
                 />
               </div>
-            </RubriqueForm>
-
-            <RubriqueForm
-              titre="Matériel & garantie"
-              icone="bi-tools"
-              couleur="amber"
-              kinds={groupes.materiel}
-            >
-              <div className="row g-3">
-                <Champ
-                  label="Constructeur / Modèle"
-                  name="manufacturer_model"
-                  value={val("manufacturerModel")}
-                  kinds={groupes.materiel}
-                />
-                <Champ
-                  label="N° de série"
-                  name="serial_number"
-                  value={val("serialNumber")}
-                  kinds={groupes.materiel}
-                />
-                <Champ
-                  label="Service Tag"
-                  name="service_tag"
-                  value={val("serviceTag")}
-                  kinds={groupes.materiel}
-                  placeholder="identifiant de support (Dell, HP…)"
-                />
-                <Champ
-                  label="Date achat / mise en service"
-                  name="purchase_date"
-                  value={date(item?.purchaseDate)}
-                  type="date"
-                  col="col-md-auto"
-                  kinds={groupes.materiel}
-                />
-                <Champ
-                  label="Emplacement"
-                  name="location"
-                  value={val("location")}
-                  placeholder="salle serveur, baie 3, étage 2"
-                />
-                <Champ
-                  label="Interface d'administration"
-                  name="management_url"
-                  value={val("managementUrl")}
-                  kinds={groupes.administration}
-                  placeholder="https://… ou une IP"
-                />
-                <Champ
-                  label="Nombre de ports"
-                  name="ports"
-                  value={val("ports")}
-                  type="number"
-                  min={0}
-                  col="col-md-2"
-                  kinds={groupes.ports}
-                />
-                <Champ
-                  label="Fin de garantie"
-                  name="warranty_end"
-                  value={date(item?.warrantyEnd)}
-                  type="date"
-                  col="col-md-auto"
-                />
-                <Champ
-                  label="Contrat de maintenance"
-                  name="maintenance_contract"
-                  value={val("maintenanceContract")}
-                />
-                <div className="col-md-4">
-                  <label className="form-label small">Fournisseur / support</label>
-                  <div className="input-group">
-                    <select
-                      name="supplier_id"
-                      id="eqSupplier"
-                      className="form-select"
-                      defaultValue={item?.supplierId ?? ""}
-                    >
-                      <option value="">— Sélectionner —</option>
-                      {suppliers.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                    {user.canEdit("suppliers") ? (
-                      <QaButton
-                        modalId="qaModalSupplier"
-                        targetId="eqSupplier"
-                        title="Ajouter un fournisseur"
-                      />
-                    ) : null}
+              <div className="kind-section" data-kinds={groupes.materiel}>
+                <div className="row g-3 mb-3">
+                  <Champ
+                    label="Constructeur / Modèle"
+                    name="manufacturer_model"
+                    value={val("manufacturerModel")}
+                    kinds={groupes.materiel}
+                  />
+                  <Champ
+                    label="N° de série"
+                    name="serial_number"
+                    value={val("serialNumber")}
+                    kinds={groupes.materiel}
+                  />
+                  <Champ
+                    label="Service Tag"
+                    name="service_tag"
+                    value={val("serviceTag")}
+                    kinds={groupes.materiel}
+                    placeholder="identifiant de support (Dell, HP…)"
+                  />
+                  <Champ
+                    label="Date achat / mise en service"
+                    name="purchase_date"
+                    value={date(item?.purchaseDate)}
+                    type="date"
+                    col="col-md-auto"
+                    kinds={groupes.materiel}
+                  />
+                  <Champ
+                    label="Emplacement"
+                    name="location"
+                    value={val("location")}
+                    placeholder="salle serveur, baie 3, étage 2"
+                  />
+                  <Champ
+                    label="Interface d'administration"
+                    name="management_url"
+                    value={val("managementUrl")}
+                    kinds={groupes.administration}
+                    placeholder="https://… ou une IP"
+                  />
+                  <Champ
+                    label="Nombre de ports"
+                    name="ports"
+                    value={val("ports")}
+                    type="number"
+                    min={0}
+                    col="col-md-2"
+                    kinds={groupes.ports}
+                  />
+                  <Champ
+                    label="Fin de garantie"
+                    name="warranty_end"
+                    value={date(item?.warrantyEnd)}
+                    type="date"
+                    col="col-md-auto"
+                  />
+                  <Champ
+                    label="Contrat de maintenance"
+                    name="maintenance_contract"
+                    value={val("maintenanceContract")}
+                  />
+                  <div className="col-md-4">
+                    <label className="form-label small">Fournisseur / support</label>
+                    <div className="input-group">
+                      <select
+                        name="supplier_id"
+                        id="eqSupplier"
+                        className="form-select"
+                        defaultValue={item?.supplierId ?? ""}
+                      >
+                        <option value="">— Sélectionner —</option>
+                        {suppliers.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
+                      {user.canEdit("suppliers") ? (
+                        <QaButton
+                          modalId="qaModalSupplier"
+                          targetId="eqSupplier"
+                          title="Ajouter un fournisseur"
+                        />
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
-            </RubriqueForm>
-
-            <RubriqueForm
-              titre="Stockage"
-              icone="bi-hdd-network"
-              couleur="slate"
-              kinds={groupes.stockage}
-            >
-              <div className="row g-3">
-                <Champ
-                  label="Protocoles"
-                  name="protocols"
-                  value={val("protocols")}
-                  placeholder="SMB/NFS/iSCSI"
-                />
-                <Champ
-                  label="Capacité (To)"
-                  name="capacity_to"
-                  value={val("capacityTo")}
-                  type="number"
-                  step="any"
-                  col="col-md-2"
-                />
-                <Champ
-                  label="Utilisé (To)"
-                  name="used_to"
-                  value={val("usedTo")}
-                  type="number"
-                  step="any"
-                  col="col-md-2"
-                />
-                <Champ label="RAID" name="raid" value={val("raid")} />
-                <Champ
-                  label="Accès (utilisateurs / groupes)"
-                  name="access"
-                  value={val("access")}
-                  col="col-12"
-                />
+              <div className="kind-section" data-kinds={groupes.stockage}>
+                <div className="row g-3 mb-3">
+                  <Champ
+                    label="Protocoles"
+                    name="protocols"
+                    value={val("protocols")}
+                    placeholder="SMB/NFS/iSCSI"
+                  />
+                  <Champ
+                    label="Capacité (To)"
+                    name="capacity_to"
+                    value={val("capacityTo")}
+                    type="number"
+                    step="any"
+                    col="col-md-2"
+                  />
+                  <Champ
+                    label="Utilisé (To)"
+                    name="used_to"
+                    value={val("usedTo")}
+                    type="number"
+                    step="any"
+                    col="col-md-2"
+                  />
+                  <Champ label="RAID" name="raid" value={val("raid")} />
+                  <Champ
+                    label="Accès (utilisateurs / groupes)"
+                    name="access"
+                    value={val("access")}
+                    col="col-12"
+                  />
+                </div>
               </div>
-            </RubriqueForm>
-
-            <RubriqueForm titre="Rôle & logiciels" icone="bi-gear-wide-connected" couleur="rose">
-              <div className="row g-3 mb-2">
+              <div className="row g-3 mb-3">
                 <Champ label="Rôle principal" name="role_principal" value={val("rolePrincipal")} />
                 <Champ
                   label="Services utilisateurs"
@@ -450,6 +416,49 @@ export function FormCorps({
                   value={val("userServices")}
                   kinds={groupes.services}
                 />
+                {/* Les outils d'une VM : trois interrupteurs sur la ligne du rôle principal, à la
+                    hauteur des champs, sous un intitulé comme les autres colonnes. */}
+                <div className="col-md-auto kind-section" data-kinds={groupes.virtualisation}>
+                  <label className="form-label small">Outils</label>
+                  <div className="d-flex gap-4 flex-wrap align-items-center form-outils">
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        name="supervised"
+                        id="supervised"
+                        defaultChecked={Boolean(item?.supervised)}
+                      />
+                      <label className="form-check-label small" htmlFor="supervised">
+                        Supervision
+                      </label>
+                    </div>
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        name="cyberwatch"
+                        id="cyberwatch"
+                        defaultChecked={Boolean(item?.cyberwatch)}
+                      />
+                      <label className="form-check-label small" htmlFor="cyberwatch">
+                        Cyberwatch
+                      </label>
+                    </div>
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        name="ninja_one"
+                        id="ninja_one"
+                        defaultChecked={Boolean(item?.ninjaOne)}
+                      />
+                      <label className="form-check-label small" htmlFor="ninja_one">
+                        Ninja One
+                      </label>
+                    </div>
+                  </div>
+                </div>
                 <Champ
                   label="Usage principal / données stockées"
                   name="usage"
@@ -458,10 +467,7 @@ export function FormCorps({
                   kinds={groupes.usage}
                 />
               </div>
-            </RubriqueForm>
-
-            <RubriqueForm titre="Continuité & sécurité" icone="bi-shield-check" couleur="emerald">
-              <div className="row g-3 mb-2">
+              <div className="row g-3">
                 <Champ
                   label="PRA / PCA"
                   name="pra_pca"
@@ -496,11 +502,16 @@ export function FormCorps({
                   col="col-md-3"
                   kinds={groupes.virtualisation}
                 />
+              </div>
+            </RubriqueForm>
+
+            <RubriqueForm titre="Notes" icone="bi-journal-text" couleur="slate">
+              <div className="row g-3">
                 <div className="col-12">
                   <label className="form-label small">Observations</label>
                   <textarea
                     name="observations"
-                    rows={2}
+                    rows={3}
                     className="form-control"
                     defaultValue={String(val("observations"))}
                   />
@@ -551,7 +562,9 @@ export function Synthese({ item }: { item: EquipementComplet }) {
       className="data-card mb-3 synthese synthese--cases"
       style={{ "--lu-intitule": "80px" } as React.CSSProperties}
     >
-      <Rubrique titre="Général" bi="bi-info-circle" couleur="indigo">
+      {/* Une seule rubrique, comme « Logiciel » sur une fiche logiciel : les rangées
+          s'enchaînent, et une seule ligne « À compléter » en bas. */}
+      <Rubrique titre="Matériel" bi="bi-hdd-stack" couleur="indigo">
         <Rangee>
           <Lu label="Type" valeur={kindLabel(item)} />
           <Lu label="Env." valeur={envLabel(item)} titre="Environnement" />
@@ -571,9 +584,6 @@ export function Synthese({ item }: { item: EquipementComplet }) {
             <Lu label="Usage" valeur={item.usage} pleine titre="Usage / données stockées" />
           ) : null}
         </Rangee>
-      </Rubrique>
-
-      <Rubrique titre="Système" bi="bi-cpu" couleur="sky">
         <Rangee>
           <Lu label="OS" valeur={osComplet} />
           <Lu
@@ -592,43 +602,40 @@ export function Synthese({ item }: { item: EquipementComplet }) {
             </LuBloc>
           </Rangee>
         ) : null}
-      </Rubrique>
-
-      {porte("reseau") ? (
-        <Rubrique titre="Réseau" bi="bi-diagram-3" couleur="teal">
-          <Rangee>
-            <Lu label="Adresse IP" valeur={item.ipAddress} />
-            {porte("vlan") ? (
-              <>
-                <Lu label="Masque" valeur={item.netmask} />
-                <Lu label="VLAN" valeur={item.vlan} />
-              </>
-            ) : null}
-            {porte("ports") ? (
-              <Lu label="Ports" valeur={item.ports} titre="Nombre de ports" />
-            ) : null}
-          </Rangee>
-          {porte("administration") ? (
+        {porte("reseau") ? (
+          <>
             <Rangee>
-              <LuBloc label="Administration" pleine facultatif>
-                {item.managementUrl ? (
-                  <a
-                    href={item.managementUrl}
-                    target="_blank"
-                    rel="noopener"
-                    className="text-truncate d-block"
-                  >
-                    {item.managementUrl}
-                  </a>
-                ) : null}
-              </LuBloc>
+              <Lu label="Adresse IP" valeur={item.ipAddress} />
+              {porte("vlan") ? (
+                <>
+                  <Lu label="Masque" valeur={item.netmask} />
+                  <Lu label="VLAN" valeur={item.vlan} />
+                </>
+              ) : null}
+              {porte("ports") ? (
+                <Lu label="Ports" valeur={item.ports} titre="Nombre de ports" />
+              ) : null}
             </Rangee>
-          ) : null}
-        </Rubrique>
-      ) : null}
+            {porte("administration") ? (
+              <Rangee>
+                <LuBloc label="Administration" pleine facultatif>
+                  {item.managementUrl ? (
+                    <a
+                      href={item.managementUrl}
+                      target="_blank"
+                      rel="noopener"
+                      className="text-truncate d-block"
+                    >
+                      {item.managementUrl}
+                    </a>
+                  ) : null}
+                </LuBloc>
+              </Rangee>
+            ) : null}
+          </>
+        ) : null}
 
-      {porte("virtualisation") ? (
-        <Rubrique titre="Hôte & ressources" bi="bi-pc-display" couleur="violet">
+        {porte("virtualisation") ? (
           <Rangee>
             <Lu label="Serveur hôte" valeur={item.hostServer} />
             <Lu label="Hyperviseur" valeur={item.hypervisor} />
@@ -636,38 +643,36 @@ export function Synthese({ item }: { item: EquipementComplet }) {
             <Lu label="RAM (Go)" valeur={item.ramGo} />
             <Lu label="Stockage (Go)" valeur={stockage} />
           </Rangee>
-        </Rubrique>
-      ) : null}
+        ) : null}
 
-      {porte("materiel") ? (
-        <Rubrique titre="Matériel & garantie" bi="bi-tools" couleur="amber">
-          <Rangee>
-            <Lu label="Modèle" valeur={item.manufacturerModel} titre="Constructeur / Modèle" />
-            <Lu label="N° de série" valeur={item.serialNumber} />
-            <Lu label="Service Tag" valeur={item.serviceTag} />
-          </Rangee>
-          <Rangee>
-            <Lu label="Emplacement" valeur={item.location} />
-            <Lu
-              label="Achat / MES"
-              valeur={item.purchaseDate ? dateCourte(item.purchaseDate) : null}
-              titre="Date achat / mise en service"
-            />
-            <Lu
-              label="Fin de garantie"
-              valeur={item.warrantyEnd ? dateCourte(item.warrantyEnd) : null}
-            />
-            <Lu
-              label="Maintenance"
-              valeur={item.maintenanceContract}
-              titre="Contrat de maintenance"
-            />
-          </Rangee>
-        </Rubrique>
-      ) : null}
+        {porte("materiel") ? (
+          <>
+            <Rangee>
+              <Lu label="Modèle" valeur={item.manufacturerModel} titre="Constructeur / Modèle" />
+              <Lu label="N° de série" valeur={item.serialNumber} />
+              <Lu label="Service Tag" valeur={item.serviceTag} />
+            </Rangee>
+            <Rangee>
+              <Lu label="Emplacement" valeur={item.location} />
+              <Lu
+                label="Achat / MES"
+                valeur={item.purchaseDate ? dateCourte(item.purchaseDate) : null}
+                titre="Date achat / mise en service"
+              />
+              <Lu
+                label="Fin de garantie"
+                valeur={item.warrantyEnd ? dateCourte(item.warrantyEnd) : null}
+              />
+              <Lu
+                label="Maintenance"
+                valeur={item.maintenanceContract}
+                titre="Contrat de maintenance"
+              />
+            </Rangee>
+          </>
+        ) : null}
 
-      {porte("stockage") ? (
-        <Rubrique titre="Stockage" bi="bi-hdd-network" couleur="slate">
+        {porte("stockage") ? (
           <Rangee>
             <Lu label="Protocoles" valeur={item.protocols} />
             <Lu label="Capacité (To)" valeur={item.capacityTo} />
@@ -675,10 +680,8 @@ export function Synthese({ item }: { item: EquipementComplet }) {
             <Lu label="RAID" valeur={item.raid} />
             <Lu label="Accès" valeur={item.access} titre="Accès (utilisateurs / groupes)" />
           </Rangee>
-        </Rubrique>
-      ) : null}
+        ) : null}
 
-      <Rubrique titre="Continuité" bi="bi-shield-check" couleur="emerald">
         <Rangee>
           <Lu
             label="Sauvegarde 1"
