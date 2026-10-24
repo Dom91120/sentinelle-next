@@ -10,7 +10,13 @@
     textEl = document.getElementById('confirmModalText');
     okBtn.addEventListener('click', function () {
       modal.hide();
-      if (pendingForm) pendingForm.submit();
+      if (!pendingForm) return;
+      // requestSubmit() et non submit() : seul le premier declenche l'evenement
+      // « submit », celui que onglets.js ecoute pour emporter l'onglet ouvert
+      // dans l'ancre. Avec submit(), supprimer une piece jointe depuis l'onglet
+      // Documents ramenait sur la Synthese.
+      if (pendingForm.requestSubmit) pendingForm.requestSubmit();
+      else pendingForm.submit();
     });
     document.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-confirm]');
