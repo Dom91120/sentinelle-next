@@ -63,6 +63,38 @@ describe("corbeille", () => {
     ).toBeNull();
   });
 
+  it("la purge d'un logiciel emporte ses pièces jointes et celles de ses devis, pas celles des contrats", async () => {
+    const c = await clientAdmin();
+    const sw = await prisma.software.create({ data: { name: "Ludopret", isActive: false } });
+    const consultation = await prisma.consultation.create({
+      data: { softwareId: sw.id, subject: "Renouvellement" },
+    });
+    const devis = await prisma.quote.create({ data: { consultationId: consultation.id } });
+    const contrat = await prisma.contract.create({
+      data: { name: "Maintenance Ludopret", software: { create: { softwareId: sw.id } } },
+    });
+    const piece = (data: { softwareId?: number; quoteId?: number; contractId?: number }) =>
+      prisma.document.create({
+        data: { filename: "acte.pdf", mime: "application/pdf", size: 3, ...data },
+      });
+    const pieceLogiciel = await piece({ softwareId: sw.id });
+    const pieceDevis = await piece({ quoteId: devis.id });
+    const pieceContrat = await piece({ contractId: contrat.id });
+
+    const r = await c.post(
+      "/trash/purge-one",
+      { entity_type: "software", entity_id: String(sw.id) },
+      { followRedirects: true },
+    );
+    expect(r.status).toBe(200);
+    expect(await prisma.software.findUnique({ where: { id: sw.id } })).toBeNull();
+    expect(await prisma.document.findUnique({ where: { id: pieceLogiciel.id } })).toBeNull();
+    expect(await prisma.document.findUnique({ where: { id: pieceDevis.id } })).toBeNull();
+    const restante = await prisma.document.findUnique({ where: { id: pieceContrat.id } });
+    expect(restante?.contractId).toBe(contrat.id);
+    expect(await prisma.contract.findUnique({ where: { id: contrat.id } })).not.toBeNull();
+  });
+
   it("vider la corbeille inclut les équipements", async () => {
     const c = await clientAdmin();
     const e = await equipementSupprime();

@@ -211,6 +211,15 @@ export const SPECS: Record<string, Spec> = {
         data: { softwareId: null },
       });
       await prisma.account.updateMany({ where: { softwareId: id }, data: { softwareId: null } });
+      // Les pièces jointes partent avec la fiche : celles du logiciel et celles de ses
+      // devis (la consultation suit en cascade, mais la clé des pièces serait seulement
+      // vidée, laissant des fichiers orphelins qu'aucun écran ne montre plus). Les
+      // contrats, eux, survivent au logiciel : leurs pièces restent.
+      await prisma.document.deleteMany({
+        where: {
+          OR: [{ softwareId: id }, { quote: { consultation: { softwareId: id } } }],
+        },
+      });
       return prisma.software.delete({ where: { id } });
     },
     historique: null,
