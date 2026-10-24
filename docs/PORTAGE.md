@@ -188,7 +188,7 @@ Logique métier des modèles (à porter en TypeScript pur, `src/lib/statuts.ts` 
 
 ### Imports / exports (`/data`), PDF, API
 - [x] `/data/export-full.zip` (`full_export.py`), `/data/<key>/export.csv`, `/template.csv`, `/import` (`csv_io.py` SPECS)
-- [x] `/accounts|certificates|domains|tests/<id>/pdf` (`pdf_entity.py`, `pdf_export.py`)
+- [x] `/accounts|domains|tests/<id>/pdf` (`pdf_entity.py`, `pdf_export.py`) ; l'export PDF du certificat a été retiré
 - [x] `/api/assets` (Sesame, Bearer), `/api/chatia/echeances|alertes|synthese|recherche` (`suivi.py`), `/api/directory/search`, `/api/alert-count`
 
 ## 8. Tâches planifiées (`scheduler.py` → `/api/cron/*` + `instrumentation.ts`)

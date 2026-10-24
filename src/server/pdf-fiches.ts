@@ -1,12 +1,7 @@
-/** Les quatre fiches exportables en PDF (port de app/pdf_export.py). */
+/** Les trois fiches exportables en PDF : compte, domaine, test (port de app/pdf_export.py, sans le certificat). */
 import { dateCourte } from "@/lib/libelles";
 import { prisma } from "@/server/db";
-import {
-  chargerCertificats,
-  chargerComptes,
-  chargerDomaines,
-  chargerTests,
-} from "@/server/donnees";
+import { chargerComptes, chargerDomaines, chargerTests } from "@/server/donnees";
 import type { CurrentUser } from "@/server/guards";
 import { ApiAuthError } from "@/server/guards";
 import { construirePdfFiche } from "@/server/pdf-entite";
@@ -42,35 +37,6 @@ export async function pdfCompte(user: CurrentUser, id: number): Promise<FichePdf
       histories,
     ),
     filename: `compte-${account.id}.pdf`,
-  };
-}
-
-export async function pdfCertificat(user: CurrentUser, id: number): Promise<FichePdf> {
-  if (!user.canView("certificates")) throw new ApiAuthError(403, "Droits insuffisants.");
-  const cert = (await chargerCertificats()).find((c) => c.id === id) ?? null;
-  if (!cert) return null;
-  const histories = await prisma.certificateHistory.findMany({
-    where: { certificateId: id },
-    orderBy: { performedAt: "desc" },
-    take: 20,
-  });
-  const rows: [string, string][] = [
-    ["Service", cert.serviceName],
-    ["Domaine", cert.domain ?? ""],
-    ["Émetteur", tiret(cert.issuer)],
-    ["Expiration", date(cert.expiryDate)],
-    ["Auto-renouvellement", cert.autoRenew ? "Oui" : "Non"],
-    ["Description", tiret(cert.description)],
-  ];
-  return {
-    octets: await construirePdfFiche(
-      cert.serviceName,
-      cert.domain ?? "",
-      rows,
-      cert.status,
-      histories,
-    ),
-    filename: `certificat-${cert.id}.pdf`,
   };
 }
 

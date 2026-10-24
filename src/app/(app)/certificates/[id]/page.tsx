@@ -7,7 +7,6 @@ import {
   BoutonModal,
   Entete,
   Historique,
-  MenuLien,
   MenuPost,
   ModalAction,
 } from "@/components/fiche";
@@ -136,12 +135,6 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
     : `Certificat TLS · ${cert.domain ?? ""}${cert.supplier || cert.issuer ? ` · ${cert.supplier ? cert.supplier.name : cert.issuer}` : ""}${cert.validity && cert.validity !== "valide" ? ` · ${validityLabel}` : ""}`;
   const complement = `${cert.issuedAt ? `émis le ${dateCourte(cert.issuedAt)}` : ""}${!signature ? `${cert.issuedAt ? " · " : ""}renouv. ${cert.autoRenew ? "automatique" : "manuel"}` : ""}`;
   const menu = [
-    <MenuLien
-      key="pdf"
-      url={`/certificates/${id}/pdf`}
-      libelle="Exporter en PDF"
-      icone="bi-file-earmark-pdf"
-    />,
     peutEditer && !signature && cert.domain ? (
       <MenuPost
         key="tls"
