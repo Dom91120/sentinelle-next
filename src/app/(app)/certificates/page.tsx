@@ -166,7 +166,7 @@ export default async function CertificatesList({ searchParams }: { searchParams:
             </colgroup>
             <thead>
               <tr>
-                <th>Titulaire</th>
+                <th>Nom</th>
                 <th>Service</th>
                 <th>Autorité</th>
                 <th>Validité</th>

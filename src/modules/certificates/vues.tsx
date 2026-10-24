@@ -485,7 +485,7 @@ export function Synthese({
       {signature ? (
         <Rubrique titre="Certificat" bi="bi-patch-check" couleur="sky">
           <Rangee>
-            <Lu label="Titulaire" valeur={certificateHolderLabel(c)} />
+            <Lu label="Nom" valeur={certificateHolderLabel(c)} />
             <LuBloc label="Courriel">
               {c.holderEmail ? (
                 <a href={`mailto:${c.holderEmail}`} className="text-truncate d-block">

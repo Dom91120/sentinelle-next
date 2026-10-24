@@ -17,6 +17,12 @@ import { ScriptDiffere } from "@/components/scripts";
 import { CERT_VALIDITY_LABELS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { certificateHolderLabel, certificateMonitored, certificateStatus } from "@/lib/statuts";
+
+/** Le nom de la fiche : le titulaire d'un certificat électronique, sinon le nom saisi. */
+function nomCertificat(c: Parameters<typeof certificateHolderLabel>[0]) {
+  return c.kind === "signature" ? certificateHolderLabel(c) || c.serviceName : c.serviceName;
+}
+
 import { formContext } from "@/modules/certificates/server";
 import { FormCorps, Synthese } from "@/modules/certificates/vues";
 import { seuilsDe } from "@/server/config-store";
@@ -36,9 +42,19 @@ export async function generateMetadata({
   const id = idDeRoute((await params).id);
   const fiche = await prisma.certificate.findUnique({
     where: { id },
-    select: { serviceName: true },
+    select: {
+      kind: true,
+      serviceName: true,
+      civility: true,
+      holder: true,
+      firstName: true,
+      domain: true,
+      expiryDate: true,
+      validity: true,
+      isActive: true,
+    },
   });
-  return { title: fiche ? `${fiche.serviceName} - Sentinelle` : "Sentinelle" };
+  return { title: fiche ? `${nomCertificat(fiche)} - Sentinelle` : "Sentinelle" };
 }
 
 export default async function CertificateDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -83,7 +99,7 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
   const validityLabel = CERT_VALIDITY_LABELS[cert.validity ?? ""] ?? "Valide";
   const revocationCode = peutEditer ? cert.revocationCode : null;
   const sousTitre = signature
-    ? `Certificat électronique · ${certificateHolderLabel(cert)}${cert.holderRole ? ` · ${cert.holderRole}` : ""}${validityLabel ? ` · ${validityLabel}` : ""}`
+    ? `Certificat électronique · ${cert.serviceName}${cert.holderRole ? ` · ${cert.holderRole}` : ""}${validityLabel ? ` · ${validityLabel}` : ""}`
     : `Certificat TLS · ${cert.domain ?? ""}${cert.supplier || cert.issuer ? ` · ${cert.supplier ? cert.supplier.name : cert.issuer}` : ""}${cert.validity && cert.validity !== "valide" ? ` · ${validityLabel}` : ""}`;
   const complement = `${cert.issuedAt ? `émis le ${dateCourte(cert.issuedAt)}` : ""}${!signature ? `${cert.issuedAt ? " · " : ""}renouv. ${cert.autoRenew ? "automatique" : "manuel"}` : ""}`;
   const menu = [
@@ -109,7 +125,7 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
   return (
     <>
       <Entete
-        titre={cert.serviceName}
+        titre={nomCertificat(cert)}
         sousTitre={sousTitre}
         statut={statut}
         primaire={
