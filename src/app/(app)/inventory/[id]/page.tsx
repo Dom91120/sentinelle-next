@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CarteFournisseur, Entete, Fait, FaitBloc, Faits, TitreSection } from "@/components/fiche";
-import { Icone } from "@/components/icones";
+import { CarteFournisseur, Entete, Fait, FaitBloc, Faits } from "@/components/fiche";
+import { Icone, Lucide } from "@/components/icones";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { BACKUP_FREQ_LABEL } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
+import { couleurIcone } from "@/lib/navigation";
 import {
   accountStatus,
   backupComputedStatus,
@@ -86,6 +87,14 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
   const showUpds = user.canView("updates") && item.systemUpdates.length > 0;
   const showCtrs = user.canView("contracts") && contrats.length > 0;
   const showAccts = user.canView("accounts") && item.accounts.length > 0;
+  const montreElements = showCerts || showBkps || showUpds || showCtrs || showAccts;
+  // Le compteur de l'onglet ne compte que ce que l'utilisateur a le droit de voir.
+  const nbElements =
+    (showCerts ? item.certificates.length : 0) +
+    (showBkps ? item.backups.length : 0) +
+    (showUpds ? item.systemUpdates.length : 0) +
+    (showCtrs ? contrats.length : 0) +
+    (showAccts ? item.accounts.length : 0);
   return (
     <>
       <Entete
@@ -113,8 +122,12 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
       <BarreOnglets id="ficheItem" modifier={peutEditer ? `/inventory/${id}/edit` : null} surPlace>
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}
-        <Onglet cible="elements" libelle="Éléments liés" icone="bi-diagram-3" />
-        <Onglet cible="logiciels" libelle="Logiciels installés" icone="bi-window-stack" />
+        <Onglet
+          cible="liaisons"
+          libelle="Liaisons"
+          icone="arrow-right-left"
+          compteur={nbElements + installes.length}
+        />
       </BarreOnglets>
 
       <Volets>
@@ -153,136 +166,178 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
           </Volet>
         ) : null}
 
-        <Volet cible="elements">
-          {showCerts || showBkps || showUpds || showCtrs || showAccts ? (
-            <div className="data-card p-4 mb-3">
-              <TitreSection
-                titre="Éléments liés"
-                icone="bi-diagram-3"
-                couleur="slate"
-                classes="mb-3"
-              />
-              {showCerts ? (
-                <>
-                  <small className="text-muted d-block mb-1">Certificats</small>
-                  <ul className="list-unstyled mb-2">
-                    {item.certificates.map((c) => (
-                      <li className="mb-1" key={c.id}>
-                        <span
-                          className={`badge-status badge-${certificateStatus(c, seuils)} me-1`}
-                        />
-                        <a href={`/certificates/${c.id}`}>
-                          {c.serviceName} — {c.domain}
-                        </a>{" "}
-                        <small className="text-muted">
-                          exp. {c.expiryDate ? dateCourte(c.expiryDate) : ""}
-                        </small>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-              {showBkps ? (
-                <>
-                  <small className="text-muted d-block mb-1">Sauvegardes</small>
-                  <ul className="list-unstyled mb-2">
-                    {item.backups.map((b) => (
-                      <li className="mb-1" key={b.id}>
-                        <span
-                          className={`badge-status badge-${backupComputedStatus(b, b.checks)} me-1`}
-                        />
-                        <a href={`/backups/${b.id}`}>{b.serviceName}</a>{" "}
-                        <small className="text-muted">
-                          {(
-                            BACKUP_FREQ_LABEL[b.frequency ?? ""] ??
-                            b.frequency ??
-                            "Non definie"
-                          ).toLowerCase()}
-                        </small>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-              {showUpds ? (
-                <>
-                  <small className="text-muted d-block mb-1">Mises à jour</small>
-                  <ul className={`list-unstyled ${showCtrs ? "mb-2" : "mb-0"}`}>
-                    {item.systemUpdates.map((u) => (
-                      <li className="mb-1" key={u.id}>
-                        <span className={`badge-status badge-${updateStatusColor(u)} me-1`} />
-                        <a href={`/updates/${u.id}`}>{u.name}</a>{" "}
-                        {u.currentVersion ? (
-                          <small className="text-muted">v{u.currentVersion}</small>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-              {showCtrs ? (
-                <>
-                  <small className="text-muted d-block mb-1">Contrats</small>
-                  <ul className={`list-unstyled ${showAccts ? "mb-2" : "mb-0"}`}>
-                    {contrats.map((c) => (
-                      <li className="mb-1" key={c.id}>
-                        <span className={`badge-status badge-${contractStatus(c, seuils)} me-1`} />
-                        <a href={`/contracts/${c.id}`}>{c.name}</a>{" "}
-                        {c.endDate ? (
-                          <small className="text-muted">éch. {dateCourte(c.endDate)}</small>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-              {showAccts ? (
-                <>
-                  <small className="text-muted d-block mb-1">Comptes</small>
+        <Volet cible="liaisons">
+          <div className="cartes-collees">
+            <div className="data-card mb-3">
+              <div className="card-header-custom">
+                <h6 className="fw-bold fiche-titre fiche-titre--violet mb-0">
+                  <Icone
+                    bi="bi-window-stack"
+                    taille={14}
+                    classes={`ico ico-${couleurIcone("bi-window-stack")}`}
+                  />
+                  Logiciels installés{" "}
+                  <span className="badge bg-secondary ms-1">{installes.length}</span>
+                </h6>
+              </div>
+              <div className="p-3">
+                {installes.length ? (
                   <ul className="list-unstyled mb-0">
-                    {item.accounts.map((a) => (
-                      <li className="mb-1" key={a.id}>
-                        <span className={`badge-status badge-${accountStatus(a, seuils)} me-1`} />
-                        <a href={`/accounts/${a.id}`}>
-                          {a.serviceName} ({a.username})
-                        </a>{" "}
-                        {a.nextPasswordChange ? (
-                          <small className="text-muted">
-                            mdp avant le {dateCourte(a.nextPasswordChange)}
-                          </small>
-                        ) : null}
+                    {installes.map((s) => (
+                      <li className="mb-1 d-flex align-items-center gap-2" key={s.id}>
+                        <Lucide
+                          nom="app-window"
+                          taille={14}
+                          classes={`flex-shrink-0 statut-ico statut-ico--${softwareComputedStatus(s, s.systemUpdates)}`}
+                        />
+                        <a href={`/inventory/logiciels/${s.id}`}>{s.name}</a>{" "}
+                        {s.version ? <small className="text-muted">v{s.version}</small> : null}
+                        {softwareIsSaas(s) ? <small className="text-muted"> (SaaS)</small> : null}
                       </li>
                     ))}
                   </ul>
-                </>
-              ) : null}
+                ) : (
+                  <p className="text-muted text-center mb-0">
+                    Aucun logiciel installé : un logiciel se rattache à un serveur depuis sa fiche,
+                    onglet Liaisons.
+                  </p>
+                )}
+              </div>
             </div>
-          ) : null}
-        </Volet>
-
-        <Volet cible="logiciels">
-          {installes.length ? (
-            <div className="data-card p-4 mb-3">
-              <TitreSection
-                titre="Logiciels installés"
-                icone="bi-window-stack"
-                couleur="violet"
-                classes="mb-3"
-              />
-              <ul className="list-unstyled mb-0">
-                {installes.map((s) => (
-                  <li className="mb-1" key={s.id}>
-                    <span
-                      className={`badge-status badge-${softwareComputedStatus(s, s.systemUpdates)} me-1`}
-                    />
-                    <a href={`/inventory/logiciels/${s.id}`}>{s.name}</a>{" "}
-                    {s.version ? <small className="text-muted">v{s.version}</small> : null}
-                    {softwareIsSaas(s) ? <small className="text-muted"> (SaaS)</small> : null}
-                  </li>
-                ))}
-              </ul>
+            <div className="data-card mb-3">
+              <div className="card-header-custom">
+                <h6 className="fw-bold fiche-titre fiche-titre--slate mb-0">
+                  <Icone
+                    bi="bi-diagram-3"
+                    taille={14}
+                    classes={`ico ico-${couleurIcone("bi-diagram-3")}`}
+                  />
+                  Éléments liés <span className="badge bg-secondary ms-1">{nbElements}</span>
+                </h6>
+              </div>
+              <div className="p-3">
+                {montreElements ? (
+                  <>
+                    {showCerts ? (
+                      <>
+                        <small className="text-muted d-block mb-1">Certificats</small>
+                        <ul className="list-unstyled mb-2">
+                          {item.certificates.map((c) => (
+                            <li className="mb-1 d-flex align-items-center gap-2" key={c.id}>
+                              <Lucide
+                                nom="shield-check"
+                                taille={14}
+                                classes={`flex-shrink-0 statut-ico statut-ico--${certificateStatus(c, seuils)}`}
+                              />
+                              <a href={`/certificates/${c.id}`}>
+                                {c.serviceName} — {c.domain}
+                              </a>{" "}
+                              <small className="text-muted">
+                                exp. {c.expiryDate ? dateCourte(c.expiryDate) : ""}
+                              </small>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : null}
+                    {showBkps ? (
+                      <>
+                        <small className="text-muted d-block mb-1">Sauvegardes</small>
+                        <ul className="list-unstyled mb-2">
+                          {item.backups.map((b) => (
+                            <li className="mb-1 d-flex align-items-center gap-2" key={b.id}>
+                              <Lucide
+                                nom="cloud-upload"
+                                taille={14}
+                                classes={`flex-shrink-0 statut-ico statut-ico--${backupComputedStatus(b, b.checks)}`}
+                              />
+                              <a href={`/backups/${b.id}`}>{b.serviceName}</a>{" "}
+                              <small className="text-muted">
+                                {(
+                                  BACKUP_FREQ_LABEL[b.frequency ?? ""] ??
+                                  b.frequency ??
+                                  "Non definie"
+                                ).toLowerCase()}
+                              </small>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : null}
+                    {showUpds ? (
+                      <>
+                        <small className="text-muted d-block mb-1">Mises à jour</small>
+                        <ul className={`list-unstyled ${showCtrs ? "mb-2" : "mb-0"}`}>
+                          {item.systemUpdates.map((u) => (
+                            <li className="mb-1 d-flex align-items-center gap-2" key={u.id}>
+                              <Lucide
+                                nom="refresh-cw"
+                                taille={14}
+                                classes={`flex-shrink-0 statut-ico statut-ico--${updateStatusColor(u)}`}
+                              />
+                              <a href={`/updates/${u.id}`}>{u.name}</a>{" "}
+                              {u.currentVersion ? (
+                                <small className="text-muted">v{u.currentVersion}</small>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : null}
+                    {showCtrs ? (
+                      <>
+                        <small className="text-muted d-block mb-1">Contrats</small>
+                        <ul className={`list-unstyled ${showAccts ? "mb-2" : "mb-0"}`}>
+                          {contrats.map((c) => (
+                            <li className="mb-1 d-flex align-items-center gap-2" key={c.id}>
+                              <Lucide
+                                nom="file-pen"
+                                taille={14}
+                                classes={`flex-shrink-0 statut-ico statut-ico--${contractStatus(c, seuils)}`}
+                              />
+                              <a href={`/contracts/${c.id}`}>{c.name}</a>{" "}
+                              {c.endDate ? (
+                                <small className="text-muted">éch. {dateCourte(c.endDate)}</small>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : null}
+                    {showAccts ? (
+                      <>
+                        <small className="text-muted d-block mb-1">Comptes</small>
+                        <ul className="list-unstyled mb-0">
+                          {item.accounts.map((a) => (
+                            <li className="mb-1 d-flex align-items-center gap-2" key={a.id}>
+                              <Lucide
+                                nom="key-round"
+                                taille={14}
+                                classes={`flex-shrink-0 statut-ico statut-ico--${accountStatus(a, seuils)}`}
+                              />
+                              <a href={`/accounts/${a.id}`}>
+                                {a.serviceName} ({a.username})
+                              </a>{" "}
+                              {a.nextPasswordChange ? (
+                                <small className="text-muted">
+                                  mdp avant le {dateCourte(a.nextPasswordChange)}
+                                </small>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className="text-muted text-center mb-0">
+                    Aucun élément rattaché à ce matériel : les certificats, sauvegardes, mises à
+                    jour, contrats et comptes se rattachent depuis leur propre fiche.
+                  </p>
+                )}
+              </div>
             </div>
-          ) : null}
+          </div>
         </Volet>
       </Volets>
     </>

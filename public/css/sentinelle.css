@@ -2734,8 +2734,10 @@ a[href^="tel:"], a[href^="tel:"]:hover, a[href^="tel:"]:focus,
     background: rgba(var(--ico-rgb, var(--sec)), 0.13);
     stroke-width: 2.5;
 }
-/* Dans un en-tete de carte, pas de pastille : l'icone seule, en couleur. */
-.card-header-custom h6.fiche-titre > svg.lucide.ico { margin-right: 6px; color: rgb(var(--ico-rgb, var(--sec))); }
+/* Dans un en-tete de carte, pas de pastille : l'icone seule, en couleur.
+   Meme chose pour un titre de bloc pose dans le corps d'une carte. */
+.card-header-custom h6.fiche-titre > svg.lucide.ico,
+.data-card h6.fiche-titre:not(.card-header-custom h6):not(.fiche-bloc > h6) > svg.lucide.ico { margin-right: 6px; color: rgb(var(--ico-rgb, var(--sec))); }
 /* Dans les cartes de la colonne de droite d'une fiche (Editeur…) : l'icone en
    couleur, 8 px avant le titre, comme les cartes Contrats et Liaisons. */
 .fiche-cote h6.fiche-titre > svg.lucide.ico { margin-right: 8px; color: rgb(var(--ico-rgb, var(--sec))); }
@@ -2866,6 +2868,12 @@ li:has(.doc-edit-volet.collapsing) > .d-flex.flex-shrink-0 { display: none !impo
 .serveurs-liste form, .flux-liste form { display: flex; }
 .flux-liste .flux-sens { color: var(--primary); }
 .serveurs-liste .serveur-ico { color: rgb(var(--ico-rgb, var(--sec))); }
+/* L'icône d'un certificat prend la couleur de son statut (échéance). */
+.statut-ico--success { color: var(--success); }
+.statut-ico--warning { color: var(--warning); }
+.statut-ico--danger  { color: var(--danger); }
+.statut-ico--info    { color: var(--info); }
+.statut-ico--muted   { color: var(--faint); }
 .btn-carre { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .btn-carre-plus { font-size: 14px; line-height: 1; }
 .flux-liste .flux-desc { font-size: 12px; color: var(--muted); }
@@ -3217,7 +3225,6 @@ main.en-edition .fiche-onglets .js-edition { color: var(--primary); background: 
 /* Une couleur par onglet, la meme d'une fiche a l'autre : les documents sont
    bleus partout, les contrats orange partout (comme dans le menu). */
 #ong-detail     { --ong-icon: #4f46e5; } /* indigo-600 */
-#ong-elements   { --ong-icon: #7c3aed; } /* violet-600 */
 /* Les liaisons et les devis en vert, l'onglet comme sa carte, le meme
    emeraude que le menu (.ico-vert). */
 #ong-liaisons,
@@ -3231,11 +3238,9 @@ main.en-edition .fiche-onglets .js-edition { color: var(--primary); background: 
 #ong-docs       { --ong-icon: #0284c7; } /* sky-600 */
 .ico-onglet--rgpd { --ong-icon: #e11d48; } /* rose-600 */
 #ong-historique { --ong-icon: #d97706; } /* amber-600 */
-#ong-logiciels  { --ong-icon: #eab308; } /* yellow-500 */
 #ong-contacts,
 .ico-onglet--contacts { --ong-icon: #db2777; } /* pink-600 */
 [data-theme="dark"] #ong-detail     { --ong-icon: #818cf8; }
-[data-theme="dark"] #ong-elements   { --ong-icon: #a78bfa; }
 [data-theme="dark"] #ong-liaisons,
 [data-theme="dark"] .ico-onglet--liaisons { --ong-icon: #34d399; }
 [data-theme="dark"] #ong-contrats,
@@ -3247,7 +3252,6 @@ main.en-edition .fiche-onglets .js-edition { color: var(--primary); background: 
 [data-theme="dark"] #ong-docs       { --ong-icon: #38bdf8; }
 [data-theme="dark"] .ico-onglet--rgpd { --ong-icon: #fb7185; }
 [data-theme="dark"] #ong-historique { --ong-icon: #fbbf24; }
-[data-theme="dark"] #ong-logiciels  { --ong-icon: #facc15; }
 [data-theme="dark"] #ong-contacts,
 [data-theme="dark"] .ico-onglet--contacts { --ong-icon: #f472b6; }
 
