@@ -560,13 +560,8 @@ export function Consultations({
     <div className="data-card mb-3">
       <div className="card-header-custom d-flex justify-content-between align-items-center">
         <h6 className="fw-bold fiche-titre fiche-titre--emerald mb-0">
-          <Icone
-            bi="bi-cash-coin"
-            taille={14}
-            classes={`ico ico-${couleurIcone("bi-cash-coin")}`}
-          />
-          Mise en concurrence{" "}
-          <span className="badge bg-secondary ms-1">{consultations.length}</span>
+          <Lucide nom="banknote" taille={14} classes="ico-onglet ico-onglet--devis" />
+          Devis <span className="badge bg-secondary ms-1">{consultations.length}</span>
         </h6>
         {peutEditer ? (
           <button

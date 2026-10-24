@@ -3218,13 +3218,14 @@ main.en-edition .fiche-onglets .js-edition { color: var(--primary); background: 
    bleus partout, les contrats orange partout (comme dans le menu). */
 #ong-detail     { --ong-icon: #4f46e5; } /* indigo-600 */
 #ong-elements   { --ong-icon: #7c3aed; } /* violet-600 */
-/* Les liaisons en vert, l'onglet comme sa carte dans la Synthese (.ico-vert) ;
-   les devis en vert fonce, pour ne pas s'y confondre. */
+/* Les liaisons et les devis en vert, l'onglet comme sa carte, le meme
+   emeraude que le menu (.ico-vert). */
 #ong-liaisons,
-.ico-onglet--liaisons { --ong-icon: #059669; } /* emerald-600 */
+.ico-onglet--liaisons,
+#ong-devis,
+.ico-onglet--devis { --ong-icon: #059669; } /* emerald-600 */
 #ong-contrats,
 .ico-onglet--contrats { --ong-icon: #f97316; } /* orange-500 */
-#ong-devis      { --ong-icon: #166534; } /* green-800 */
 #ong-suivi      { --ong-icon: #eab308; } /* yellow-500 */
 #ong-documents,
 #ong-docs       { --ong-icon: #0284c7; } /* sky-600 */
@@ -3239,7 +3240,8 @@ main.en-edition .fiche-onglets .js-edition { color: var(--primary); background: 
 [data-theme="dark"] .ico-onglet--liaisons { --ong-icon: #34d399; }
 [data-theme="dark"] #ong-contrats,
 [data-theme="dark"] .ico-onglet--contrats { --ong-icon: #fb923c; }
-[data-theme="dark"] #ong-devis      { --ong-icon: #4ade80; }
+[data-theme="dark"] #ong-devis,
+[data-theme="dark"] .ico-onglet--devis { --ong-icon: #34d399; }
 [data-theme="dark"] #ong-suivi      { --ong-icon: #facc15; }
 [data-theme="dark"] #ong-documents,
 [data-theme="dark"] #ong-docs       { --ong-icon: #38bdf8; }
