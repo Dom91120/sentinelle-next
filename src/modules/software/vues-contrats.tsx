@@ -575,7 +575,7 @@ export function Consultations({
             data-bs-toggle="collapse"
             data-bs-target="#nouvelleConsultation"
           >
-            <Icone bi="bi-plus-lg" taille="1em" classes="me-1" /> Consultation
+            <Icone bi="bi-plus-lg" taille="1em" classes="me-1" /> Devis
           </button>
         ) : null}
       </div>
@@ -590,9 +590,7 @@ export function Consultations({
             <input type="hidden" name="csrf_token" value={csrf} />
             <div className="row g-2 align-items-end">
               <div className="col-md-7">
-                <label className="form-label fw-medium small mb-1">
-                  Objet de la consultation *
-                </label>
+                <label className="form-label fw-medium small mb-1">Objet *</label>
                 <input
                   type="text"
                   name="subject"
@@ -770,7 +768,7 @@ export function Consultations({
           );
         })
       ) : (
-        <div className="p-4 text-center text-muted">Aucune consultation enregistrée.</div>
+        <div className="p-4 text-center text-muted">Aucun devis enregistré.</div>
       )}
     </div>
   );
