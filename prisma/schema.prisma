@@ -282,6 +282,7 @@ model Certificate {
   revocationCode String?   @map("revocation_code") @db.VarChar(64)
   validity       String?   @default("valide") @db.VarChar(16)
   documents      Document[]
+  software       SoftwareCertificate[]
 
   @@index([domainId])
   @@index([equipmentId])
@@ -860,6 +861,18 @@ model SoftwareEquipment {
   @@map("software_equipment")
 }
 
+/// Certificats d'un logiciel (M:N) : le TLS de son portail, le certificat de signature de son flux…
+model SoftwareCertificate {
+  softwareId    Int         @map("software_id")
+  certificateId Int         @map("certificate_id")
+  software      Software    @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  @@id([softwareId, certificateId])
+  @@index([certificateId])
+  @@map("software_certificate")
+}
+
 /// Flux ORIENTÉ entre deux logiciels.
 model SoftwareLink {
   id            Int      @id @default(autoincrement())
@@ -933,6 +946,7 @@ model Software {
 
   userServices  SoftwareService[]
   equipments    SoftwareEquipment[]
+  certificates  SoftwareCertificate[]
   contracts     ContractSoftware[]
   systemUpdates SystemUpdate[]
   accounts      Account[]

@@ -17,6 +17,9 @@ import { dateCourte } from "@/lib/libelles";
 import { couleurIcone } from "@/lib/navigation";
 import {
   accountStatus,
+  certificateHolderLabel,
+  certificateLabel,
+  certificateStatus,
   contractEnCours,
   contractStatus,
   linkSensDepuis,
@@ -81,6 +84,7 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
       accessReviews: { where: { isActive: true } },
       accounts: { where: { isActive: true } },
       equipments: { include: { equipment: true } },
+      certificates: { include: { certificate: true } },
       userServices: { include: { userService: true }, orderBy: { userServiceId: "asc" } },
       linksOut: { include: { target: true }, orderBy: { id: "asc" } },
       linksIn: { include: { source: true }, orderBy: { id: "asc" } },
@@ -101,6 +105,7 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
     autres,
     tousLesServices,
     tousEquipements,
+    tousCertificats,
     snooze,
     pieces,
     categories,
@@ -128,6 +133,12 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
       orderBy: [{ position: "asc" }, { name: "asc" }],
     }),
     prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+    features.certificates && user.canView("certificates")
+      ? prisma.certificate.findMany({
+          where: { isActive: true },
+          orderBy: [{ serviceName: "asc" }, { domain: "asc" }],
+        })
+      : Promise.resolve([]),
     getActiveSnooze("software", id),
     docsOn ? forParent("software", id) : Promise.resolve([]),
     docCategories(),
@@ -157,6 +168,20 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
   const equipments = item.equipments.map((l) => l.equipment);
   const deja = new Set(equipments.map((e) => e.id));
   const serveursDisponibles = tousEquipements.filter((e) => !deja.has(e.id));
+  // Les certificats du logiciel ne se montrent qu'avec le module et le droit de les voir.
+  const certificatsOn = features.certificates && user.canView("certificates");
+  const certificats = certificatsOn
+    ? item.certificates
+        .map((l) => l.certificate)
+        .filter((c) => c.isActive)
+        .sort((a, b) => a.serviceName.localeCompare(b.serviceName, "fr"))
+    : [];
+  const dejaCertificats = new Set(certificats.map((c) => c.id));
+  // Le nom court, celui de la liste Certificats : le titulaire d'un certificat
+  // électronique, sinon le nom ; le libellé complet reste en infobulle.
+  const nomCertificat = (c: Parameters<typeof certificateLabel>[0]) =>
+    c.kind === "signature" ? certificateHolderLabel(c) || c.serviceName : c.serviceName;
+  const certificatsDisponibles = tousCertificats.filter((c) => !dejaCertificats.has(c.id));
   const userServices = item.userServices.map((l) => l.userService);
   const servicesLies = new Set(userServices.map((s) => s.id));
   const flux: Flux[] = [
@@ -168,7 +193,11 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
   const revues = item.accessReviews;
   const comptes = item.accounts;
   const statut = softwareComputedStatus(item, updates);
-  const nbLiaisons = (features.links ? flux.length : 0) + equipments.length + userServices.length;
+  const nbLiaisons =
+    (features.links ? flux.length : 0) +
+    equipments.length +
+    certificats.length +
+    userServices.length;
   const over = softwareOverLicence(item);
   const sup = item.supplier;
   // L'éditeur se lit à droite, sous les boutons de navigation ; le sous-titre garde le reste.
@@ -594,6 +623,29 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
                             </ul>
                           </div>
                         ) : null}
+                        {certificats.length ? (
+                          <div className="liaisons-groupe">
+                            <div className="liaisons-titre">Certificats</div>
+                            <ul className="list-unstyled mb-0">
+                              {certificats.map((c) => (
+                                <li className="d-flex align-items-center gap-2" key={c.id}>
+                                  <Lucide
+                                    nom="shield-check"
+                                    taille={14}
+                                    classes={`flex-shrink-0 statut-ico statut-ico--${certificateStatus(c, seuils)}`}
+                                  />
+                                  <a
+                                    href={`/certificates/${c.id}`}
+                                    className="text-truncate"
+                                    title={certificateLabel(c)}
+                                  >
+                                    {nomCertificat(c)}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
                         {features.links && flux.length ? (
                           <div className="liaisons-groupe">
                             <div className="liaisons-titre">Flux</div>
@@ -808,6 +860,96 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
                 ) : null}
               </div>
             </div>
+
+            {certificatsOn ? (
+              <div className="data-card mb-3">
+                <div className="card-header-custom">
+                  <h6 className="fw-bold fiche-titre fiche-titre--slate mb-0">
+                    <Icone
+                      bi="bi-award"
+                      taille={14}
+                      classes={`ico ico-${couleurIcone("bi-award")}`}
+                    />
+                    Certificats{" "}
+                    <span className="badge bg-secondary ms-1">{certificats.length}</span>
+                  </h6>
+                </div>
+                <div className="p-3">
+                  {certificats.length ? (
+                    <ul className="list-unstyled mb-3 serveurs-liste">
+                      {certificats.map((c) => (
+                        <li
+                          className="d-flex align-items-center justify-content-between gap-3"
+                          key={c.id}
+                        >
+                          <span className="d-flex align-items-center gap-2 min-w-0">
+                            <Lucide
+                              nom="shield-check"
+                              taille={16}
+                              classes={`flex-shrink-0 statut-ico statut-ico--${certificateStatus(c, seuils)}`}
+                            />
+                            <a
+                              href={`/certificates/${c.id}`}
+                              className="fw-semibold text-decoration-none text-truncate"
+                              title={certificateLabel(c)}
+                            >
+                              {nomCertificat(c)}
+                            </a>
+                          </span>
+                          {peutEditer ? (
+                            <form
+                              method="POST"
+                              action={`/inventory/logiciels/${id}/certificates/${c.id}/detach`}
+                            >
+                              <input type="hidden" name="csrf_token" value={csrf} />
+                              <button
+                                type="submit"
+                                className="btn btn-sm btn-ghost btn-icone btn-ghost-danger"
+                                title="Retirer"
+                                aria-label={`Retirer ${c.serviceName}`}
+                                data-confirm={`Retirer « ${c.serviceName} » des certificats de ce logiciel ?`}
+                              >
+                                <Lucide nom="trash-2" taille={16} />
+                              </button>
+                            </form>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted mb-3">Aucun certificat renseigné.</p>
+                  )}
+                  {peutEditer ? (
+                    <form
+                      method="POST"
+                      action={`/inventory/logiciels/${id}/certificates`}
+                      className="d-flex flex-wrap align-items-center gap-2"
+                    >
+                      <input type="hidden" name="csrf_token" value={csrf} />
+                      <select
+                        name="certificate_id"
+                        id="swCertificat"
+                        className="form-select form-select-sm w-auto"
+                        aria-label="Certificat"
+                        required
+                        defaultValue=""
+                      >
+                        <option value="">Choisir un certificat…</option>
+                        {certificatsDisponibles.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {certificateLabel(c)}
+                          </option>
+                        ))}
+                      </select>
+                      <button type="submit" className="btn btn-sm btn-outline-secondary">
+                        <Lucide nom="plus" taille={14} classes="me-1" />
+                        Associer
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
             {features.links ? (
               <FluxCarte

@@ -2855,8 +2855,8 @@ li:has(.doc-edit-volet.collapsing) > .d-flex.flex-shrink-0 { display: none !impo
 .dossiers-liste .border-top { border-color: var(--line) !important; }
 /* Les services utilisateurs d'un logiciel : la grille de cases de
    SoftInventory, quatre colonnes qui se replient avec la largeur. */
-/* Services cochés et serveurs rattachés : la même grille de quatre colonnes,
-   qui se resserre avec la fenêtre. */
+/* Services cochés, serveurs et certificats rattachés : la même grille de quatre
+   colonnes, qui se resserre avec la fenêtre. */
 .services-grille, .serveurs-liste { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 1rem; }
 .serveurs-liste { row-gap: 4px; }
 @media (max-width: 1199.98px) { .services-grille, .serveurs-liste { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -3112,7 +3112,7 @@ a.marche-doc-nom:hover { color: var(--primary); }
 /* Le recapitulatif des liaisons d'un logiciel : un groupe par nature de lien
    (services, serveurs, flux), 8 px entre deux groupes. */
 .liaisons-groupe + .liaisons-groupe { margin-top: 8px; }
-.liaisons-resume svg:not([class*="kind-icon--"]):not(.ico-vert), .liaisons-titre { color: var(--text); }
+.liaisons-resume svg:not([class*="kind-icon--"]):not(.ico-vert):not([class*="statut-ico--"]), .liaisons-titre { color: var(--text); }
 .liaisons-titre { font-weight: 600; }
 /* Les serveurs et les flux de la carte Liaisons : le nom en couleur du texte,
    en gras. */

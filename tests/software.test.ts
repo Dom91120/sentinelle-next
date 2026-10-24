@@ -19,6 +19,13 @@ const servicesDe = async (softwareId: number) =>
   (
     await prisma.softwareService.findMany({ where: { softwareId }, include: { userService: true } })
   ).map((x) => x.userService.name);
+const certificatsDe = async (softwareId: number) =>
+  (
+    await prisma.softwareCertificate.findMany({
+      where: { softwareId },
+      include: { certificate: true },
+    })
+  ).map((x) => x.certificate.serviceName);
 const lire = (id: number) => prisma.software.findUniqueOrThrow({ where: { id } });
 
 describe("logiciels", () => {
@@ -480,6 +487,48 @@ describe("logiciels", () => {
     );
     expect(await serveursDe(sw.id)).toEqual([]);
     expect(await prisma.equipment.findUnique({ where: { id: e1.id } })).not.toBeNull();
+  });
+
+  it("les certificats s'associent et se retirent depuis la fiche", async () => {
+    const c = await clientAdmin();
+    const c1 = await prisma.certificate.create({
+      data: { serviceName: "Portail famille", domain: "famille.exemple.fr", expiryDate: jour(90) },
+    });
+    await prisma.certificate.create({
+      data: { serviceName: "Messagerie", domain: "mail.exemple.fr", expiryDate: jour(30) },
+    });
+    const sw = await prisma.software.create({ data: { name: "Portail" } });
+    let html = (await c.get(`/inventory/logiciels/${sw.id}`)).text;
+    expect(html).toContain("Choisir un certificat");
+    expect(html).toContain(
+      `<option value="${c1.id}">Portail famille - famille.exemple.fr</option>`,
+    );
+    await c.post(
+      `/inventory/logiciels/${sw.id}/certificates`,
+      { certificate_id: String(c1.id) },
+      { followRedirects: true },
+    );
+    expect(await certificatsDe(sw.id)).toEqual(["Portail famille"]);
+    html = (await c.get(`/inventory/logiciels/${sw.id}`)).text;
+    expect(html).toContain(`href="/certificates/${c1.id}"`);
+    expect(
+      html.match(/<select[^>]*name="certificate_id"[\s\S]*?<\/select>/)?.[0] ?? "",
+    ).not.toContain(`<option value="${c1.id}">`);
+    // Associer deux fois ne crée pas de doublon.
+    await c.post(
+      `/inventory/logiciels/${sw.id}/certificates`,
+      { certificate_id: String(c1.id) },
+      { followRedirects: true },
+    );
+    expect(await certificatsDe(sw.id)).toEqual(["Portail famille"]);
+    await c.post(
+      `/inventory/logiciels/${sw.id}/certificates/${c1.id}/detach`,
+      {},
+      { followRedirects: true },
+    );
+    expect(await certificatsDe(sw.id)).toEqual([]);
+    // Retirer le lien ne touche pas au certificat.
+    expect(await prisma.certificate.findUnique({ where: { id: c1.id } })).not.toBeNull();
   });
 
   it("un flux se lit, se corrige et se supprime depuis la fiche", async () => {
