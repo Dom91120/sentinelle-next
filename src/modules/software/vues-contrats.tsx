@@ -570,12 +570,14 @@ export function Consultations({
         </h6>
         {peutEditer ? (
           <button
-            className="btn btn-sm btn-outline-primary"
+            className="btn btn-sm btn-ghost btn-icone"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#nouvelleConsultation"
+            title="Ajouter un devis"
+            aria-label="Ajouter un devis"
           >
-            <Icone bi="bi-plus-lg" taille="1em" classes="me-1" /> Devis
+            <Lucide nom="plus" taille={16} />
           </button>
         ) : null}
       </div>
