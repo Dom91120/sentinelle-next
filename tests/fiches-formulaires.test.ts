@@ -113,10 +113,10 @@ describe("fiches", () => {
   it("un menu d'une seule entrée devient un bouton", async () => {
     const c = await clientAdmin();
     const ids = await jeu();
-    const compte = (await c.get(`/accounts/${ids["/accounts"]}`)).text;
-    expect(compte).toContain('<ul class="menu-seul">');
-    expect(compte).not.toContain("dropdown-menu");
-    expect(compte).toContain('title="Exporter en PDF"');
+    const test = (await c.get(`/tests/${ids["/tests"]}`)).text;
+    expect(test).toContain('<ul class="menu-seul">');
+    expect(test).not.toContain("dropdown-menu");
+    expect(test).toContain('title="Exporter en PDF"');
     const domaine = (await c.get(`/domains/${ids["/domains"]}`)).text;
     expect(domaine).toContain("dropdown-menu");
     expect(domaine).not.toContain("menu-seul");
@@ -179,15 +179,6 @@ describe("fiches", () => {
         expect(cases, url).toBeLessThanOrEqual(6);
       }
     }
-  });
-
-  it("la valeur se pose en face de son intitulé (ancienne synthèse)", async () => {
-    const c = await clientAdmin();
-    const ids = await jeu();
-    await c.post("/preferences", { action: "save_forms", software_form_legacy: "on" });
-    const html = (await c.get(`/inventory/logiciels/${ids["/inventory/logiciels"]}`)).text;
-    expect(html).toContain("fiche-champ");
-    expect(entre(html, 'id="vol-detail"', 'id="vol-details"')).not.toContain("form-section");
   });
 
   it("les pièces jointes sont à un clic", async () => {

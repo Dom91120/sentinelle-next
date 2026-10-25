@@ -356,22 +356,6 @@ export function BandeauEcheance({
   );
 }
 
-/** Le rail droit : « Lié à ». */
-export function Lie({ titre = "Lié à", children }: { titre?: string; children?: React.ReactNode }) {
-  if (!children) return null;
-  return (
-    <div className="data-card mb-3">
-      <div className="card-header-custom">
-        <h6 className="fw-bold mb-0">
-          <Icone bi="bi-link-45deg" taille="1em" classes="me-2" />
-          {titre}
-        </h6>
-      </div>
-      <div className="fiche-lies">{children}</div>
-    </div>
-  );
-}
-
 export function Lien({
   url,
   icone,

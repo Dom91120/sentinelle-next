@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Documents } from "@/components/documents";
-import { Champ, Entete, Fait, FaitBloc, Faits, Lien, TitreSection } from "@/components/fiche";
+import { Entete, Lien } from "@/components/fiche";
 import { Icone, Lucide } from "@/components/icones";
 import { StatusBadge } from "@/components/macros";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
@@ -22,7 +22,6 @@ import {
   domainStatus,
 } from "@/lib/statuts";
 import { TableauContrats } from "@/modules/contracts/vues";
-import { Contacts } from "@/modules/software/vues";
 import { kindLabel } from "@/modules/suppliers/server";
 import { FormulaireFournisseur, Synthese } from "@/modules/suppliers/vues";
 import { seuilsDe } from "@/server/config-store";
@@ -81,7 +80,6 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
   const seuils = seuilsDe(user.settings);
   const today = aujourdhui();
   const docsOn = documentsEnabled(user.settings);
-  const legacy = user.settings.SUPPLIER_FORM_LEGACY;
   const [voisins, pieces] = await Promise.all([
     voisinsDe("supplier", id, "name", page),
     docsOn ? forParent("supplier", id) : Promise.resolve([]),
@@ -110,8 +108,8 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
       ) : null}
     </>
   );
-  const telSupport = supplier.supportPhone || supplier.phone;
-  const mailSupport = supplier.supportEmail || supplier.email;
+  const _telSupport = supplier.supportPhone || supplier.phone;
+  const _mailSupport = supplier.supportEmail || supplier.email;
   return (
     <>
       <Entete titre={supplier.name} sousTitre={sousTitre} voisins={voisins} base="/suppliers" />
@@ -157,159 +155,7 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
         <Volet cible="detail" actif>
           <div className="row g-3">
             <div className={rail ? "col-lg-9" : "col-12"}>
-              {!legacy ? (
-                <Synthese supplier={supplier} />
-              ) : (
-                <div className="data-card p-3 mb-3">
-                  <Faits>
-                    <FaitBloc label="Hotline">
-                      {telSupport ? (
-                        <a href={`tel:${telSupport.replace(/ /g, "")}`}>{telSupport}</a>
-                      ) : (
-                        "-"
-                      )}
-                    </FaitBloc>
-                    <FaitBloc label="N° client">
-                      {supplier.customerRef ? <code>{supplier.customerRef}</code> : "-"}
-                    </FaitBloc>
-                    <Fait label="Horaires" value={supplier.hours} />
-                    <FaitBloc label="E-mail de l'assistance">
-                      {mailSupport ? (
-                        <a href={`mailto:${mailSupport}`}>{mailSupport}</a>
-                      ) : (
-                        <span className="text-muted">—</span>
-                      )}
-                    </FaitBloc>
-                  </Faits>
-                  <div className="fiche-sections">
-                    <div className="fiche-bloc fiche-bloc--sky">
-                      <TitreSection
-                        titre="Assistance"
-                        icone="bi-life-preserver"
-                        couleur="sky"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Hotline support"
-                          value={
-                            telSupport ? (
-                              <>
-                                <Icone bi="bi-telephone" taille="1em" classes="me-1" />
-                                <a href={`tel:${telSupport.replace(/ /g, "")}`}>{telSupport}</a>
-                                {supplier.hours ? (
-                                  <small className="text-muted d-block">{supplier.hours}</small>
-                                ) : null}
-                                {supplier.hours2 ? (
-                                  <small className="text-muted d-block">{supplier.hours2}</small>
-                                ) : null}
-                              </>
-                            ) : (
-                              <span className="text-muted">-</span>
-                            )
-                          }
-                        />
-                        <Champ
-                          label="E-mail de l'assistance"
-                          value={
-                            mailSupport ? (
-                              <a href={`mailto:${mailSupport}`}>{mailSupport}</a>
-                            ) : (
-                              <span className="text-muted">-</span>
-                            )
-                          }
-                        />
-                        <Champ
-                          label="N° client / support"
-                          value={
-                            supplier.customerRef ? (
-                              <code>{supplier.customerRef}</code>
-                            ) : (
-                              <span className="text-muted">-</span>
-                            )
-                          }
-                        />
-                        {supplier.supportUrl ? (
-                          <Champ
-                            label="Portail de tickets"
-                            value={
-                              <a href={supplier.supportUrl} target="_blank" rel="noopener">
-                                <Icone bi="bi-box-arrow-up-right" taille="1em" classes="me-1" />
-                                Ouvrir le portail
-                              </a>
-                            }
-                          />
-                        ) : null}
-                      </div>
-                    </div>
-                    <div className="fiche-bloc fiche-bloc--indigo">
-                      <TitreSection
-                        titre="Coordonnées"
-                        icone="bi-building"
-                        couleur="slate"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Téléphone standard"
-                          value={
-                            <>
-                              {supplier.phone || "-"}
-                              {supplier.email ? (
-                                <a
-                                  href={`mailto:${supplier.email}`}
-                                  className="d-block small text-truncate"
-                                >
-                                  <Icone bi="bi-envelope" taille="1em" classes="me-1" />
-                                  {supplier.email}
-                                </a>
-                              ) : null}
-                            </>
-                          }
-                        />
-                        {supplier.address || supplier.city ? (
-                          <Champ
-                            label="Adresse"
-                            value={
-                              <>
-                                {supplier.address ?? ""}
-                                <span className="d-block">
-                                  {supplier.postalCode ?? ""} {supplier.city ?? ""}
-                                </span>
-                              </>
-                            }
-                          />
-                        ) : null}
-                        {supplier.website ? (
-                          <Champ
-                            label="Site web"
-                            value={
-                              <a href={supplier.website} target="_blank" rel="noopener">
-                                {supplier.website}
-                              </a>
-                            }
-                          />
-                        ) : null}
-                      </div>
-                    </div>
-                    {supplier.notes ? (
-                      <div className="fiche-bloc fiche-bloc--slate">
-                        <TitreSection
-                          titre="Notes"
-                          icone="bi-journal-text"
-                          couleur="slate"
-                          classes="mb-0"
-                        />
-                        <div className="fiche-grille">
-                          <Champ label="Notes" value={supplier.notes} />
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              )}
-              {/* Ancien formulaire : le bloc des contacts (celui d'un logiciel) suit les faits. */}
-              {legacy ? <Contacts sup={supplier} /> : null}
+              <Synthese supplier={supplier} />
             </div>
             {rail ? (
               <div className="col-lg-3">
@@ -497,7 +343,6 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                 user={user}
                 csrf={csrf}
                 retour={`/suppliers/${id}#details`}
-                dansFiche
               />
             </fieldset>
           </Volet>

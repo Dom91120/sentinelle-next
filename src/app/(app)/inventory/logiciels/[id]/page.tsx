@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Documents } from "@/components/documents";
-import { CarteEditeur, Champ, Entete, TitreSection } from "@/components/fiche";
+import { CarteEditeur, Entete } from "@/components/fiche";
 import { Icone, Lucide } from "@/components/icones";
 import { StatusBadge } from "@/components/macros";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
-import {
-  QaModalContract,
-  QaModalEquipment,
-  QaModalServer,
-  QaModalSupplier,
-} from "@/components/quick-add";
+import { QaModalServer, QaModalSupplier } from "@/components/quick-add";
 import { EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { couleurIcone } from "@/lib/navigation";
@@ -31,14 +26,11 @@ import {
 } from "@/lib/statuts";
 import { FormulaireLogiciel, rattachementsDe } from "@/modules/software/form-page";
 import {
-  authModeLabel,
   criticalityLabel,
   formContext,
-  gdprLocationLabel,
   hostingLabel,
   lifecycleLabel,
   marchesRattachables,
-  sourceTypeLabel,
 } from "@/modules/software/server";
 import { Contacts, type Flux, FluxCarte, Partages, Synthese } from "@/modules/software/vues";
 import { Consultations, Contrats } from "@/modules/software/vues-contrats";
@@ -97,7 +89,6 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
   const peutEditer = user.canEdit("software");
   const seuils = seuilsDe(user.settings);
   const docsOn = documentsEnabled(user.settings);
-  const legacy = user.settings.SOFTWARE_FORM_LEGACY;
   const [
     voisins,
     ctx,
@@ -314,201 +305,7 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
         <Volet cible="detail" actif>
           <div className="row g-3">
             <div className={colGauche}>
-              {!legacy ? (
-                <Synthese item={item} gdpr={features.gdpr} />
-              ) : (
-                <div className="data-card p-3 mb-3">
-                  <div className="fiche-sections">
-                    <div className="fiche-bloc fiche-bloc--indigo">
-                      <TitreSection
-                        titre="Identité"
-                        icone="bi-window-stack"
-                        couleur="indigo"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ label="Version" value={item.version} />
-                        <Champ
-                          label="Mise en service"
-                          value={item.serviceDate ? dateCourte(item.serviceDate) : null}
-                        />
-                        <Champ
-                          label="URL / accès"
-                          value={
-                            item.url ? (
-                              <a href={item.url} target="_blank" rel="noopener">
-                                {item.url}
-                              </a>
-                            ) : null
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc fiche-bloc--sky">
-                      <TitreSection
-                        titre="Hébergement & nature"
-                        icone="bi-cloud"
-                        couleur="sky"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Hébergement"
-                          value={`${hostingLabel(item)}${item.isDocker ? " — Docker" : ""}`}
-                        />
-                        <Champ label="Type de source" value={sourceTypeLabel(item)} />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc fiche-bloc--violet">
-                      <TitreSection
-                        titre="Qualification"
-                        icone="bi-sliders"
-                        couleur="violet"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ label="Criticité" value={criticalityLabel(item)} />
-                        <Champ
-                          label="Technologie"
-                          value={item.technology ? item.technology.label : null}
-                        />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc fiche-bloc--teal">
-                      <TitreSection
-                        titre="Authentification & utilisateurs"
-                        icone="bi-person-lock"
-                        couleur="teal"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Authentification"
-                          value={
-                            <>
-                              {authModeLabel(item) || "Non renseignée"}
-                              {item.authStrong ? (
-                                <span className="badge bg-success-subtle text-success ms-1">
-                                  2FA
-                                </span>
-                              ) : null}
-                            </>
-                          }
-                        />
-                        <Champ
-                          label="Utilisateurs"
-                          value={
-                            item.usersCount === null
-                              ? "Non comptés"
-                              : `${item.usersCount}${item.usersMax ? ` / ${item.usersMax}` : ""}`
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc fiche-bloc--emerald">
-                      <TitreSection
-                        titre="Référents"
-                        icone="bi-people"
-                        couleur="emerald"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Référent métier"
-                          value={
-                            item.responsible || item.responsibleEmail ? (
-                              <>
-                                {item.responsible ?? ""}
-                                {item.responsibleEmail ? (
-                                  <a
-                                    href={`mailto:${item.responsibleEmail}`}
-                                    className="d-block small text-truncate"
-                                  >
-                                    <Icone bi="bi-envelope" taille="1em" classes="me-1" />
-                                    {item.responsibleEmail}
-                                  </a>
-                                ) : null}
-                              </>
-                            ) : null
-                          }
-                        />
-                        <Champ
-                          label="Référent technique"
-                          value={
-                            item.techResponsible || item.techResponsibleEmail ? (
-                              <>
-                                {item.techResponsible ?? ""}
-                                {item.techResponsibleEmail ? (
-                                  <a
-                                    href={`mailto:${item.techResponsibleEmail}`}
-                                    className="d-block small text-truncate"
-                                  >
-                                    <Icone bi="bi-envelope" taille="1em" classes="me-1" />
-                                    {item.techResponsibleEmail}
-                                  </a>
-                                ) : null}
-                              </>
-                            ) : null
-                          }
-                        />
-                      </div>
-                    </div>
-                    {features.gdpr ? (
-                      <div className="fiche-bloc fiche-bloc--amber">
-                        <TitreSection
-                          titre="Données personnelles (RGPD)"
-                          icone="bi-shield-lock"
-                          couleur="amber"
-                          classes="mb-0"
-                        />
-                        <div className="fiche-grille">
-                          {item.gdprPersonalData ? (
-                            <>
-                              <Champ label="Catégories" value={item.gdprCategories} />
-                              <Champ label="Réf. registre" value={item.gdprRegistryRef} />
-                              <Champ label="Localisation" value={gdprLocationLabel(item)} />
-                              {sup && (sup.dpoContact || sup.dpoEmail) ? (
-                                <Champ
-                                  label="DPO de l'éditeur"
-                                  value={
-                                    <>
-                                      {sup.dpoContact ?? ""}
-                                      {sup.dpoEmail ? (
-                                        <a
-                                          href={`mailto:${sup.dpoEmail}`}
-                                          className="d-block small text-truncate"
-                                        >
-                                          {sup.dpoEmail}
-                                        </a>
-                                      ) : null}
-                                    </>
-                                  }
-                                />
-                              ) : null}
-                            </>
-                          ) : (
-                            <Champ
-                              label="Traitement"
-                              value={<span className="text-muted">Aucune donnée personnelle</span>}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ) : null}
-                    <div className="fiche-bloc fiche-bloc--rose">
-                      <TitreSection
-                        titre="Description"
-                        icone="bi-journal-text"
-                        couleur="rose"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ label="Notes" value={item.description ?? ""} large />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <Synthese item={item} gdpr={features.gdpr} />
             </div>
 
             {sup || marchesEnCours.length || nbLiaisons ? (
@@ -1239,13 +1036,7 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
       </Volets>
 
       {user.canEdit("inventory") ? <QaModalServer csrf={csrf} /> : null}
-      {peutEditer ? (
-        <>
-          {user.canEdit("suppliers") ? <QaModalSupplier csrf={csrf} /> : null}
-          {legacy && user.canEdit("contracts") ? <QaModalContract csrf={csrf} /> : null}
-          {legacy && user.canEdit("inventory") ? <QaModalEquipment csrf={csrf} /> : null}
-        </>
-      ) : null}
+      {peutEditer ? user.canEdit("suppliers") ? <QaModalSupplier csrf={csrf} /> : null : null}
     </>
   );
 }

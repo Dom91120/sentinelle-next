@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { softwareComputedStatus, softwareIsSaas, softwareOverLicence } from "@/lib/statuts";
 import { clientAdmin } from "./setup/client";
-import { jour, prisma, reglage, resetDb } from "./setup/db";
+import { jour, prisma, resetDb } from "./setup/db";
 import { entre } from "./setup/html";
 
 beforeEach(resetDb);
@@ -645,53 +645,6 @@ describe("logiciels", () => {
     expect(synthese).toContain("COUR-1");
     expect(synthese).not.toContain("ECHU-1");
     expect(html.split('id="vol-contrats"', 2)[1]).toContain("ECHU-1");
-  });
-
-  it("l'ancien formulaire se choisit dans les préférences", async () => {
-    const c = await clientAdmin();
-    const e = await prisma.equipment.create({ data: { name: "SRV-ANCIEN", kind: "vm" } });
-    const sw = await prisma.software.create({
-      data: { name: "Ancien", equipments: { create: { equipmentId: e.id } } },
-    });
-    const nouveau = (await c.get(`/inventory/logiciels/${sw.id}/edit`)).text;
-    expect(nouveau).toContain("logiciel-saisie");
-    expect(nouveau).not.toContain('name="equipment_ids"');
-    await c.post("/preferences", { action: "save_forms", software_form_legacy: "on" });
-    expect(await reglage("SOFTWARE_FORM_LEGACY")).toBe(true);
-    for (const url of [
-      `/inventory/logiciels/${sw.id}/edit`,
-      `/inventory/logiciels/${sw.id}`,
-      "/inventory/logiciels/create",
-    ]) {
-      const html = (await c.get(url)).text;
-      expect(html, url).toContain("form-section form-section--");
-      expect(html, url).toContain('name="equipment_ids"');
-      expect(html, url).not.toContain("logiciel-saisie");
-    }
-    await c.post(`/inventory/logiciels/${sw.id}/edit`, { name: "Ancien", equipment_ids: "" });
-    expect(await serveursDe(sw.id)).toEqual([]);
-    await c.post("/preferences", { action: "save_forms" });
-    expect(await reglage("SOFTWARE_FORM_LEGACY")).toBe(false);
-  });
-
-  it("la synthèse d'un logiciel suit l'interrupteur du formulaire", async () => {
-    const c = await clientAdmin();
-    const sw = await prisma.software.create({
-      data: { name: "Lu", version: "4.2", isDocker: true },
-    });
-    let html = (await c.get(`/inventory/logiciels/${sw.id}`)).text;
-    expect(html).toContain('class="data-card mb-3 synthese synthese--cases"');
-    expect(html).toContain("Logiciel</h6>");
-    expect(html).not.toContain("Technique</h6>");
-    expect(html).toContain("Docker");
-    expect(html).toContain("À compléter");
-    expect(html).not.toContain('data-manque="Version"');
-    expect(html).not.toContain("Hébergement &amp; nature");
-    await c.post("/preferences", { action: "save_forms", software_form_legacy: "on" });
-    html = (await c.get(`/inventory/logiciels/${sw.id}`)).text;
-    expect(html).not.toContain("synthese");
-    expect(html).toContain("Hébergement &amp; nature");
-    await c.post("/preferences", { action: "save_forms" });
   });
 
   it("l'onglet Contacts reprend ceux de l'éditeur", async () => {

@@ -156,35 +156,6 @@ export function QaModalSupplier({ csrf }: { csrf: string }) {
   );
 }
 
-export function QaModalContract({ csrf }: { csrf: string }) {
-  return (
-    <Modal
-      id="qaModalContract"
-      endpoint="/contracts/quick-create"
-      titre="Nouveau contrat"
-      icone="bi-file-earmark-text"
-      csrf={csrf}
-    >
-      <div className="mb-2">
-        <label className="form-label small">Nom *</label>
-        <input
-          type="text"
-          data-qa-field="name"
-          data-qa-required
-          className="form-control form-control-sm"
-        />
-      </div>
-      <div className="mb-2">
-        <label className="form-label small">Échéance</label>
-        <input type="date" data-qa-field="end_date" className="form-control form-control-sm" />
-      </div>
-      <div className="form-text">
-        Détails (type, préavis, coût…) à compléter ensuite sur la fiche.
-      </div>
-    </Modal>
-  );
-}
-
 export function QaModalSoftware({ csrf }: { csrf: string }) {
   return (
     <Modal

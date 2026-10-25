@@ -351,11 +351,6 @@ export default async function PreferencesPage() {
     ["task", "Tests & revues de droits"],
     ["contract", "Contrats & licences (échéance - préavis)"],
   ];
-  const anciens = [
-    p.softwareFormLegacy ? "logiciels" : "",
-    p.contractFormLegacy ? "contrats" : "",
-    p.supplierFormLegacy ? "fournisseurs" : "",
-  ].filter(Boolean);
 
   return (
     <>
@@ -1710,12 +1705,6 @@ export default async function PreferencesPage() {
               <SousOnglet cible="secListes" bi="bi-list" libelle="Listes" couleur="sky" />
               <SousOnglet cible="secFiches" bi="bi-card-text" libelle="Fiches" couleur="violet" />
               <SousOnglet
-                cible="secForms"
-                bi="bi-window-stack"
-                libelle="Formulaires"
-                couleur="sky"
-              />
-              <SousOnglet
                 cible="secAppearance"
                 bi="bi-palette"
                 libelle="Apparence"
@@ -1814,71 +1803,6 @@ export default async function PreferencesPage() {
                       Deux chevrons en tête de chaque fiche pour passer à la précédente ou à la
                       suivante dans l'ordre des noms, sans repasser par la liste — comme dans
                       SoftInventory. Désactivé : on revient à la liste pour changer de fiche.
-                    </p>
-                    <Enregistrer />
-                  </form>
-                </Rubrique>
-              </div>
-              <div className="tab-pane fade" id="pane-secForms" role="tabpanel">
-                <Rubrique
-                  id="secForms"
-                  bi="bi-window-stack"
-                  titre="Formulaires"
-                  badge={
-                    anciens.length ? (
-                      <span className="badge bg-secondary ms-2">
-                        Ancien formulaire : {anciens.join(", ")}
-                      </span>
-                    ) : (
-                      <BadgeOk libelle="Nouveaux formulaires" />
-                    )
-                  }
-                  aide="La présentation des formulaires de saisie, pour tous les utilisateurs."
-                >
-                  <form method="POST" action="/preferences">
-                    <Csrf csrf={csrf} />
-                    <input type="hidden" name="action" value="save_forms" />
-                    <Interrupteur
-                      id="softwareFormLegacy"
-                      name="software_form_legacy"
-                      label="Ancien formulaire des logiciels"
-                      checked={p.softwareFormLegacy}
-                    />
-                    <p className="text-muted small mt-1 mb-2">
-                      Ajout et modification d'un logiciel (page et onglet Détails) avec l'ancien
-                      formulaire : neuf rubriques numérotées, marchés, services et serveurs compris
-                      ; l'onglet Synthèse reprend ses anciennes rubriques. Désactivé : la grille de
-                      SoftInventory (Identité, Technique, RGPD), les rattachements se gérant dans
-                      les onglets Contrats et Liaisons, et une Synthèse qui en reprend les cartes,
-                      en lecture.
-                    </p>
-                    <Interrupteur
-                      id="contractFormLegacy"
-                      name="contract_form_legacy"
-                      label="Ancien formulaire des contrats"
-                      checked={p.contractFormLegacy}
-                    />
-                    <p className="text-muted small mt-1 mb-2">
-                      Ajout et modification d'un contrat (page et onglet Détails) avec l'ancien
-                      formulaire : rubriques numérotées avec leur aide, logiciels et équipements
-                      couverts en deux listes. L'onglet Synthèse reprend alors ses anciennes
-                      rubriques et la carte « Couvre ». Désactivé : la grille de SoftInventory, une
-                      seule carte « Contrat » et les éléments couverts en puces, et une Synthèse qui
-                      en reprend les cartes, en lecture. Le formulaire ouvert dans l'onglet Contrats
-                      d'un logiciel reste la grille.
-                    </p>
-                    <Interrupteur
-                      id="supplierFormLegacy"
-                      name="supplier_form_legacy"
-                      label="Ancien formulaire des fournisseurs"
-                      checked={p.supplierFormLegacy}
-                    />
-                    <p className="text-muted small mt-1 mb-2">
-                      Ajout et modification d'un fournisseur (page et onglet Détails) avec l'ancien
-                      formulaire : rubriques numérotées avec leur sommaire ; l'onglet Synthèse
-                      reprend ses anciennes rubriques. Désactivé : une seule carte à rubriques
-                      (Identité, Assistance, Contacts, Notes), et une Synthèse qui en reprend les
-                      rubriques, en lecture.
                     </p>
                     <Enregistrer />
                   </form>

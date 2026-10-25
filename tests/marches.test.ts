@@ -4,7 +4,7 @@ import { contractKindLabel, contractPeriodLabel, contractRenewalLabel } from "@/
 import { marchesRattachables } from "@/modules/software/server";
 import { migrateContractKinds } from "@/server/amorcage";
 import { clientAdmin } from "./setup/client";
-import { jour, prisma, reglage, resetDb } from "./setup/db";
+import { jour, prisma, resetDb } from "./setup/db";
 import { optionSelectionnee } from "./setup/html";
 
 beforeEach(resetDb);
@@ -473,69 +473,6 @@ describe("marchés", () => {
     expect((await c.get(`/contracts/${ct.id}/edit`)).text).not.toMatch(
       /<input[^>]*id="autoRenew"[^>]*checked/,
     );
-  });
-
-  it("l'ancien formulaire de contrat se choisit dans les préférences", async () => {
-    const c = await clientAdmin();
-    const e = await prisma.equipment.create({ data: { name: "SRV-ACTE", kind: "vm" } });
-    const ct = await prisma.contract.create({ data: { name: "Acte ancien" } });
-    await c.post("/preferences", { action: "save_forms", contract_form_legacy: "on" });
-    expect(await reglage("CONTRACT_FORM_LEGACY")).toBe(true);
-    for (const url of [`/contracts/${ct.id}/edit`, `/contracts/${ct.id}`, "/contracts/create"]) {
-      const html = (await c.get(url)).text;
-      expect(html, url).toContain("form-section form-section--");
-      expect(html, url).toContain('name="equipment_ids"');
-      expect(html, url).not.toContain("marche-saisie");
-    }
-    expect((await c.get(`/contracts/${ct.id}/edit?inline=1`)).text).toContain("marche-saisie");
-    await c.post(`/contracts/${ct.id}/edit`, {
-      name: "Acte ancien",
-      equipment_ids: [String(e.id)],
-      firm_years: "3",
-      notice_days: "60",
-    });
-    const maj = await prisma.contract.findUniqueOrThrow({ where: { id: ct.id } });
-    expect(
-      (
-        await prisma.contractEquipment.findMany({
-          where: { contractId: ct.id },
-          include: { equipment: true },
-        })
-      ).map((x) => x.equipment.name),
-    ).toEqual(["SRV-ACTE"]);
-    expect(maj.firmYears).toBe(3);
-    await c.post("/preferences", { action: "save_forms" });
-    expect(await reglage("CONTRACT_FORM_LEGACY")).toBe(false);
-  });
-
-  it("la synthèse d'un contrat suit l'interrupteur du formulaire", async () => {
-    const c = await clientAdmin();
-    const e = await prisma.equipment.create({ data: { name: "SRV-COUVERT", kind: "nas" } });
-    const sw = await prisma.software.create({ data: { name: "Logiciel couvert" } });
-    const ct = await prisma.contract.create({
-      data: {
-        name: "Acte lu",
-        costYearly: 1234.5,
-        renewals: 2,
-        equipments: { create: { equipmentId: e.id } },
-        software: { create: { softwareId: sw.id } },
-      },
-    });
-    let html = (await c.get(`/contracts/${ct.id}`)).text;
-    expect(html).toContain('class="data-card mb-3 synthese synthese--cases"');
-    expect(html).toContain("Éléments couverts");
-    expect(html).toContain("kind-icon--nas");
-    expect(html).toContain("kind-icon--software");
-    expect(html).toContain("1 234,50 €");
-    expect(html).toContain("2 fois");
-    expect(html).not.toContain("Couvre");
-    expect(html).not.toContain("fiche-sections");
-    await c.post("/preferences", { action: "save_forms", contract_form_legacy: "on" });
-    html = (await c.get(`/contracts/${ct.id}`)).text;
-    expect(html).not.toContain("synthese");
-    expect(html).toContain("fiche-sections");
-    expect(html).toContain("Couvre");
-    await c.post("/preferences", { action: "save_forms" });
   });
 
   it("un contrat est en cours quand il a commencé et n'est pas échu", async () => {

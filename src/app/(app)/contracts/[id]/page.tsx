@@ -6,25 +6,15 @@ import {
   BandeauEcheance,
   BoutonModal,
   CarteEditeur,
-  Champ,
   Entete,
   Historique,
-  Lie,
-  Lien,
   ModalAction,
-  TitreSection,
 } from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
 import { QaModalSupplier } from "@/components/quick-add";
-import { EQUIPMENT_KIND_ICONS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
-import {
-  contractActionDeadline,
-  contractKindLabel,
-  contractRenewalLabel,
-  contractStatus,
-} from "@/lib/statuts";
+import { contractActionDeadline, contractStatus } from "@/lib/statuts";
 import { FormulaireContrat } from "@/modules/contracts/form-page";
 import { couvertsDe, formContext, natureLabel } from "@/modules/contracts/server";
 import { Synthese } from "@/modules/contracts/vues";
@@ -63,7 +53,6 @@ export default async function ContractDetail({ params }: { params: Promise<{ id:
   const { user, csrf } = page;
   const peutEditer = user.canEdit("contracts");
   const docsOn = documentsEnabled(user.settings);
-  const legacy = user.settings.CONTRACT_FORM_LEGACY;
   const [histories, voisins, ctx, couverts, snooze, pieces] = await Promise.all([
     prisma.contractHistory.findMany({
       where: { contractId: id },
@@ -76,12 +65,12 @@ export default async function ContractDetail({ params }: { params: Promise<{ id:
     docsOn ? forParent("contract", id) : Promise.resolve([]),
   ]);
   const statut = contractStatus(contract, seuilsDe(user.settings));
-  const nature = natureLabel(contract);
+  const _nature = natureLabel(contract);
   // Référence puis fournisseur : le type et la nature se lisent dans la synthèse.
   const sousTitre = [contract.reference, contract.supplier?.name].filter(Boolean).join(" · ");
   const complement = `${contract.endDate ? `échéance ${dateCourte(contract.endDate)}` : ""}${contract.noticeDays ? ` · préavis de ${contract.noticeDays} j` : ""}${contract.autoRenew ? " · reconduction tacite" : ""}`;
-  const logiciels = contract.software.map((l) => l.software);
-  const equipements = contract.equipments.map((l) => l.equipment);
+  const _logiciels = contract.software.map((l) => l.software);
+  const _equipements = contract.equipments.map((l) => l.equipment);
   return (
     <>
       <Entete
@@ -135,145 +124,10 @@ export default async function ContractDetail({ params }: { params: Promise<{ id:
         <Volet cible="detail" actif>
           <div className="row g-3">
             <div className="col-lg-9">
-              {!legacy ? (
-                <Synthese contract={contract} />
-              ) : (
-                <div className="data-card p-3 mb-3">
-                  <div className="fiche-sections">
-                    <div className="fiche-bloc">
-                      <TitreSection
-                        titre="L'acte"
-                        icone="bi-file-earmark-text"
-                        couleur="slate"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ label="Nature" value={nature} />
-                        <Champ label="Type" value={contractKindLabel(contract)} />
-                        <Champ label="Notre référence" value={contract.reference} />
-                        <Champ label="Référence fournisseur" value={contract.supplierReference} />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc">
-                      <TitreSection
-                        titre="Montants"
-                        icone="bi-cash-coin"
-                        couleur="slate"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Montant annuel"
-                          value={
-                            <>
-                              {contract.costYearly ? `${contract.costYearly.toFixed(0)} €` : ""}
-                              {contract.costMaxYearly ? (
-                                <small className="d-block text-muted">
-                                  maximum annuel : {contract.costMaxYearly.toFixed(0)} €
-                                </small>
-                              ) : null}
-                              {contract.costTotal ? (
-                                <small className="d-block text-muted">
-                                  total sur la durée : {contract.costTotal.toFixed(0)} €
-                                </small>
-                              ) : null}
-                            </>
-                          }
-                        />
-                        <Champ label="Imputation budgétaire" value={contract.budgetCode} />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc">
-                      <TitreSection
-                        titre="Durée"
-                        icone="bi-calendar-range"
-                        couleur="slate"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Début"
-                          value={contract.startDate ? dateCourte(contract.startDate) : null}
-                        />
-                        <Champ
-                          label="Échéance"
-                          value={contract.endDate ? dateCourte(contract.endDate) : null}
-                        />
-                        <Champ
-                          label="Préavis de résiliation"
-                          value={contract.noticeDays ? `${contract.noticeDays} jours` : null}
-                        />
-                        <Champ
-                          label="Durée ferme"
-                          value={
-                            <>
-                              {contract.firmYears
-                                ? `${contract.firmYears} an${contract.firmYears > 1 ? "s" : ""}`
-                                : ""}
-                              {contractRenewalLabel(contract) ? (
-                                <small className="d-block text-muted">
-                                  {contractRenewalLabel(contract)}
-                                </small>
-                              ) : null}
-                            </>
-                          }
-                        />
-                        <Champ label="Reconduction" value={contract.autoRenew ? "Tacite" : "Non"} />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc">
-                      <TitreSection
-                        titre="Suivi"
-                        icone="bi-person-check"
-                        couleur="slate"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ
-                          label="Bon de commande signé le"
-                          value={contract.orderSignedOn ? dateCourte(contract.orderSignedOn) : null}
-                        />
-                      </div>
-                    </div>
-                    <div className="fiche-bloc">
-                      <TitreSection
-                        titre="Notes"
-                        icone="bi-journal-text"
-                        couleur="slate"
-                        classes="mb-0"
-                      />
-                      <div className="fiche-grille">
-                        <Champ label="Description" value={contract.description ?? ""} large />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <Synthese contract={contract} />
             </div>
             <div className="col-lg-3">
               <CarteEditeur sup={contract.supplier} />
-              {legacy ? (
-                <Lie titre="Couvre">
-                  {logiciels.map((sw) => (
-                    <Lien
-                      key={`s${sw.id}`}
-                      url={`/inventory/logiciels/${sw.id}`}
-                      icone="app-window"
-                      nom={sw.name}
-                      teinte="software"
-                    />
-                  ))}
-                  {equipements.map((e) => (
-                    <Lien
-                      key={`e${e.id}`}
-                      url={`/inventory/${e.id}`}
-                      icone={EQUIPMENT_KIND_ICONS[e.kind ?? "vm"] ?? "server"}
-                      nom={e.name}
-                      teinte={e.kind}
-                    />
-                  ))}
-                </Lie>
-              ) : null}
               <Activite histories={histories} />
               <SnoozeCard
                 entityType="contract"

@@ -110,7 +110,7 @@ Logique métier des modèles (à porter en TypeScript pur, `src/lib/statuts.ts` 
 - [x] Tableau de bord personnalisable : `save_dashboard_custom`
 - [x] Mémoire de pagination : `save_pagination_memory`
 - [x] Navigation entre fiches : `save_fiche_navigation`
-- [x] Formulaires : `save_forms` (anciens formulaires logiciels / contrats / fournisseurs)
+- [x] Formulaires : `save_forms` retiré avec les anciens formulaires (logiciels / contrats / fournisseurs) ; seule la grille reste
 - [x] Apparence : `save_ui_color`
 - [x] Sauvegarde de la base : `save_backup_keep`, `backup_db`, `delete_db_backup`, liste des copies
 - [x] LDAP / AD : `save_ldap`, `test_ldap`
@@ -161,16 +161,16 @@ Logique métier des modèles (à porter en TypeScript pur, `src/lib/statuts.ts` 
 - [x] `/import` (xlsx, `inventory_import.py`)
 
 ### Logiciels (`/inventory/logiciels`)
-- [x] liste (filtres, tri), `/quick-create`, création / édition (nouveau formulaire et ancien `_form_corps_ancien`), fiche à onglets (synthèse, contacts, flux, contrats, consultations/devis, partages, documents, suivi)
+- [x] liste (filtres, tri), `/quick-create`, création / édition (la grille ; l'ancien `_form_corps_ancien` a été retiré), fiche à onglets (synthèse, contacts, flux, contrats, consultations/devis, partages, documents, suivi)
 - [x] `/services`, `/servers`, `/servers/<id>/detach`, `/links/add|edit|delete`, `/shares/add|delete`, `/delete`
 
 ### Contrats et marchés (`/contracts`)
-- [x] liste (`_tableau`), `/quick-create`, création / édition (nouveau et ancien), fiche, `/renew`, `/delete`
+- [x] liste (`_tableau`), `/quick-create`, création / édition (la grille, l'ancien formulaire retiré), fiche, `/renew`, `/delete`
 - [x] `/software/<id>/attach`, `/<id>/software/<id>/detach`
 - [x] consultations `/consultations/<software>/add`, `/consultations/<id>/delete`, devis `/quotes/add`, `/quotes/<id>/select`, `/quotes/<id>/delete` (module devis)
 
 ### Fournisseurs (`/suppliers`)
-- [x] liste, `/quick-create`, création / édition (nouveau et ancien), fiche (synthèse, contacts, éléments liés), `/delete`
+- [x] liste, `/quick-create`, création / édition (la grille, l'ancien formulaire retiré), fiche (synthèse, contacts, éléments liés), `/delete`
 
 ### Alertes (`/alerts`)
 - [x] liste (journal AlertLog), `/snooze`, `/unsnooze` (`_snooze_card`)

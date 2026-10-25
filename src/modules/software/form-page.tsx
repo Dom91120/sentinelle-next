@@ -1,8 +1,8 @@
-/** software/form.html : le formulaire, grille de SoftInventory ou ancien (SOFTWARE_FORM_LEGACY), et ses modales d'ajout rapide. */
-import { QaModalContract, QaModalEquipment, QaModalSupplier } from "@/components/quick-add";
+/** software/form.html : la grille de SoftInventory et sa modale d'ajout rapide d'un éditeur. */
+import { QaModalSupplier } from "@/components/quick-add";
 import type { Software } from "@/generated/prisma/client";
 import type { FormContext } from "@/modules/software/server";
-import { FormCorps, FormCorpsAncien } from "@/modules/software/vues";
+import { FormCorps } from "@/modules/software/vues";
 import type { Page } from "@/server/page";
 
 export type Rattachements = { contractIds: number[]; equipmentIds: number[]; serviceIds: number[] };
@@ -23,7 +23,6 @@ export function FormulaireLogiciel({
   dansFiche?: boolean;
 }) {
   const { user, csrf, nonce } = page;
-  const legacy = user.settings.SOFTWARE_FORM_LEGACY;
   const gdpr = page.features.gdpr;
   const commun = {
     item,
@@ -39,31 +38,8 @@ export function FormulaireLogiciel({
   };
   return (
     <>
-      {legacy ? (
-        dansFiche ? (
-          <div className="data-card p-4">
-            <FormCorpsAncien {...commun} />
-          </div>
-        ) : (
-          <div className="form-page">
-            <nav className="form-sommaire" aria-label="Rubriques du formulaire" />
-            <div className="form-corps">
-              <div className="data-card p-4">
-                <FormCorpsAncien {...commun} />
-              </div>
-            </div>
-          </div>
-        )
-      ) : (
-        <FormCorps {...commun} />
-      )}
-      {!dansFiche ? (
-        <>
-          {user.canEdit("suppliers") ? <QaModalSupplier csrf={csrf} /> : null}
-          {legacy && user.canEdit("contracts") ? <QaModalContract csrf={csrf} /> : null}
-          {legacy && user.canEdit("inventory") ? <QaModalEquipment csrf={csrf} /> : null}
-        </>
-      ) : null}
+      <FormCorps {...commun} />
+      {!dansFiche && user.canEdit("suppliers") ? <QaModalSupplier csrf={csrf} /> : null}
     </>
   );
 }

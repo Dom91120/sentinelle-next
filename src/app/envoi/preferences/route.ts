@@ -175,21 +175,6 @@ export async function POST(req: Request) {
             `Boutons Précédent / Suivant ${enabled ? "affichés" : "masqués"} en tête des fiches.`,
           );
         }
-        case "save_forms": {
-          const etats = {
-            SOFTWARE_FORM_LEGACY: coche(form, "software_form_legacy"),
-            CONTRACT_FORM_LEGACY: coche(form, "contract_form_legacy"),
-            SUPPLIER_FORM_LEGACY: coche(form, "supplier_form_legacy"),
-          };
-          await saveSettings(Object.fromEntries(Object.entries(etats).map(([k, v]) => [k, b(v)])));
-          await audit(
-            "config formulaires",
-            Object.entries(etats)
-              .map(([k, v]) => `${k}=${v ? "True" : "False"}`)
-              .join(", "),
-          );
-          return ok("Formulaires enregistrés.");
-        }
         case "save_ui_color": {
           let color = "";
           if (coche(form, "ui_color_enabled")) {

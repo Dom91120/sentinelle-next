@@ -1,7 +1,7 @@
-/** Fournisseurs : onglet Détails, nouveau formulaire, Synthèse et l'ancien formulaire (port de tests/test_fournisseurs_formulaire.py). */
+/** Fournisseurs : onglet Détails, formulaire et Synthèse (port de tests/test_fournisseurs_formulaire.py). */
 import { beforeEach, describe, expect, it } from "vitest";
 import { clientAdmin } from "./setup/client";
-import { prisma, reglage, regler, resetDb } from "./setup/db";
+import { prisma, regler, resetDb } from "./setup/db";
 import { entre } from "./setup/html";
 
 beforeEach(resetDb);
@@ -67,30 +67,6 @@ describe("fournisseurs", () => {
     for (const v of ["MOREAU", "factu@arpege.fr", "CLI-9"]) expect(s).toContain(v);
     expect(html).not.toContain('id="ong-contacts"');
     expect(html).toContain('id="ong-details"');
-  });
-
-  it("l'ancien formulaire des fournisseurs se choisit dans les préférences", async () => {
-    const c = await clientAdmin();
-    const sup = await prisma.supplier.create({
-      data: { name: "Arpège", commercialContact: "DUPONT" },
-    });
-    await c.post("/preferences", { action: "save_forms", supplier_form_legacy: "on" });
-    expect(await reglage("SUPPLIER_FORM_LEGACY")).toBe(true);
-    for (const url of [`/suppliers/${sup.id}/edit`, `/suppliers/${sup.id}`, "/suppliers/create"]) {
-      const html = (await c.get(url)).text;
-      expect(html, url).toContain("form-section form-section--");
-      expect(html, url).not.toContain("fournisseur-saisie");
-    }
-    const html = (await c.get(`/suppliers/${sup.id}`)).text;
-    expect(html).not.toContain("synthese synthese--cases");
-    expect(html).toContain("fiche-faits");
-    expect(html).not.toContain('id="ong-contacts"');
-    await c.post(`/suppliers/${sup.id}/edit`, { ...CHAMPS, name: "Arpège ancien" });
-    expect((await prisma.supplier.findUniqueOrThrow({ where: { id: sup.id } })).name).toBe(
-      "Arpège ancien",
-    );
-    await c.post("/preferences", { action: "save_forms" });
-    expect(await reglage("SUPPLIER_FORM_LEGACY")).toBe(false);
   });
 
   it("la synthèse tait les contacts vides", async () => {
