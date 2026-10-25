@@ -6,7 +6,7 @@ import { prisma } from "@/server/db";
 import { requireAdmin } from "@/server/guards";
 import { idDe, pasTrouve, redirigerAvecMessage, traiterFormulaire } from "@/server/http";
 
-const RETOUR = "/referentiels";
+const RETOUR = "/preferences#secReferentiels";
 
 /** POST /referentiels/<id>/scope : change le type de fiche auquel une valeur est réservée. */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -2,6 +2,7 @@ import { Icone, Lucide } from "@/components/icones";
 import { ScriptDiffere } from "@/components/scripts";
 import { dateHeure } from "@/lib/libelles";
 import { contextePreferences } from "@/modules/preferences/server";
+import { GestionReferentiels } from "@/modules/referentiels/vues";
 import { requireAdmin } from "@/server/guards";
 import { contextePage } from "@/server/page";
 
@@ -169,6 +170,56 @@ const ONGLETS_JS = `(function () {
     var c = (location.hash || '').replace(/^#/, '');
     if (c) ouvrir(c);
   });
+  // Une modale de référentiel reste ouverte d'un geste à l'autre : chaque ajout ou
+  // retrait recharge la page, et la modale qu'on utilisait se rouvre (identifiant en
+  // stockage de session, effacé quand on la ferme soi-même).
+  var CLE_REF = 'prefs:ref-modale';
+  document.addEventListener('shown.bs.modal', function (e) {
+    if (e.target.classList.contains('ref-modal')) try { sessionStorage.setItem(CLE_REF, e.target.id); } catch (x) { /* sans mémoire */ }
+  });
+  document.addEventListener('hidden.bs.modal', function (e) {
+    if (e.target.classList.contains('ref-modal')) try { sessionStorage.removeItem(CLE_REF); } catch (x) { /* idem */ }
+  });
+  try {
+    var aRouvrir = sessionStorage.getItem(CLE_REF);
+    var modale = aRouvrir && document.getElementById(aRouvrir);
+    if (modale && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modale).show();
+  } catch (x) { /* idem */ }
+  // Dans une modale de liste, le crayon rend le libellé modifiable sur sa ligne ; la
+  // coche l'enregistre (ou Entrée), Échap remet le libellé d'origine.
+  document.addEventListener('click', function (e) {
+    var crayon = e.target.closest('.rf-edit');
+    if (!crayon) return;
+    var ligne = crayon.closest('.rf-row');
+    if (!ligne || ligne.classList.contains('is-edit')) return;
+    ligne.querySelectorAll('.rf-ghost').forEach(function (c) { c.disabled = false; });
+    ligne.classList.add('is-edit');
+    var premier = ligne.querySelector('.rf-ghost');
+    premier.focus();
+    if (premier.select) premier.select();
+  });
+  function annulerEdition(ligne) {
+    ligne.querySelectorAll('.rf-ghost').forEach(function (c) {
+      if (c.tagName === 'SELECT') {
+        Array.prototype.forEach.call(c.options, function (o) { o.selected = o.defaultSelected; });
+      } else {
+        c.value = c.defaultValue;
+      }
+      c.disabled = true;
+    });
+    ligne.classList.remove('is-edit');
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.rf-cancel');
+    if (b) annulerEdition(b.closest('.rf-row'));
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var champ = e.target.closest && e.target.closest('.rf-row.is-edit .rf-ghost');
+    if (!champ) return;
+    e.stopPropagation();
+    annulerEdition(champ.closest('.rf-row'));
+  }, true);
   // Chaque formulaire emporte la rubrique ouverte : la redirection la garde.
   document.addEventListener('submit', function (e) {
     var form = e.target;
@@ -1669,21 +1720,14 @@ export default async function PreferencesPage() {
                   id="secReferentiels"
                   bi="bi-list-ul"
                   titre="Référentiels et services utilisateurs"
-                  aide="Listes de valeurs et services utilisateurs, gérés sur leur propre écran."
+                  aide="Les listes de valeurs des formulaires et l'annuaire des services utilisateurs : dépliez une liste pour la modifier."
                 >
-                  <p className="text-muted small mb-2">
-                    Les listes de valeurs proposées dans les formulaires — technologies
-                    applicatives, catégories de pièces jointes, types de tâches — et l'annuaire des
-                    services utilisateurs (directions de la collectivité), avec leur référent.
-                  </p>
                   <p className="text-muted small mb-3">
-                    Seuls les libellés <strong>descriptifs</strong> s'y règlent : le cycle de vie
+                    Seuls les libellés <strong>descriptifs</strong> se règlent ici : le cycle de vie
                     d'un logiciel ou le statut d'un certificat pilotent des filtres et des couleurs,
-                    et restent fixes.
+                    et restent fixes. Une valeur retirée reste sur les fiches qui la portent.
                   </p>
-                  <a href="/referentiels" className="btn btn-sm btn-primary">
-                    <Icone bi="bi-arrow-right" taille="1em" classes="me-1" /> Gérer les référentiels
-                  </a>
+                  <GestionReferentiels csrf={csrf} />
                 </Rubrique>
               </div>
             </div>

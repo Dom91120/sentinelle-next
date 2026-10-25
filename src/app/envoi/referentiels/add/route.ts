@@ -6,7 +6,7 @@ import { prisma } from "@/server/db";
 import { requireAdmin } from "@/server/guards";
 import { redirigerAvecMessage, traiterFormulaire } from "@/server/http";
 
-const RETOUR = "/referentiels";
+const RETOUR = "/preferences#secReferentiels";
 
 /** POST /referentiels/add */
 export async function POST(req: Request) {

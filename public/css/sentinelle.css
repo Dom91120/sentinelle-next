@@ -2314,6 +2314,55 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .pref-sous-onglets .som-etat { margin-left: 2px; }
 /* Les icônes des deux barres en couleur, celle de leur famille (.ico-*). */
 .pref-page .fiche-onglets .nav-link > svg.lucide[class*="ico-"] { color: rgb(var(--ico-rgb)); }
+/* Référentiels dans les Préférences : une ligne par liste (nom, compteur, aperçu,
+   crayon) ; la gestion s'ouvre dans une modale, les valeurs en puces avec leur type
+   et leur croix, puis le champ d'ajout. */
+.ref-lignes { display: flex; flex-direction: column; gap: 4px; }
+.ref-ligne { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 4px 6px 4px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; }
+.ref-ligne:hover { background: var(--inset); }
+.ref-ligne > .fw-medium, .ref-ligne > .badge { flex-shrink: 0; white-space: nowrap; }
+.ref-ligne-ico { flex-shrink: 0; color: var(--faint); }
+.ref-apercu { flex: 1 1 auto; min-width: 0; }
+.ref-ligne .btn-icone { flex-shrink: 0; }
+/* Dans la modale, le tableau des éditeurs de culturesa-next : barre d'outils avec
+   l'ajout, en-têtes de colonnes, une ligne par valeur (grille), champs « fantômes »
+   nus au repos et cadrés au survol, actions révélées au survol, pied « Fermer ». */
+.ref-modal .modal-body { position: relative; padding: 18px 20px 16px; }
+.ref-modal-close { position: absolute; top: 14px; right: 16px; }
+.rf-title { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 600; margin-bottom: 2px; padding-right: 28px; }
+.rf-subtitle { font-size: 0.78rem; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+.rf-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; padding-bottom: 8px; }
+.rf-ajout-champ { flex: 1 1 10rem; min-width: 8rem; }
+.rf-ajout-champ--court { flex: 0 1 8rem; }
+.rf-ajout { white-space: nowrap; }
+/* Le type de la nouvelle valeur garde la largeur de son option la plus longue : il ne se laisse pas comprimer par le champ. */
+.rf-toolbar .form-select { flex: 0 0 auto; width: auto; padding-right: 2rem; }
+.rf-head { display: grid; gap: 12px; align-items: center; padding: 0 12px 6px; border-bottom: 1px solid var(--border); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; color: var(--muted); }
+.rf-row { display: grid; gap: 10px; align-items: center; padding: 1px 12px; border-radius: 8px; }
+.rf-row:hover { background: var(--inset); }
+.rf-row--retire { opacity: 0.55; }
+.rf-label { font-size: 0.85rem; font-weight: 600; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rf-ghost:disabled { color: var(--text); -webkit-text-fill-color: var(--text); opacity: 1; cursor: default; pointer-events: none; background-color: transparent; background-image: none; border-color: transparent; }
+.rf-row:hover .rf-ghost:disabled { background: transparent; border-color: transparent; }
+.rf-muted { font-size: 0.8rem; color: var(--muted); }
+.rf-row form { min-width: 0; }
+/* Le type d'une ligne : le sélecteur Bootstrap (flèche en fond, sans flèche native), aux
+   mêmes remplissages que celui de la barre d'ajout, donc à la même largeur. */
+.rf-row select.rf-ghost { width: auto; padding: 2px 2rem 2px 10px; }
+.rf-ghost { width: 100%; box-sizing: border-box; font: inherit; font-size: 0.8rem; color: var(--text); background-color: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); padding: 2px 8px; outline: none; box-shadow: none; }
+.rf-row:hover .rf-ghost { background-color: var(--input-bg, #fff); border-color: var(--border); }
+.rf-ghost:focus { background-color: var(--input-bg, #fff); border-color: var(--primary); box-shadow: var(--ring); }
+.rf-ghost::placeholder { color: var(--faint); }
+.rf-act { display: flex; justify-content: flex-end; gap: 2px; opacity: 0.35; transition: opacity 0.15s; }
+.rf-act form { display: flex; }
+.rf-act .btn-icone { width: 24px; height: 24px; padding: 3px; }
+.rf-act .btn.rf-save, .rf-act .btn.rf-cancel { display: none; }
+.rf-row.is-edit .rf-act .btn.rf-save, .rf-row.is-edit .rf-act .btn.rf-cancel { display: inline-flex; }
+.rf-row.is-edit .rf-act .btn.rf-edit, .rf-row.is-edit .rf-act .rf-delete { display: none; }
+.rf-row.is-edit .rf-act { opacity: 1; }
+.rf-row:hover .rf-act, .rf-act:focus-within { opacity: 1; }
+.rf-empty { padding: 20px; text-align: center; font-size: 0.85rem; color: var(--muted); }
+.rf-foot { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
 .som-etat { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); opacity: 0.5; flex: 0 0 auto; }
 .som-etat.ok { background: var(--success); opacity: 1; }
 .som-etat.ko { background: var(--danger); opacity: 1; }

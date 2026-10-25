@@ -552,7 +552,7 @@ describe("certificats électroniques", () => {
     const html = (await c.get("/certificates/create")).text;
     for (const p of ['data-portee="tls"', 'data-portee="signature"', 'data-portee="tous"'])
       expect(html).toContain(p);
-    expect((await c.get("/referentiels")).text).toContain('name="scope"');
+    expect((await c.get("/preferences")).text).toContain('name="scope"');
     await c.post("/referentiels/add", { kind: "cert_usage", label: "Client VPN", scope: "tls" });
     const vpn = await ref("cert_usage", "Client VPN");
     expect(vpn.scope).toBe("tls");

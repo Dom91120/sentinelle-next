@@ -4,7 +4,7 @@ import { prisma } from "@/server/db";
 import { requireAdmin } from "@/server/guards";
 import { idDe, pasTrouve, redirigerAvecMessage, traiterFormulaire } from "@/server/http";
 
-const RETOUR = "/referentiels";
+const RETOUR = "/preferences#secReferentiels";
 
 /**
  * POST /referentiels/<id>/delete : retire la valeur de la liste. Les fiches qui la
