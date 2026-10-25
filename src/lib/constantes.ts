@@ -32,17 +32,18 @@ export function statusFromDays(daysLeft: number, seuils: Triplet): Statut {
 
 // Catégories soumises aux permissions par rôle (les sections Utilisateurs et
 // Préférences restent réservées aux administrateurs via is_admin).
+/** Dans l'ordre du menu : échéances, exploitation, parc, puis les alertes (administration). */
 export const PERMISSION_CATEGORIES = [
   "accounts",
   "certificates",
   "domains",
+  "contracts",
   "backups",
   "tests",
-  "reviews",
   "updates",
+  "reviews",
   "inventory",
   "software",
-  "contracts",
   "suppliers",
   "alerts",
 ] as const;
@@ -52,13 +53,13 @@ export const CATEGORY_LABELS: Record<PermissionCategory, string> = {
   accounts: "Comptes",
   certificates: "Certificats",
   domains: "Domaines",
+  contracts: "Contrats",
   backups: "Sauvegardes",
   tests: "Tests",
-  reviews: "Revues de droits",
   updates: "Mises à jour",
+  reviews: "Revues de droits",
   inventory: "Matériel",
   software: "Logiciels",
-  contracts: "Contrats",
   suppliers: "Fournisseurs",
   alerts: "Alertes",
 };
