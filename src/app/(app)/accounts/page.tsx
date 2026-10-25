@@ -67,7 +67,15 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
 
       <div className="data-card">
         <div className="table-responsive">
-          <table className="table table-hover mb-0 js-filterable">
+          <table className="table table-hover mb-0 js-filterable tableau-comptes">
+            <colgroup>
+              <col style={{ width: "34%" }} />
+              <col style={{ width: "18%" }} />
+              <col style={{ width: "13%" }} />
+              <col style={{ width: "13%" }} />
+              <col style={{ width: "10%" }} />
+              <col />
+            </colgroup>
             <thead>
               <tr>
                 <th>Libellé</th>
@@ -93,12 +101,15 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
                     <td>
                       <a
                         href={`/accounts/${account.id}`}
-                        className="fw-medium text-decoration-none"
+                        className="fw-medium text-decoration-none d-block text-truncate"
+                        title={account.serviceName}
                       >
                         {account.serviceName}
                       </a>
                       {account.url ? (
-                        <small className="d-block text-muted">{account.url}</small>
+                        <small className="d-block text-muted text-truncate" title={account.url}>
+                          {account.url}
+                        </small>
                       ) : null}
                     </td>
                     <td>{account.username}</td>

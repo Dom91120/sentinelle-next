@@ -1254,6 +1254,11 @@ body.dash-editing .stat-toggle { display: inline-flex; }
 .tabular { font-variant-numeric: tabular-nums; }
 .tableau-certificats { table-layout: fixed; }
 .tableau-certificats td { overflow: hidden; }
+/* Liste des comptes : la colonne Libellé est bornée, le libellé et l'adresse se
+   tronquent (l'adresse complète reste en infobulle) ; les autres colonnes se
+   replient comme avant. */
+.tableau-comptes { table-layout: fixed; }
+.tableau-comptes td:first-child { overflow: hidden; }
 /* Liste des logiciels : meme disposition fixe que les certificats. Les
    cellules de texte se tronquent. Les pastilles sont centrees sans rembourrage
    a droite : centrees dans leur boite de contenu, elles tombaient 6 px a
