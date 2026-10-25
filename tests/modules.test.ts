@@ -15,7 +15,8 @@ describe("modules", () => {
     const html = (await c.get("/preferences")).text;
     for (const name of ["quotes", "gdpr", "links", "certificates"])
       expect(html).toContain(`name="module_${name}"`);
-    expect(html).toContain("Tous les modules actifs");
+    // Le badge de la rubrique Modules (le bandeau d'état en tête de page a disparu).
+    expect(html).toContain("Tous actifs");
     await c.post("/preferences", { action: "save_modules" }, { followRedirects: true });
     for (const key of [
       "QUOTES_ENABLED",
@@ -24,7 +25,7 @@ describe("modules", () => {
       "CERTIFICATES_ENABLED",
     ])
       expect(await reglage(key), key).toBe(false);
-    expect((await c.get("/preferences")).text).toContain("4 modules désactivés");
+    expect((await c.get("/preferences")).text).toContain("0/4 actifs");
     await c.post(
       "/preferences",
       { action: "save_modules", module_gdpr: "on" },

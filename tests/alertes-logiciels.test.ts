@@ -88,7 +88,8 @@ describe("préférences", () => {
     const c = await clientAdmin();
     const html = (await c.get("/preferences")).text;
     expect(html).toContain('name="software_alerts"');
-    expect(html).toContain("Alertes logiciels activées");
+    // L'interrupteur est coché (le bandeau d'état en tête de page a disparu).
+    expect(html).toMatch(/id="softwareAlerts"[^>]*checked/);
     await c.post("/preferences", { action: "save_software_alerts" }, { followRedirects: true });
     expect(await reglage("SOFTWARE_ALERTS")).toBe(false);
     await c.post(

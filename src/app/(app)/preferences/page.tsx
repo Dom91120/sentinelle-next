@@ -142,6 +142,18 @@ const ONGLETS_JS = `(function () {
       else if (badge.classList.contains('bg-danger')) etat.classList.add('ko');
     }
   });
+  // L'onglet de famille résume ses rubriques : rouge si l'une est en défaut, vert si
+  // toutes celles qui ont un état sont actives, rien sinon.
+  familles.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (b) {
+    var volet = document.querySelector(b.getAttribute('data-bs-target'));
+    var etat = b.querySelector('.som-etat');
+    if (!volet || !etat) return;
+    var points = volet.querySelectorAll('.pref-sous-onglets .som-etat');
+    var ko = Array.prototype.some.call(points, function (p) { return p.classList.contains('ko'); });
+    var ok = Array.prototype.some.call(points, function (p) { return p.classList.contains('ok'); });
+    if (ko) etat.classList.add('ko');
+    else if (ok) etat.classList.add('ok');
+  });
   function rubriqueCourante() {
     var fam = familles.querySelector('.nav-link.active');
     var volet = fam && document.querySelector(fam.getAttribute('data-bs-target'));
@@ -283,7 +295,7 @@ function Interrupteur({
   );
 }
 
-/** Un onglet de famille (premier niveau), dans la barre des fiches. */
+/** Un onglet de famille (premier niveau), dans la barre des fiches ; son point d'état résume ses rubriques (script). */
 function FamilleOnglet({
   cible,
   libelle,
@@ -311,6 +323,7 @@ function FamilleOnglet({
       >
         <Lucide nom={icone} taille={16} classes={`ico-${couleur}`} />
         {libelle}
+        <span className="som-etat" />
       </button>
     </li>
   );
@@ -415,101 +428,6 @@ export default async function PreferencesPage() {
             Les réglages de Sentinelle : connexion, messagerie, seuils d'alerte, apparence
           </p>
         </div>
-      </div>
-
-      <div className="pref-etat" aria-label="État des réglages">
-        {p.mailConfigured ? (
-          <span className="badge-status badge-success">
-            <Icone bi="bi-envelope" taille="1em" />
-            Messagerie : {p.mailMethod === "o365" ? "Office 365" : "SMTP"}
-          </span>
-        ) : (
-          <span className="badge-status badge-danger">
-            <Icone bi="bi-envelope" taille="1em" />
-            Messagerie non configurée
-          </span>
-        )}
-        {p.ldap.enabled ? (
-          <span className="badge-status badge-success">
-            <Icone bi="bi-diagram-3" taille="1em" />
-            LDAP activé
-          </span>
-        ) : (
-          <span className="badge-status badge-muted">
-            <Icone bi="bi-diagram-3" taille="1em" />
-            LDAP désactivé
-          </span>
-        )}
-        {p.ctMonitoring ? (
-          <span className="badge-status badge-success">
-            <Icone bi="bi-shield-lock" taille="1em" />
-            Surveillance CT activée
-          </span>
-        ) : (
-          <span className="badge-status badge-muted">
-            <Icone bi="bi-shield-lock" taille="1em" />
-            Surveillance CT désactivée
-          </span>
-        )}
-        {p.softwareAlerts ? (
-          <span className="badge-status badge-success">
-            <Icone bi="bi-window-stack" taille="1em" />
-            Alertes logiciels activées
-          </span>
-        ) : (
-          <span className="badge-status badge-muted">
-            <Icone bi="bi-window-stack" taille="1em" />
-            Alertes logiciels désactivées
-          </span>
-        )}
-        {p.dbBackups.length ? (
-          <span className="badge-status badge-success">
-            <Icone bi="bi-database" taille="1em" />
-            {p.dbBackups.length} sauvegarde{pluriel(p.dbBackups.length)}
-          </span>
-        ) : (
-          <span className="badge-status badge-danger">
-            <Icone bi="bi-database" taille="1em" />
-            Aucune sauvegarde
-          </span>
-        )}
-        {modulesCoupes.length ? (
-          <span className="badge-status badge-muted">
-            <Icone bi="bi-toggles" taille="1em" />
-            {modulesCoupes.length} module{pluriel(modulesCoupes.length)} désactivé
-            {pluriel(modulesCoupes.length)}
-          </span>
-        ) : (
-          <span className="badge-status badge-success">
-            <Icone bi="bi-toggles" taille="1em" />
-            Tous les modules actifs
-          </span>
-        )}
-        {p.documentsEnabled ? (
-          <span className="badge-status badge-success">
-            <Icone bi="bi-paperclip" taille="1em" />
-            Pièces jointes : {p.documentMaxMb} Mo
-          </span>
-        ) : (
-          <span className="badge-status badge-muted">
-            <Icone bi="bi-paperclip" taille="1em" />
-            Pièces jointes désactivées
-          </span>
-        )}
-        {p.uiPrimaryColor ? (
-          <span
-            className="badge-status badge-muted"
-            style={{ "--badge": p.uiPrimaryColor } as React.CSSProperties}
-          >
-            <Icone bi="bi-palette" taille="1em" />
-            Couleur personnalisée
-          </span>
-        ) : (
-          <span className="badge-status badge-muted">
-            <Icone bi="bi-palette" taille="1em" />
-            Palette d'origine
-          </span>
-        )}
       </div>
 
       <div className="pref-page">

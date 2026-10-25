@@ -2298,11 +2298,8 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .form-section-corps { padding: 16px; }
 
 /* ---- Preferences : rubriques ouvertes par familles (Dom 2026-09-23) ----
-   Le bandeau d etat en tete, le sommaire par familles (icone + point d etat),
-   et les bandeaux de rubrique qui poussent leurs pastilles a droite. */
-.pref-etat { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
-.pref-etat .badge-status { font-size: 0.75rem; padding: 3px 10px; gap: 6px; }
-.pref-etat .badge-status :is(i, svg.lucide) { font-size: 0.8rem; }
+   Les familles et rubriques en onglets, chacun avec son point d etat, et les
+   bandeaux de rubrique qui poussent leurs pastilles a droite. */
 /* Préférences : les familles en onglets, les rubriques en sous-onglets, les
    deux dans la barre des fiches ; les sous-onglets alignés à droite, une
    rubrique à la fois. */
@@ -2312,6 +2309,9 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .pref-familles { margin-bottom: 14px; }
 .pref-sous-onglets { justify-content: flex-end; margin-bottom: 14px; }
 .pref-sous-onglets .som-etat { margin-left: 2px; }
+/* Un point ne se montre que s'il dit quelque chose : vert (actif, configuré) ou rouge (en
+   défaut). Une rubrique sans état, un compteur comme « 10/10 », n'en a pas. */
+.pref-page .som-etat:not(.ok):not(.ko) { display: none; }
 /* Les icônes des deux barres en couleur, celle de leur famille (.ico-*). */
 .pref-page .fiche-onglets .nav-link > svg.lucide[class*="ico-"] { color: rgb(var(--ico-rgb)); }
 /* Référentiels dans les Préférences : une ligne par liste (nom, compteur, crayon), sur
