@@ -2321,15 +2321,23 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .ref-ligne { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 4px 6px 4px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; }
 .ref-ligne:hover { background: var(--inset); }
 .ref-ligne > .fw-medium, .ref-ligne > .badge { flex-shrink: 0; white-space: nowrap; }
-.ref-ligne-ico { flex-shrink: 0; color: var(--faint); }
+.ref-ligne-ico { flex-shrink: 0; color: rgb(var(--ico-rgb, 148, 163, 184)); }
+/* L'icône d'un bandeau de rubrique prend la couleur demandée (.ico-*), celle de son sous-onglet. */
+.pref-rubrique > .form-section-titre > svg.lucide[class*="ico-"] { color: rgb(var(--ico-rgb)); }
 .ref-ligne .btn-icone { flex-shrink: 0; }
 /* Dans la modale, le tableau des éditeurs de culturesa-next : barre d'outils avec
    l'ajout, en-têtes de colonnes, une ligne par valeur (grille), champs « fantômes »
    nus au repos et cadrés au survol, actions révélées au survol, pied « Fermer ». */
-.ref-modal .modal-body { position: relative; padding: 18px 20px 16px; }
-.ref-modal-close { position: absolute; top: 14px; right: 16px; }
-.rf-title { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 600; margin-bottom: 2px; padding-right: 28px; }
-.rf-subtitle { font-size: 0.78rem; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+/* La modale a la forme d'une rubrique des Préférences : bandeau de titre (icône, titre,
+   compteur à droite, croix), ligne d'aide, corps. La rubrique perd son cadre, la modale
+   l'apporte déjà. */
+.ref-modal .modal-content { overflow: hidden; }
+.ref-modal .form-section { border: 0; border-radius: 0; margin: 0; display: flex; flex-direction: column; min-height: 0; max-height: 100%; }
+.ref-modal .form-section-titre, .ref-modal .form-section-aide { flex-shrink: 0; }
+/* La modale est défilante : c'est le corps de la rubrique qui défile, bandeau et aide restent. */
+.ref-modal .form-section-corps { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.ref-modal .form-section-titre .ref-modal-close { margin-left: 8px; font-size: 0.7rem; }
+.ref-modal .form-section-aide { padding-bottom: 2px; }
 .rf-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; padding-bottom: 8px; }
 .rf-ajout-champ { flex: 1 1 10rem; min-width: 8rem; }
 .rf-ajout-champ--court { flex: 0 1 8rem; }
@@ -2366,7 +2374,8 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .som-etat.ok { background: var(--success); opacity: 1; }
 .som-etat.ko { background: var(--danger); opacity: 1; }
 .pref-rubrique { scroll-margin-top: 16px; }
-.pref-rubrique > .form-section-titre { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+/* Dans les Préférences, le bandeau de titre a le fond du corps (pas de lavis) ; son trait du bas reste. */
+.pref-rubrique > .form-section-titre { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; background: transparent; }
 .pref-rubrique > .form-section-titre .badge { font-size: 0.68rem; padding: 2px 8px; margin-left: 0 !important; }
 .pref-rubrique > .form-section-titre .badge:first-of-type { margin-left: auto !important; }
 

@@ -353,6 +353,7 @@ function SousOnglet({
 function Rubrique({
   id,
   bi,
+  couleur,
   titre,
   badge,
   aide,
@@ -360,6 +361,8 @@ function Rubrique({
 }: {
   id: string;
   bi: string;
+  /** Couleur de l'icône (palette .ico-*), celle du sous-onglet ; sinon celle du bandeau. */
+  couleur?: string;
   titre: string;
   badge?: React.ReactNode;
   aide: string;
@@ -368,7 +371,7 @@ function Rubrique({
   return (
     <section className="form-section pref-rubrique" id={id}>
       <div className="form-section-titre">
-        <Icone bi={bi} taille="1em" classes="me-2" />
+        <Icone bi={bi} taille="1em" classes={couleur ? `me-2 ico-${couleur}` : "me-2"} />
         {titre}
         {badge}
       </div>
@@ -477,13 +480,13 @@ export default async function PreferencesPage() {
             {pluriel(modulesCoupes.length)}
           </span>
         ) : (
-          <span className="badge-status badge-muted">
+          <span className="badge-status badge-success">
             <Icone bi="bi-toggles" taille="1em" />
             Tous les modules actifs
           </span>
         )}
         {p.documentsEnabled ? (
-          <span className="badge-status badge-muted">
+          <span className="badge-status badge-success">
             <Icone bi="bi-paperclip" taille="1em" />
             Pièces jointes : {p.documentMaxMb} Mo
           </span>
@@ -565,6 +568,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secLdap"
                   bi="bi-diagram-3"
+                  couleur="violet"
                   titre="Authentification LDAP / Active Directory"
                   badge={
                     p.ldap.enabled ? <span className="badge bg-success ms-2">Activé</span> : null
@@ -791,6 +795,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secConformity"
                   bi="bi-speedometer2"
+                  couleur="emerald"
                   titre="Conformité globale"
                   badge={
                     <>
@@ -839,6 +844,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secSurveillance"
                   bi="bi-shield-lock"
+                  couleur="orange"
                   titre="Surveillance"
                   badge={
                     p.ctMonitoring ? (
@@ -918,6 +924,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secMail"
                   bi="bi-envelope"
+                  couleur="sky"
                   titre="Messagerie"
                   badge={
                     p.mailConfigured ? (
@@ -1231,6 +1238,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secRecipients"
                   bi="bi-people"
+                  couleur="violet"
                   titre="Destinataires & test d'envoi"
                   badge={p.configured.recipients ? <BadgeOk libelle="Configuré" /> : null}
                   aide="Qui reçoit les alertes et le bilan PDF planifié ; un envoi de test pour vérifier."
@@ -1387,6 +1395,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secThresholds"
                   bi="bi-sliders"
+                  couleur="amber"
                   titre="Seuils d'alerte (jours restants)"
                   badge={p.configured.thresholds ? <BadgeOk libelle="Personnalisé" /> : null}
                   aide="Le nombre de jours restants qui fait passer un statut en Proche, Attention puis Critique."
@@ -1467,6 +1476,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secDb"
                   bi="bi-database"
+                  couleur="indigo"
                   titre="Base de données"
                   badge={
                     p.dbBackups.length ? (
@@ -1607,6 +1617,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secDocuments"
                   bi="bi-paperclip"
+                  couleur="indigo"
                   titre="Pièces jointes"
                   badge={
                     p.documentsEnabled ? (
@@ -1650,7 +1661,10 @@ export default async function PreferencesPage() {
                     </p>
                     <div className="row g-2 align-items-end mb-2" style={{ maxWidth: "22rem" }}>
                       <div className="col-7">
-                        <label className="form-label small mb-1" htmlFor="documentMaxMb">
+                        <label
+                          className="form-label small mb-1 text-nowrap"
+                          htmlFor="documentMaxMb"
+                        >
                           Taille maximale par fichier
                         </label>
                         <div className="input-group input-group-sm">
@@ -1675,6 +1689,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secModules"
                   bi="bi-toggles"
+                  couleur="emerald"
                   titre="Modules"
                   badge={
                     modulesCoupes.length ? (
@@ -1719,6 +1734,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secReferentiels"
                   bi="bi-list-ul"
+                  couleur="amber"
                   titre="Référentiels et services utilisateurs"
                   aide="Les listes de valeurs des formulaires et l'annuaire des services utilisateurs : le crayon ouvre une liste pour la modifier."
                 >
@@ -1760,6 +1776,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secDashboard"
                   bi="bi-grid-1x2"
+                  couleur="indigo"
                   titre="Tableau de bord"
                   badge={
                     p.dashboardCustom ? (
@@ -1792,6 +1809,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secListes"
                   bi="bi-list"
+                  couleur="sky"
                   titre="Listes"
                   badge={
                     p.paginationMemory ? (
@@ -1824,6 +1842,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secFiches"
                   bi="bi-card-text"
+                  couleur="violet"
                   titre="Fiches"
                   badge={
                     p.ficheNavigation ? (
@@ -1856,6 +1875,7 @@ export default async function PreferencesPage() {
                 <Rubrique
                   id="secAppearance"
                   bi="bi-palette"
+                  couleur="rose"
                   titre="Apparence"
                   badge={
                     p.uiPrimaryColor ? (

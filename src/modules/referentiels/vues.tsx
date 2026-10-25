@@ -30,7 +30,7 @@ function Ligne({
 }) {
   return (
     <div className="ref-ligne">
-      <Icone bi={bi} taille="1em" classes="ref-ligne-ico" />
+      <Icone bi={bi} taille="1em" classes="ref-ligne-ico ico-amber" />
       <span className="fw-medium">{libelle}</span>
       <span className="badge bg-secondary">{nombre}</span>
       <span className="flex-grow-1" />
@@ -50,6 +50,7 @@ function Ligne({
 
 function Modale({
   id,
+  bi,
   titre,
   nombre,
   sousTitre,
@@ -57,6 +58,7 @@ function Modale({
   children,
 }: {
   id: string;
+  bi: string;
   titre: string;
   nombre: number;
   sousTitre: string;
@@ -73,25 +75,33 @@ function Modale({
     >
       <div className={`modal-dialog modal-dialog-scrollable${large ? " modal-xl" : " modal-lg"}`}>
         <div className="modal-content">
-          <div className="modal-body">
-            <div className="rf-title" id={`${id}Titre`}>
-              {titre} <span className="text-muted">· {nombre}</span>
+          <section className="form-section pref-rubrique">
+            <div className="form-section-titre" id={`${id}Titre`}>
+              <Icone bi={bi} taille="1em" classes="me-2 ico-amber" />
+              {titre}
+              <span className="badge bg-secondary ms-2">{nombre}</span>
+              <button
+                type="button"
+                className="btn-close ref-modal-close"
+                data-bs-dismiss="modal"
+                aria-label="Fermer"
+              />
             </div>
-            <p className="rf-subtitle">{sousTitre}</p>
-            {children}
-            <div className="rf-foot">
-              <span className="flex-grow-1" />
-              <button type="button" className="btn btn-sm btn-ghost" data-bs-dismiss="modal">
-                Fermer
-              </button>
+            <p className="form-section-aide">{sousTitre}</p>
+            <div className="form-section-corps">
+              {children}
+              <div className="rf-foot">
+                <span className="flex-grow-1" />
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Fermer
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="btn-close ref-modal-close"
-              data-bs-dismiss="modal"
-              aria-label="Fermer"
-            />
-          </div>
+          </section>
         </div>
       </div>
     </div>
@@ -141,6 +151,7 @@ export async function GestionReferentiels({ csrf }: { csrf: string }) {
           <Modale
             key={kind}
             id={`refModal-${kind}`}
+            bi="bi-list-ul"
             titre={label}
             nombre={items.length}
             sousTitre="Les valeurs proposées dans les formulaires. Une valeur retirée reste sur les fiches qui la portent."
@@ -169,7 +180,7 @@ export async function GestionReferentiels({ csrf }: { csrf: string }) {
                   ))}
                 </select>
               ) : null}
-              <button type="submit" className="btn btn-sm btn-ghost rf-ajout">
+              <button type="submit" className="btn btn-sm btn-primary rf-ajout">
                 <Lucide nom="plus" taille={14} /> Ajouter
               </button>
             </form>
@@ -263,6 +274,7 @@ export async function GestionReferentiels({ csrf }: { csrf: string }) {
 
       <Modale
         id="refModal-services"
+        bi="bi-people"
         titre="Services utilisateurs"
         nombre={actifs.length}
         sousTitre="Les directions de la collectivité et leur référent, proposés sur les fiches logiciel. Un service retiré reste sur les fiches qui le nomment."
@@ -299,7 +311,7 @@ export async function GestionReferentiels({ csrf }: { csrf: string }) {
             placeholder="Téléphone"
             aria-label="Téléphone du référent"
           />
-          <button type="submit" className="btn btn-sm btn-ghost rf-ajout">
+          <button type="submit" className="btn btn-sm btn-primary rf-ajout">
             <Lucide nom="plus" taille={14} /> Ajouter
           </button>
         </form>
