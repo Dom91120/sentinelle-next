@@ -6,7 +6,6 @@ import {
   BoutonModal,
   Entete,
   Historique,
-  MenuLien,
   ModalAction,
 } from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
@@ -69,14 +68,6 @@ export default async function AccountDetail({ params }: { params: Promise<{ id: 
             <BoutonModal id="mdp-change" libelle="Mot de passe changé" icone="bi-key" />
           ) : null
         }
-        menu={[
-          <MenuLien
-            key="pdf"
-            url={`/accounts/${id}/pdf`}
-            libelle="Exporter en PDF"
-            icone="bi-file-earmark-pdf"
-          />,
-        ]}
         voisins={voisins}
         base="/accounts"
         bandeau={

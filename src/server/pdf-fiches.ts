@@ -1,7 +1,7 @@
-/** Les trois fiches exportables en PDF : compte, domaine, test (port de app/pdf_export.py, sans le certificat). */
+/** Les fiches exportables en PDF : domaine et test (port de app/pdf_export.py, sans le compte ni le certificat). */
 import { dateCourte } from "@/lib/libelles";
 import { prisma } from "@/server/db";
-import { chargerComptes, chargerDomaines, chargerTests } from "@/server/donnees";
+import { chargerDomaines, chargerTests } from "@/server/donnees";
 import type { CurrentUser } from "@/server/guards";
 import { ApiAuthError } from "@/server/guards";
 import { construirePdfFiche } from "@/server/pdf-entite";
@@ -10,35 +10,6 @@ const tiret = (v: string | null | undefined) => v || "—";
 const date = (d: Date | null | undefined) => (d ? dateCourte(d) : "—");
 
 export type FichePdf = { octets: Buffer; filename: string } | null;
-
-export async function pdfCompte(user: CurrentUser, id: number): Promise<FichePdf> {
-  if (!user.canView("accounts")) throw new ApiAuthError(403, "Droits insuffisants.");
-  const account = (await chargerComptes()).find((a) => a.id === id) ?? null;
-  if (!account) return null;
-  const histories = await prisma.accountHistory.findMany({
-    where: { accountId: id },
-    orderBy: { performedAt: "desc" },
-    take: 20,
-  });
-  const rows: [string, string][] = [
-    ["Service", account.serviceName],
-    ["Utilisateur", account.username],
-    ["URL", tiret(account.url)],
-    ["Dernier changement", date(account.lastPasswordChange)],
-    ["Prochain changement", date(account.nextPasswordChange)],
-    ["Description", tiret(account.description)],
-  ];
-  return {
-    octets: await construirePdfFiche(
-      account.serviceName,
-      account.username,
-      rows,
-      account.status,
-      histories,
-    ),
-    filename: `compte-${account.id}.pdf`,
-  };
-}
 
 export async function pdfDomaine(user: CurrentUser, id: number): Promise<FichePdf> {
   if (!user.canView("domains")) throw new ApiAuthError(403, "Droits insuffisants.");

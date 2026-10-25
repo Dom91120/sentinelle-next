@@ -240,7 +240,7 @@ export function Synthese({ account }: { account: AccountComplet }) {
   return (
     <div
       className="data-card mb-3 synthese synthese--cases"
-      style={{ "--lu-intitule": "80px" } as React.CSSProperties}
+      style={{ "--lu-intitule": "75px" } as React.CSSProperties}
     >
       {/* Les rattachements (logiciel, équipement, fournisseur) sont une ligne de la
           rubrique Compte, pas une rubrique à part. */}
