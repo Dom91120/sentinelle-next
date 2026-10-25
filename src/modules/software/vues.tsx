@@ -494,7 +494,8 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
           {gdpr ? (
             <Carte titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
               <div className="grille grille-rgpd">
-                <div className="d-flex align-items-end">
+                <div>
+                  <span className="form-label small mb-1 d-block">RGPD</span>
                   <div className="form-check case-rgpd">
                     <input
                       type="checkbox"

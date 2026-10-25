@@ -2460,7 +2460,7 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
    Contacts : les quatre référents et courriels, métier puis technique, à largeurs égales. */
 .logiciel-saisie .grille-technique { grid-template-columns: 1fr 1fr 1fr auto; align-items: start; }
 .logiciel-saisie .grille-contacts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.logiciel-saisie .grille-rgpd { grid-template-columns: 1fr 1.3fr 1fr 1fr; }
+.logiciel-saisie .grille-rgpd { grid-template-columns: auto 1.3fr 1fr 1fr; }
 .logiciel-saisie .grille-large { grid-column: span 2; }
 .logiciel-saisie .grille > div { min-width: 0; }
 .logiciel-saisie .form-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
@@ -2468,7 +2468,10 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
    et son libellé centrés dedans. */
 .logiciel-saisie .case-rgpd { display: flex; align-items: center; min-height: 26px; margin: 0; padding-left: 0; }
 .logiciel-saisie .case-rgpd .form-check-input { float: none; margin: 0 8px 0 0; flex: 0 0 auto; }
-.logiciel-saisie .case-rgpd .form-check-label { line-height: 1.25; }
+.logiciel-saisie .case-rgpd .form-check-label { line-height: 1.25; white-space: nowrap; }
+/* La cellule de la case a sa largeur de contenu : le libellé tient sur une ligne, l'intitulé
+   « RGPD » reste au niveau des autres. */
+.logiciel-saisie .grille-rgpd > div:has(> .case-rgpd) { min-width: max-content; }
 /* Une liste remplit sa cellule mais ne descend jamais sous la largeur de son option la
    plus longue (flèche comprise) : la cellule s'élargit plutôt que de couper le texte. */
 .logiciel-saisie .champ-ajuste { width: 100%; min-width: max-content; padding-right: 2rem; }
