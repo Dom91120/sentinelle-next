@@ -77,6 +77,7 @@ function Sel({
   id,
   petit = true,
   disabled,
+  classes = "",
 }: {
   name: string;
   labels: Record<string, string>;
@@ -85,12 +86,13 @@ function Sel({
   id?: string;
   petit?: boolean;
   disabled?: boolean;
+  classes?: string;
 }) {
   return (
     <select
       name={name}
       id={id}
-      className={petit ? "form-select form-select-sm" : "form-select"}
+      className={`${petit ? "form-select form-select-sm" : "form-select"}${classes ? ` ${classes}` : ""}`}
       defaultValue={current ?? ""}
       disabled={disabled}
     >
@@ -339,76 +341,6 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                   defaultValue={item?.usersMax ?? ""}
                 />
               </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swRefMetier">
-                  Référent métier
-                </label>
-                <input
-                  type="text"
-                  name="responsible"
-                  id="swRefMetier"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.responsible)}
-                  data-ad-search=""
-                  data-ad-email="responsible_email"
-                  placeholder="Rechercher dans l'annuaire…"
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swMailMetier">
-                  Courriel métier
-                </label>
-                <input
-                  type="email"
-                  name="responsible_email"
-                  id="swMailMetier"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.responsibleEmail)}
-                />
-              </div>
-            </div>
-            <div className="grille grille-technique">
-              <div>
-                <label className="form-label small mb-1" htmlFor="swHebergement">
-                  Hébergement
-                </label>
-                <Sel
-                  name="hosting"
-                  labels={HOSTING_LABELS}
-                  current={item ? item.hosting : "on_premise"}
-                  id="swHebergement"
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swTechno">
-                  Technologie
-                </label>
-                <select
-                  name="technology_id"
-                  id="swTechno"
-                  className="form-select form-select-sm"
-                  defaultValue={item?.technologyId ?? ""}
-                >
-                  <option value="">— non renseignée —</option>
-                  {technologies.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swSource">
-                  Type licence
-                </label>
-                <Sel
-                  name="source_type"
-                  labels={SOURCE_TYPE_LABELS}
-                  current={item ? item.sourceType : "proprietaire"}
-                  id="swSource"
-                />
-              </div>
-
               <div className="d-flex align-items-end gap-3">
                 <div className="flex-grow-1 min-w-0">
                   <label className="form-label small mb-1" htmlFor="swAuth">
@@ -447,8 +379,85 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                   type="date"
                   name="service_date"
                   id="swMiseEnService"
-                  className="form-control form-control-sm"
+                  className="form-control form-control-sm champ-date"
                   defaultValue={item?.serviceDate ? isoDate(item.serviceDate) : ""}
+                />
+              </div>
+            </div>
+            <div className="grille grille-technique">
+              <div>
+                <label className="form-label small mb-1" htmlFor="swHebergement">
+                  Hébergement
+                </label>
+                <Sel
+                  name="hosting"
+                  labels={HOSTING_LABELS}
+                  current={item ? item.hosting : "on_premise"}
+                  id="swHebergement"
+                  classes="champ-ajuste"
+                />
+              </div>
+              <div>
+                <label className="form-label small mb-1" htmlFor="swTechno">
+                  Technologie
+                </label>
+                <select
+                  name="technology_id"
+                  id="swTechno"
+                  className="form-select form-select-sm champ-ajuste"
+                  defaultValue={item?.technologyId ?? ""}
+                >
+                  <option value="">— non renseignée —</option>
+                  {technologies.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="form-label small mb-1" htmlFor="swSource">
+                  Type licence
+                </label>
+                <Sel
+                  name="source_type"
+                  labels={SOURCE_TYPE_LABELS}
+                  current={item ? item.sourceType : "proprietaire"}
+                  id="swSource"
+                  classes="champ-ajuste"
+                />
+              </div>
+              <div className="grille-contenu">
+                <span className="form-label small mb-1 d-block">Nature</span>
+                <Nature item={item} />
+              </div>
+            </div>
+            <div className="grille grille-contacts">
+              <div>
+                <label className="form-label small mb-1" htmlFor="swRefMetier">
+                  Référent métier
+                </label>
+                <input
+                  type="text"
+                  name="responsible"
+                  id="swRefMetier"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.responsible)}
+                  data-ad-search=""
+                  data-ad-email="responsible_email"
+                  placeholder="Rechercher dans l'annuaire…"
+                />
+              </div>
+              <div>
+                <label className="form-label small mb-1" htmlFor="swMailMetier">
+                  Courriel réf. métier
+                </label>
+                <input
+                  type="email"
+                  name="responsible_email"
+                  id="swMailMetier"
+                  className="form-control form-control-sm"
+                  defaultValue={v(item?.responsibleEmail)}
                 />
               </div>
               <div>
@@ -467,13 +476,9 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 />
               </div>
 
-              <div className="grille-large">
-                <span className="form-label small mb-1 d-block">Nature</span>
-                <Nature item={item} />
-              </div>
               <div>
                 <label className="form-label small mb-1" htmlFor="swMailTech">
-                  Courriel technique
+                  Courriel réf. technique
                 </label>
                 <input
                   type="email"
@@ -484,11 +489,13 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                 />
               </div>
             </div>
+          </Carte>
 
-            {gdpr ? (
+          {gdpr ? (
+            <Carte titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
               <div className="grille grille-rgpd">
                 <div className="d-flex align-items-end">
-                  <div className="form-check mb-1">
+                  <div className="form-check case-rgpd">
                     <input
                       type="checkbox"
                       className="form-check-input"
@@ -539,8 +546,8 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
                   />
                 </div>
               </div>
-            ) : null}
-          </Carte>
+            </Carte>
+          ) : null}
 
           <Carte titre="Descriptif" bi="bi-journal-text" couleur="slate">
             <label className="form-label small mb-1" htmlFor="swDescriptif">
@@ -586,7 +593,7 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
   return (
     <div
       className="data-card mb-3 synthese synthese--cases"
-      style={{ "--lu-intitule": "80px" } as React.CSSProperties}
+      style={{ "--lu-intitule": "70px" } as React.CSSProperties}
     >
       <Rubrique titre="Logiciel" bi="bi-window-stack" couleur="indigo">
         <Rangee>
@@ -639,7 +646,7 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
           </LuBloc>
         </Rangee>
         <Rangee>
-          <Lu label="Hébergement" valeur={hostingLabel(item)} />
+          <Lu label="Héberg." valeur={hostingLabel(item)} titre="Hébergement" />
           <Lu label="Technologie" valeur={item.technology ? item.technology.label : null} />
           <Lu label="Type licence" valeur={sourceTypeLabel(item)} />
         </Rangee>
@@ -658,8 +665,9 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
             label="Mise en serv."
             valeur={item.serviceDate ? dateCourte(item.serviceDate) : null}
             titre="Mise en service"
+            facultatif
           />
-          <Lu label="Réf. technique" valeur={item.techResponsible} titre="Référent technique" />
+          <Lu label="Réf. tech." valeur={item.techResponsible} titre="Référent technique" />
         </Rangee>
         <Rangee>
           {/* Les natures en texte, comme les autres valeurs (pas d'étiquette à icône). */}
@@ -676,7 +684,7 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
                 .join(" · ") || null
             }
           />
-          <LuBloc label="Mail technique" titre="Courriel du référent technique">
+          <LuBloc label="Mail tech." titre="Courriel du référent technique">
             {item.techResponsibleEmail ? (
               <a href={`mailto:${item.techResponsibleEmail}`} className="text-truncate d-block">
                 {item.techResponsibleEmail}
@@ -684,39 +692,39 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
             ) : null}
           </LuBloc>
         </Rangee>
-
-        {gdpr ? (
-          <>
-            <Rangee>
-              <Lu
-                label="RGPD"
-                valeur={item.gdprPersonalData ? "Traitées" : "Aucune donnée personnelle"}
-                pleine={!item.gdprPersonalData}
-                titre="Données personnelles"
-              />
-              {item.gdprPersonalData ? (
-                <>
-                  <Lu label="Catégorie" valeur={item.gdprCategories} />
-                  <Lu label="Réf. registre" valeur={item.gdprRegistryRef} />
-                  <Lu label="Localisation" valeur={gdprLocationLabel(item)} />
-                </>
-              ) : null}
-            </Rangee>
-            {item.gdprPersonalData && sup && (sup.dpoContact || sup.dpoEmail) ? (
-              <Rangee>
-                <Lu label="DPO éditeur" valeur={sup.dpoContact} titre="DPO de l'éditeur" />
-                <LuBloc label="Courriel DPO">
-                  {sup.dpoEmail ? (
-                    <a href={`mailto:${sup.dpoEmail}`} className="text-truncate d-block">
-                      {sup.dpoEmail}
-                    </a>
-                  ) : null}
-                </LuBloc>
-              </Rangee>
-            ) : null}
-          </>
-        ) : null}
       </Rubrique>
+
+      {gdpr ? (
+        <Rubrique titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
+          <Rangee>
+            <Lu
+              label="RGPD"
+              valeur={item.gdprPersonalData ? "Traitées" : "Aucune donnée personnelle"}
+              pleine={!item.gdprPersonalData}
+              titre="Données personnelles"
+            />
+            {item.gdprPersonalData ? (
+              <>
+                <Lu label="Catégorie" valeur={item.gdprCategories} />
+                <Lu label="Réf. registre" valeur={item.gdprRegistryRef} />
+                <Lu label="Localisation" valeur={gdprLocationLabel(item)} />
+              </>
+            ) : null}
+          </Rangee>
+          {item.gdprPersonalData && sup && (sup.dpoContact || sup.dpoEmail) ? (
+            <Rangee>
+              <Lu label="DPO éditeur" valeur={sup.dpoContact} titre="DPO de l'éditeur" />
+              <LuBloc label="Courriel DPO">
+                {sup.dpoEmail ? (
+                  <a href={`mailto:${sup.dpoEmail}`} className="text-truncate d-block">
+                    {sup.dpoEmail}
+                  </a>
+                ) : null}
+              </LuBloc>
+            </Rangee>
+          ) : null}
+        </Rubrique>
+      ) : null}
 
       <Rubrique titre="Descriptif" bi="bi-journal-text" couleur="slate">
         <Rangee>
