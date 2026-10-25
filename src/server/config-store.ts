@@ -311,8 +311,15 @@ export function serialize(key: string, value: unknown): string {
 // Cache en mémoire de processus : rechargé à la première lecture, invalidé à
 // chaque écriture, et au plus toutes les 60 s (plusieurs instances).
 // En mode test (SENTINELLE_TEST), aucun cache : chaque écriture se voit à la requête suivante.
+// Il vit sur globalThis et non dans une variable de module : en développement, la page
+// et la route qui écrit peuvent charger deux exemplaires de ce module, et une variable
+// de module n'était invalidée que dans l'un des deux — la page relisait l'ancienne
+// valeur jusqu'à 60 s (la couleur de l'interface « ne changeait pas »).
 const CACHE_TTL_MS = process.env.SENTINELLE_TEST ? 0 : 60_000;
-let cache: { at: number; settings: AppSettings } | null = null;
+type CacheReglages = { at: number; settings: AppSettings } | null;
+const partage = globalThis as unknown as { __sentinelleReglages?: { cache: CacheReglages } };
+partage.__sentinelleReglages ??= { cache: null };
+const memo = partage.__sentinelleReglages;
 
 /**
  * En mode test (SENTINELLE_TEST), les réglages « environnement seul » peuvent aussi
@@ -360,15 +367,16 @@ async function load(): Promise<AppSettings> {
 
 /** La configuration vivante (base + repli env), mémoïsée 60 s. */
 export async function getSettings(): Promise<AppSettings> {
+  const cache = memo.cache;
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) return cache.settings;
   const settings = await load();
-  cache = { at: Date.now(), settings };
+  memo.cache = { at: Date.now(), settings };
   return settings;
 }
 
 /** Force la relecture au prochain appel. */
 export function invalidateSettings(): void {
-  cache = null;
+  memo.cache = null;
 }
 
 /** Persiste un dict {CLÉ: valeur-chaîne} en base (chiffre les secrets). */

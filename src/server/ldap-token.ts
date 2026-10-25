@@ -11,7 +11,12 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import { LDAP_TOKEN_PREFIX } from "@/server/password";
 
 const TTL_MS = 30_000;
-const jetons = new Map<string, { userId: string; expires: number }>();
+// Sur globalThis : le jeton est émis par la connexion et consommé par l'authentification,
+// deux routes qui peuvent tenir chacune leur exemplaire de ce module en développement.
+type Jetons = Map<string, { userId: string; expires: number }>;
+const partage = globalThis as unknown as { __sentinelleLdapJetons?: Jetons };
+partage.__sentinelleLdapJetons ??= new Map();
+const jetons: Jetons = partage.__sentinelleLdapJetons;
 
 function purge(): void {
   const now = Date.now();

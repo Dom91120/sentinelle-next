@@ -11,7 +11,11 @@ import { activeSnoozeKeys } from "@/server/snooze";
 
 const TTL_MS = process.env.SENTINELLE_TEST ? 0 : 60_000;
 type Cache = { at: number; danger: Record<string, number>; trash: Record<string, number> };
-let cache: Cache | null = null;
+// Sur globalThis, pour la même raison que le cache des réglages (config-store) : la route
+// qui invalide et la page qui lit peuvent tenir deux exemplaires de ce module.
+const partage = globalThis as unknown as { __sentinelleNav?: { cache: Cache | null } };
+partage.__sentinelleNav ??= { cache: null };
+const memo = partage.__sentinelleNav;
 
 export const TRASH_CATEGORIES = [
   "accounts",
@@ -70,21 +74,21 @@ async function calculer(): Promise<Cache> {
 }
 
 export function invalidateNavCounts(): void {
-  cache = null;
+  memo.cache = null;
 }
 
 /** `nav_counts` : compteurs danger par catégorie + corbeille (selon les droits de l'utilisateur). */
 export async function navCounts(user: CurrentUser): Promise<Record<string, number>> {
-  if (!cache || Date.now() - cache.at > TTL_MS) {
+  if (!memo.cache || Date.now() - memo.cache.at > TTL_MS) {
     try {
-      cache = await calculer();
+      memo.cache = await calculer();
     } catch (e) {
       console.error("[nav] compteurs impossibles :", e);
       return {};
     }
   }
-  const counts: Record<string, number> = { ...cache.danger };
-  counts.trash = Object.entries(cache.trash).reduce(
+  const counts: Record<string, number> = { ...memo.cache.danger };
+  counts.trash = Object.entries(memo.cache.trash).reduce(
     (n, [cat, c]) => (user.canEdit(cat) ? n + c : n),
     0,
   );
