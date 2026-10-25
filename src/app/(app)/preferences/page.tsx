@@ -1720,7 +1720,7 @@ export default async function PreferencesPage() {
                   id="secReferentiels"
                   bi="bi-list-ul"
                   titre="Référentiels et services utilisateurs"
-                  aide="Les listes de valeurs des formulaires et l'annuaire des services utilisateurs : dépliez une liste pour la modifier."
+                  aide="Les listes de valeurs des formulaires et l'annuaire des services utilisateurs : le crayon ouvre une liste pour la modifier."
                 >
                   <p className="text-muted small mb-3">
                     Seuls les libellés <strong>descriptifs</strong> se règlent ici : le cycle de vie

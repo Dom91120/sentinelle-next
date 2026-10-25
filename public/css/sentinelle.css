@@ -2314,15 +2314,14 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .pref-sous-onglets .som-etat { margin-left: 2px; }
 /* Les icônes des deux barres en couleur, celle de leur famille (.ico-*). */
 .pref-page .fiche-onglets .nav-link > svg.lucide[class*="ico-"] { color: rgb(var(--ico-rgb)); }
-/* Référentiels dans les Préférences : une ligne par liste (nom, compteur, aperçu,
-   crayon) ; la gestion s'ouvre dans une modale, les valeurs en puces avec leur type
-   et leur croix, puis le champ d'ajout. */
-.ref-lignes { display: flex; flex-direction: column; gap: 4px; }
+/* Référentiels dans les Préférences : une ligne par liste (nom, compteur, crayon), sur
+   deux colonnes ; la gestion s'ouvre dans une modale. */
+.ref-lignes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 767.98px) { .ref-lignes { grid-template-columns: 1fr; } }
 .ref-ligne { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 4px 6px 4px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.875rem; }
 .ref-ligne:hover { background: var(--inset); }
 .ref-ligne > .fw-medium, .ref-ligne > .badge { flex-shrink: 0; white-space: nowrap; }
 .ref-ligne-ico { flex-shrink: 0; color: var(--faint); }
-.ref-apercu { flex: 1 1 auto; min-width: 0; }
 .ref-ligne .btn-icone { flex-shrink: 0; }
 /* Dans la modale, le tableau des éditeurs de culturesa-next : barre d'outils avec
    l'ajout, en-têtes de colonnes, une ligne par valeur (grille), champs « fantômes »

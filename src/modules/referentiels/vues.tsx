@@ -1,6 +1,6 @@
 /**
  * Référentiels et services utilisateurs, gérés depuis l'onglet Préférences (port de
- * referentials/index.html). Dans l'onglet, une ligne par liste (nom, compteur, aperçu)
+ * referentials/index.html). Dans l'onglet, une ligne par liste (nom, compteur), sur deux colonnes,
  * et un crayon qui ouvre sa modale ; dans la modale, le tableau des éditeurs de
  * culturesa-next : une barre d'outils avec l'ajout, des en-têtes de colonnes, une
  * ligne par valeur avec ses champs à même la ligne, inertes tant que le crayon n'a pas
@@ -16,26 +16,24 @@ function Csrf({ csrf }: { csrf: string }) {
   return <input type="hidden" name="csrf_token" value={csrf} />;
 }
 
-/** La ligne d'une liste dans l'onglet : son nom, son compteur, un aperçu, le crayon qui ouvre la modale. */
+/** La ligne d'une liste dans l'onglet : son nom, son compteur, le crayon qui ouvre la modale. */
 function Ligne({
   id,
   bi,
   libelle,
   nombre,
-  apercu,
 }: {
   id: string;
   bi: string;
   libelle: string;
   nombre: number;
-  apercu: string;
 }) {
   return (
     <div className="ref-ligne">
       <Icone bi={bi} taille="1em" classes="ref-ligne-ico" />
       <span className="fw-medium">{libelle}</span>
       <span className="badge bg-secondary">{nombre}</span>
-      <span className="ref-apercu text-muted small text-truncate">{apercu || "Liste vide"}</span>
+      <span className="flex-grow-1" />
       <button
         type="button"
         className="btn btn-sm btn-ghost btn-icone"
@@ -125,7 +123,6 @@ export async function GestionReferentiels({ csrf }: { csrf: string }) {
           bi="bi-list-ul"
           libelle={label}
           nombre={listes[kind].length}
-          apercu={listes[kind].map((i) => i.label).join(" · ")}
         />
       ))}
       <Ligne
@@ -133,7 +130,6 @@ export async function GestionReferentiels({ csrf }: { csrf: string }) {
         bi="bi-people"
         libelle="Services utilisateurs"
         nombre={actifs.length}
-        apercu={actifs.map((s) => s.name).join(" · ")}
       />
 
       {Object.entries(REFERENTIAL_KINDS).map(([kind, label]) => {
