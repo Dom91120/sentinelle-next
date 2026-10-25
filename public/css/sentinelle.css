@@ -2303,15 +2303,20 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .pref-etat { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
 .pref-etat .badge-status { font-size: 0.75rem; padding: 3px 10px; gap: 6px; }
 .pref-etat .badge-status :is(i, svg.lucide) { font-size: 0.8rem; }
-.pref-page .som-famille { margin: 14px 0 4px; padding: 0 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: normal; text-transform: uppercase; color: var(--faint); }
-.pref-page .som-famille:first-child { margin-top: 0; }
-.pref-page .form-sommaire-lien :is(i, svg.lucide) { width: 16px; text-align: center; color: var(--faint); font-size: 0.9rem; }
-.pref-page .form-sommaire-lien.active :is(i, svg.lucide) { color: var(--primary); }
+/* Préférences : les familles en onglets, les rubriques en sous-onglets, les
+   deux dans la barre des fiches ; les sous-onglets alignés à droite, une
+   rubrique à la fois. */
+.pref-page { max-width: 1180px; }
+/* Voilée à l'arrivée avec une ancre, jusqu'à ce que le script ouvre la bonne rubrique. */
+.prefs-a-rouvrir .pref-page { visibility: hidden; }
+.pref-familles { margin-bottom: 14px; }
+.pref-sous-onglets { justify-content: flex-end; margin-bottom: 14px; }
+.pref-sous-onglets .som-etat { margin-left: 2px; }
+/* Les icônes des deux barres en couleur, celle de leur famille (.ico-*). */
+.pref-page .fiche-onglets .nav-link > svg.lucide[class*="ico-"] { color: rgb(var(--ico-rgb)); }
 .som-etat { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); opacity: 0.5; flex: 0 0 auto; }
 .som-etat.ok { background: var(--success); opacity: 1; }
 .som-etat.ko { background: var(--danger); opacity: 1; }
-.form-famille { margin: 0 0 10px; font-size: 0.72rem; font-weight: 700; letter-spacing: normal; text-transform: uppercase; color: var(--muted); }
-.form-section + .form-famille { margin-top: 28px; }
 .pref-rubrique { scroll-margin-top: 16px; }
 .pref-rubrique > .form-section-titre { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .pref-rubrique > .form-section-titre .badge { font-size: 0.68rem; padding: 2px 8px; margin-left: 0 !important; }
