@@ -20,14 +20,7 @@ export default async function InventoryEdit({ params }: { params: Promise<{ id: 
   return (
     <>
       <EnteteForm titre="Modifier un équipement" retour={retour} />
-      <FormCorps
-        item={item}
-        {...ctx}
-        user={page.user}
-        csrf={page.csrf}
-        nonce={page.nonce}
-        retour={retour}
-      />
+      <FormCorps item={item} {...ctx} user={page.user} csrf={page.csrf} retour={retour} />
     </>
   );
 }

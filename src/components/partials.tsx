@@ -4,10 +4,11 @@
  */
 
 import { Icone } from "@/components/icones";
-import { QaAddLink, QaModalEquipment } from "@/components/quick-add";
+import { QaAddLink } from "@/components/quick-add";
 import type { AlertSnooze, Equipment } from "@/generated/prisma/client";
 import { ENVIRONMENT_LABELS, EQUIPMENT_KIND_LABELS, permissionCategory } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
+import { QaModalEquipment } from "@/modules/inventory/vues";
 import type { CurrentUser } from "@/server/guards";
 
 /** `_snooze_card.html` — le report actif est passé par la page (getActiveSnooze). */

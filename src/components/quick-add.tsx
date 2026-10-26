@@ -1,6 +1,5 @@
 /** Composant « ajout rapide » (port de _quick_add.html). Cf. public/js/quick-add.js. */
 import { Icone } from "@/components/icones";
-import { EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 
 export function QaButton({
   modalId,
@@ -51,7 +50,8 @@ export function QaAddLink({
   );
 }
 
-function Modal({
+/** La fenêtre d'un ajout rapide : en-tête, corps (jeton, champs, erreur), pied Annuler / Créer. */
+export function QaModal({
   id,
   endpoint,
   titre,
@@ -59,7 +59,9 @@ function Modal({
   csrf,
   children,
   footer,
-  large,
+  taille,
+  classes,
+  libelle = "Créer",
 }: {
   id: string;
   endpoint: string;
@@ -68,17 +70,23 @@ function Modal({
   csrf: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  large?: boolean;
+  /** Largeur Bootstrap (lg, xl) ; une fenêtre xl défile dans son corps. */
+  taille?: "lg" | "xl";
+  classes?: string;
+  /** Le libellé du bouton d'enregistrement. */
+  libelle?: string;
 }) {
+  const dialogue =
+    taille === "xl" ? " modal-xl modal-dialog-scrollable" : taille === "lg" ? " modal-lg" : "";
   return (
     <div
-      className="modal fade"
+      className={`modal fade${classes ? ` ${classes}` : ""}`}
       id={id}
       tabIndex={-1}
       aria-hidden="true"
       data-qa-endpoint={endpoint}
     >
-      <div className={`modal-dialog${large ? " modal-lg" : ""}`}>
+      <div className={`modal-dialog${dialogue}`}>
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">
@@ -105,7 +113,7 @@ function Modal({
                 </button>
                 <button type="button" className="btn btn-primary btn-sm" data-qa-save>
                   <Icone bi="bi-check-lg" taille="1em" classes="me-1" />
-                  Créer
+                  {libelle}
                 </button>
               </>
             )}
@@ -118,7 +126,7 @@ function Modal({
 
 export function QaModalSupplier({ csrf }: { csrf: string }) {
   return (
-    <Modal
+    <QaModal
       id="qaModalSupplier"
       endpoint="/suppliers/quick-create"
       titre="Nouveau fournisseur"
@@ -152,13 +160,13 @@ export function QaModalSupplier({ csrf }: { csrf: string }) {
           <input type="email" data-qa-field="email" className="form-control form-control-sm" />
         </div>
       </div>
-    </Modal>
+    </QaModal>
   );
 }
 
 export function QaModalSoftware({ csrf }: { csrf: string }) {
   return (
-    <Modal
+    <QaModal
       id="qaModalSoftware"
       endpoint="/inventory/logiciels/quick-create"
       titre="Nouvelle application"
@@ -178,58 +186,20 @@ export function QaModalSoftware({ csrf }: { csrf: string }) {
       <div className="form-text">
         Détails (éditeur, serveurs, contrat…) à compléter ensuite sur la fiche du logiciel.
       </div>
-    </Modal>
-  );
-}
-
-export function QaModalEquipment({ csrf }: { csrf: string }) {
-  return (
-    <Modal
-      id="qaModalEquipment"
-      endpoint="/inventory/quick-create"
-      titre="Nouvel équipement"
-      icone="bi-hdd-stack"
-      csrf={csrf}
-    >
-      <div className="row g-2">
-        <div className="col-md-7">
-          <label className="form-label small">Nom *</label>
-          <input
-            type="text"
-            data-qa-field="name"
-            data-qa-required
-            className="form-control form-control-sm"
-            placeholder="ex: SRV-APP01"
-          />
-        </div>
-        <div className="col-md-5">
-          <label className="form-label small">Type</label>
-          <select data-qa-field="kind" className="form-select form-select-sm">
-            {Object.entries(EQUIPMENT_KIND_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div className="form-text">
-        Détails (OS, réseau, garantie…) à compléter ensuite sur la fiche.
-      </div>
-    </Modal>
+    </QaModal>
   );
 }
 
 /** La modale « Nouveau serveur » de SoftInventory. */
 export function QaModalServer({ csrf }: { csrf: string }) {
   return (
-    <Modal
+    <QaModal
       id="qaModalServer"
       endpoint="/inventory/quick-create"
       titre="Nouveau serveur"
       icone="bi-hdd-stack"
       csrf={csrf}
-      large
+      taille="lg"
       footer={
         <>
           <button type="button" className="btn btn-primary btn-sm" data-qa-save>
@@ -302,6 +272,6 @@ export function QaModalServer({ csrf }: { csrf: string }) {
           />
         </div>
       </div>
-    </Modal>
+    </QaModal>
   );
 }

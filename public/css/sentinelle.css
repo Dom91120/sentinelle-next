@@ -3624,3 +3624,10 @@ div:has(> div > .page-title) .page-subtitle { margin-top: -1px; font-size: 0.74r
   .fiche-entete:has(> .fiche-entete-bandeau) > .fiche-entete-bandeau { justify-self: center; margin-left: 0; margin-right: 0; }
   .fiche-entete:has(> .fiche-entete-bandeau) > .fiche-actions { justify-self: end; }
 }
+
+/* La modale « Nouvel équipement » de l'ajout rapide : le formulaire complet d'une fiche
+   (rubriques Matériel / Notes), dans une fenêtre large qui défile ; la carte des champs
+   colle aux bords du corps, l'erreur éventuelle reste visible sous elle. */
+.qa-modal-fiche .modal-body { padding: 12px 16px; background: var(--page); }
+.qa-modal-fiche .modal-body > .fiche-saisie > .data-card { margin-bottom: 0 !important; }
+.qa-modal-fiche [data-qa-error]:not(.d-none) { margin-top: 10px !important; }

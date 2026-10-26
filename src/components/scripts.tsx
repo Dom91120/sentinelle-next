@@ -36,6 +36,7 @@ export function ScriptsPage({ nonce, extra }: { nonce?: string; extra?: React.Re
     "/js/dom-actions.js",
     "/js/theme.js",
     "/js/quick-add.js",
+    "/js/kind-sections.js",
     "/js/onglets.js",
     "/js/directory-autocomplete.js",
     "/js/filtres-colonnes.js",

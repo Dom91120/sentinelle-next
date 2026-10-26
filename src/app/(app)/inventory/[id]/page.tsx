@@ -158,7 +158,6 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
                 {...ctx}
                 user={user}
                 csrf={csrf}
-                nonce={nonce}
                 retour={`/inventory/${id}#details`}
                 actionForm={`/inventory/${id}/edit`}
               />

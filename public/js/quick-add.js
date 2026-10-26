@@ -20,6 +20,21 @@
         var box = modal.querySelector('[data-qa-error]');
         if (box) { box.textContent = msg || ''; box.classList.toggle('d-none', !msg); }
     }
+    function isCheck(inp) {
+        return inp.type === 'checkbox' || inp.type === 'radio';
+    }
+    // Apres creation : chaque champ retrouve sa valeur initiale (celle du HTML), et le
+    // select du type previent les blocs par type (kind-sections.js) qu'il a change.
+    function reset(modal) {
+        fields(modal).forEach(function (inp) {
+            if (isCheck(inp)) inp.checked = inp.defaultChecked;
+            else if (inp.tagName === 'SELECT') {
+                var i = Array.prototype.findIndex.call(inp.options, function (o) { return o.defaultSelected; });
+                inp.selectedIndex = i === -1 ? 0 : i;
+            } else inp.value = inp.defaultValue || '';
+            if (inp.tagName === 'SELECT') inp.dispatchEvent(new Event('change', {bubbles: true}));
+        });
+    }
 
     // Ouverture : retenir le select cible sur le modal concerne.
     document.addEventListener('click', function (e) {
@@ -48,8 +63,10 @@
 
         var missing = false;
         fields(modal).forEach(function (inp) {
+            // Une case non cochee ne s'envoie pas, comme dans un formulaire.
+            if (isCheck(inp) && !inp.checked) return;
             var v = (inp.value || '').trim();
-            if (inp.hasAttribute('data-qa-required') && !v) missing = true;
+            if ((inp.hasAttribute('data-qa-required') || inp.required) && !v) missing = true;
             data.append(inp.getAttribute('data-qa-field'), v);
         });
         if (missing) { setError(modal, 'Veuillez remplir les champs obligatoires.'); return; }
@@ -75,7 +92,7 @@
             }
             var inst = window.bootstrap && bootstrap.Modal.getInstance(modal);
             if (inst) inst.hide();
-            fields(modal).forEach(function (inp) { inp.value = ''; });
+            reset(modal);
         }).catch(function () {
             btn.disabled = false; setError(modal, 'Erreur réseau.');
         });

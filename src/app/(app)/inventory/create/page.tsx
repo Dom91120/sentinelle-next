@@ -18,14 +18,7 @@ export default async function InventoryCreate({
   return (
     <>
       <EnteteForm titre="Ajouter un équipement" retour="/inventory" />
-      <FormCorps
-        item={null}
-        {...ctx}
-        user={page.user}
-        csrf={page.csrf}
-        nonce={page.nonce}
-        retour="/inventory"
-      />
+      <FormCorps item={null} {...ctx} user={page.user} csrf={page.csrf} retour="/inventory" />
     </>
   );
 }
