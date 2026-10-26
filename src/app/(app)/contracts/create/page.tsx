@@ -7,25 +7,32 @@ import { contexteModule } from "@/server/module";
 
 export const metadata = { title: "Ajouter un contrat - Sentinelle" };
 
-/** contracts/form.html (création ; ?software_id= coche ce logiciel dans les éléments couverts) */
+/**
+ * contracts/form.html (création ; ?software_id= coche ce logiciel dans les éléments couverts,
+ * ?supplier_id= présélectionne ce fournisseur et ramène à sa fiche).
+ */
 export default async function ContractCreate({
   searchParams,
 }: {
-  searchParams: Promise<{ software_id?: string }>;
+  searchParams: Promise<{ software_id?: string; supplier_id?: string }>;
 }) {
   const page = await contexteModule("contracts");
   await requireEdit("contracts");
-  const sid = parseInt_((await searchParams).software_id, null);
+  const p = await searchParams;
+  const sid = parseInt_(p.software_id, null);
+  const fid = parseInt_(p.supplier_id, null);
   const ctx = await formContext(sid ? [sid] : []);
+  const retour = fid ? `/suppliers/${fid}#contrats` : "/contracts";
   return (
     <>
-      <EnteteForm titre="Ajouter un contrat" retour="/contracts" />
+      <EnteteForm titre="Ajouter un contrat" retour={retour} />
       <FormulaireContrat
         contract={null}
         ctx={ctx}
         couverts={{ software: [], equipment: [] }}
         page={page}
-        retour="/contracts"
+        retour={retour}
+        fournisseurChoisi={fid}
       />
     </>
   );

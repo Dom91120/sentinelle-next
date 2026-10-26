@@ -20,10 +20,12 @@ import { csrfToken } from "@/server/http";
 export async function FragmentContrat({
   contract,
   logicielsChoisis = [],
+  fournisseurChoisi = null,
   erreur,
 }: {
   contract: Contract | null;
   logicielsChoisis?: number[];
+  fournisseurChoisi?: number | null;
   erreur?: string | null;
 }) {
   const user = await getCurrentUser();
@@ -34,7 +36,11 @@ export async function FragmentContrat({
     contract ? couvertsDe(contract.id) : Promise.resolve({ software: [], equipment: [] }),
   ]);
   const csrf = await csrfToken();
-  const retour = contract ? `/contracts/${contract.id}` : "/contracts";
+  const retour = contract
+    ? `/contracts/${contract.id}`
+    : fournisseurChoisi
+      ? `/suppliers/${fournisseurChoisi}#contrats`
+      : "/contracts";
   const messages = await readFlashes();
   if (erreur) messages.push(["danger", erreur]);
   return (
@@ -55,6 +61,7 @@ export async function FragmentContrat({
         csrf={csrf}
         retour={retour}
         inline
+        fournisseurChoisi={fournisseurChoisi}
       />
       {/* fin du fragment : voir server/fragment.ts */}
       <FinFragment />

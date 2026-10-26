@@ -14,6 +14,7 @@ export function FormulaireContrat({
   retour,
   actionForm,
   dansFiche = false,
+  fournisseurChoisi = null,
 }: {
   contract: Contract | null;
   ctx: FormContext;
@@ -22,9 +23,10 @@ export function FormulaireContrat({
   retour: string;
   actionForm?: string;
   dansFiche?: boolean;
+  fournisseurChoisi?: number | null;
 }) {
   const { user, csrf } = page;
-  const commun = { contract, ...ctx, couverts, user, csrf, retour, actionForm };
+  const commun = { contract, ...ctx, couverts, user, csrf, retour, actionForm, fournisseurChoisi };
   return (
     <>
       <FormCorps {...commun} />

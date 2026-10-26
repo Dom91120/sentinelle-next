@@ -86,6 +86,14 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
   ]);
   const equipments = supplier.equipments;
   const contracts = supplier.contracts;
+  // Les contrats rattachables : ceux des autres fournisseurs et les orphelins.
+  const rattachables = user.canEdit("contracts")
+    ? await prisma.contract.findMany({
+        where: { isActive: true, OR: [{ supplierId: null }, { supplierId: { not: id } }] },
+        orderBy: { name: "asc" },
+        include: { supplier: true },
+      })
+    : [];
   const software = [...supplier.software].sort((a, b) =>
     a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
   );
@@ -500,7 +508,7 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
 
         <Volet cible="contrats">
           <div className="data-card">
-            <div className="card-header-custom">
+            <div className="card-header-custom d-flex justify-content-between align-items-center gap-2 flex-wrap">
               <h6 className="fw-bold fiche-titre fiche-titre--amber mb-0">
                 <Icone
                   bi="bi-file-earmark-text"
@@ -509,8 +517,60 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
                 />
                 Contrats <span className="badge bg-secondary ms-1">{contracts.length}</span>
               </h6>
+              {/* Comme l'onglet Contrats d'un logiciel : rattacher un contrat existant, ou en
+                  créer un, dont le fournisseur est déjà celui-ci, dans un formulaire en tête
+                  de la liste (formulaire-inline.js). */}
+              {user.canEdit("contracts") ? (
+                <div className="d-flex gap-2 marches-actions">
+                  {rattachables.length ? (
+                    <form
+                      method="POST"
+                      action={`/contracts/supplier/${id}/attach`}
+                      className="d-flex gap-2"
+                    >
+                      <input type="hidden" name="csrf_token" value={csrf} />
+                      <select
+                        name="contract_id"
+                        className="form-select form-select-sm"
+                        style={{ maxWidth: "20rem" }}
+                        required
+                        aria-label="Rattacher un contrat existant"
+                        defaultValue=""
+                      >
+                        <option value="">— Rattacher un contrat existant —</option>
+                        {rattachables.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.reference ? `${c.reference} — ` : ""}
+                            {c.name}
+                            {c.supplier ? ` (${c.supplier.name})` : " (sans fournisseur)"}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="submit"
+                        className="btn btn-sm btn-ghost btn-icone"
+                        title="Rattacher le contrat choisi"
+                        aria-label="Rattacher le contrat choisi"
+                      >
+                        <Lucide nom="link" taille={16} />
+                      </button>
+                    </form>
+                  ) : null}
+                  <a
+                    href={`/contracts/create?supplier_id=${id}`}
+                    className="btn btn-sm btn-ghost btn-icone"
+                    title="Créer un contrat"
+                    aria-label="Créer un contrat"
+                    data-formulaire-inline
+                    data-avant="#contrats-liste"
+                    data-classes="p-3 border-bottom"
+                  >
+                    <Lucide nom="plus" taille={16} />
+                  </a>
+                </div>
+              ) : null}
             </div>
-            <div className="table-responsive">
+            <div id="contrats-liste" className="table-responsive">
               <TableauContrats
                 contracts={contracts}
                 today={today}

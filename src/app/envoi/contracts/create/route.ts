@@ -10,7 +10,12 @@ import { invalidateNavCounts } from "@/server/nav";
 export async function POST(req: Request) {
   const url = new URL(req.url);
   const sid = url.searchParams.get("software_id");
+  const fid = url.searchParams.get("supplier_id");
   const inline = url.searchParams.get("inline") === "1";
+  const q = new URLSearchParams();
+  if (sid) q.set("software_id", sid);
+  if (fid) q.set("supplier_id", fid);
+  const suffixe = q.toString() ? `?${q.toString()}` : "";
   return traiterFormulaire(req, async (form) => {
     const user = await requireEdit("contracts");
     const { data, couverts } = await depuisFormulaire(form);
@@ -18,11 +23,12 @@ export async function POST(req: Request) {
     if (!data.name && inline)
       return fragmentContrat(req, null, {
         software_id: sid,
+        supplier_id: fid,
         erreur: "Le nom du contrat est obligatoire.",
       });
     if (!data.name)
       return redirigerAvecMessage(
-        `/contracts/create${sid ? `?software_id=${encodeURIComponent(sid)}` : ""}`,
+        `/contracts/create${suffixe}`,
         "Le nom du contrat est obligatoire.",
         "danger",
       );
@@ -37,6 +43,8 @@ export async function POST(req: Request) {
       },
     });
     invalidateNavCounts();
-    return redirigerAvecMessage("/contracts", "Contrat ajouté", "success");
+    // Créé depuis une fiche fournisseur : on y revient, sur son onglet Contrats.
+    const retour = fid && c.supplierId ? `/suppliers/${c.supplierId}#contrats` : "/contracts";
+    return redirigerAvecMessage(retour, "Contrat ajouté", "success");
   });
 }

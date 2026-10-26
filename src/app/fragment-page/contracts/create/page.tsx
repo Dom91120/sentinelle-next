@@ -9,6 +9,14 @@ export default async function PageFragmentCreation({
 }) {
   const p = await searchParams;
   const sid = parseInt_(typeof p.software_id === "string" ? p.software_id : null, null);
+  const fid = parseInt_(typeof p.supplier_id === "string" ? p.supplier_id : null, null);
   const erreur = typeof p.erreur === "string" ? p.erreur : null;
-  return <FragmentContrat contract={null} logicielsChoisis={sid ? [sid] : []} erreur={erreur} />;
+  return (
+    <FragmentContrat
+      contract={null}
+      logicielsChoisis={sid ? [sid] : []}
+      fournisseurChoisi={fid}
+      erreur={erreur}
+    />
+  );
 }

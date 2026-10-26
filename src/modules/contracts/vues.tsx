@@ -47,6 +47,8 @@ export type FormProps = {
   retour: string;
   actionForm?: string;
   inline?: boolean;
+  /** Création depuis une fiche fournisseur : ce fournisseur est présélectionné. */
+  fournisseurChoisi?: number | null;
 };
 
 function Rub({
@@ -158,6 +160,7 @@ export function FormCorps({
   retour,
   actionForm,
   inline = false,
+  fournisseurChoisi = null,
 }: FormProps) {
   const kindDefaut = contract
     ? (contract.kindId ?? "")
@@ -274,7 +277,7 @@ export function FormCorps({
                       name="supplier_id"
                       id="supplierSelect"
                       className="form-select form-select-sm min-w-0 flex-grow-1"
-                      defaultValue={contract?.supplierId ?? ""}
+                      defaultValue={contract?.supplierId ?? fournisseurChoisi ?? ""}
                     >
                       <option value="">— non précisé —</option>
                       {suppliers.map((s) => (
