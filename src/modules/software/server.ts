@@ -78,6 +78,18 @@ export async function formContext() {
 
 export type FormContext = Awaited<ReturnType<typeof formContext>>;
 
+/** Les listes de la modale « Nouvelle application » : éditeurs et technologies seulement. */
+export async function formContextRapide() {
+  const [suppliers, technologies] = await Promise.all([
+    prisma.supplier.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+    prisma.referential.findMany({
+      where: { kind: "technology", isActive: true },
+      orderBy: [{ position: "asc" }, { label: "asc" }],
+    }),
+  ]);
+  return { suppliers, technologies };
+}
+
 function ids(f: FormData, cle: string): number[] {
   return f
     .getAll(cle)

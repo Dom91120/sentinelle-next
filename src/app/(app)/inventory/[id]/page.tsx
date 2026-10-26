@@ -58,7 +58,7 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
     },
   });
   if (!brut) notFound();
-  const { user, csrf, nonce } = page;
+  const { user, csrf } = page;
   const peutEditer = user.canEdit("inventory");
   const seuils = seuilsDe(user.settings);
   const [statuts, voisins, ctx] = await Promise.all([

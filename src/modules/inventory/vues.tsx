@@ -2,7 +2,7 @@
 
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
 import { Icone } from "@/components/icones";
-import { QaButton, QaModal, QaModalSupplier } from "@/components/quick-add";
+import { nomChamp, QaButton, QaModal, QaModalSupplier } from "@/components/quick-add";
 import { Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
 import type { Equipment, Software, SoftwareEquipment, Supplier } from "@/generated/prisma/client";
 import {
@@ -79,11 +79,6 @@ function Champ({
       />
     </div>
   );
-}
-
-/** L'attribut qui relève un champ : `name` dans un formulaire, `data-qa-field` dans la modale d'ajout rapide. */
-function nomChamp(nom: string, rapide?: boolean) {
-  return rapide ? { "data-qa-field": nom } : { name: nom };
 }
 
 /**

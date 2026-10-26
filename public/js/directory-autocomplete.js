@@ -21,9 +21,13 @@
     }
 
     function attach(input) {
-        var form = input.closest('form');
+        // Le champ courriel associe : dans le formulaire, ou dans la modale d'ajout
+        // rapide (quick-add.js), ou il est releve par data-qa-field et non par name.
+        var scope = input.closest('form') || input.closest('.modal');
         var emailName = input.getAttribute('data-ad-email');
-        var emailInput = emailName && form ? form.querySelector('[name="' + emailName + '"]') : null;
+        var emailInput = emailName && scope
+            ? scope.querySelector('[name="' + emailName + '"], [data-qa-field="' + emailName + '"]')
+            : null;
 
         // Conteneur positionne pour ancrer la liste de suggestions.
         var host = input.parentElement;

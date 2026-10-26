@@ -1,13 +1,15 @@
 /** Les gabarits des comptes (port de accounts/_form_corps.html et _synthese.html). */
 
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
-import { QaButton, QaModalSoftware, QaModalSupplier } from "@/components/quick-add";
+import { QaButton, QaModalSupplier } from "@/components/quick-add";
 import { Lu, LuBloc, Pastille, Rangee, Rubrique } from "@/components/synthese";
 import type { Account, Equipment, Software, Supplier } from "@/generated/prisma/client";
 import { EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
 import { QaModalEquipment } from "@/modules/inventory/vues";
+import { QaModalSoftware } from "@/modules/software/vues";
+import { enabledIn } from "@/server/features";
 import type { CurrentUser } from "@/server/guards";
 
 export type AccountComplet = Account & {
@@ -224,7 +226,9 @@ export function FormCorps({
         </form>
       </div>
 
-      {user.canEdit("software") ? <QaModalSoftware csrf={csrf} /> : null}
+      {user.canEdit("software") ? (
+        <QaModalSoftware csrf={csrf} gdpr={enabledIn(user.settings, "gdpr")} />
+      ) : null}
       {user.canEdit("inventory") ? <QaModalEquipment csrf={csrf} /> : null}
       {user.canEdit("suppliers") ? <QaModalSupplier csrf={csrf} /> : null}
     </>

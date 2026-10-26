@@ -1,6 +1,14 @@
 /** Composant « ajout rapide » (port de _quick_add.html). Cf. public/js/quick-add.js. */
 import { Icone } from "@/components/icones";
 
+/**
+ * L'attribut qui relève un champ : `name` dans un formulaire, `data-qa-field` dans une modale
+ * d'ajout rapide (quick-add.js), pour que le formulaire hôte ne l'emporte pas.
+ */
+export function nomChamp(nom: string, rapide?: boolean) {
+  return rapide ? { "data-qa-field": nom } : { name: nom };
+}
+
 export function QaButton({
   modalId,
   targetId,
@@ -159,32 +167,6 @@ export function QaModalSupplier({ csrf }: { csrf: string }) {
           <label className="form-label small">E-mail</label>
           <input type="email" data-qa-field="email" className="form-control form-control-sm" />
         </div>
-      </div>
-    </QaModal>
-  );
-}
-
-export function QaModalSoftware({ csrf }: { csrf: string }) {
-  return (
-    <QaModal
-      id="qaModalSoftware"
-      endpoint="/inventory/logiciels/quick-create"
-      titre="Nouvelle application"
-      icone="bi-window-stack"
-      csrf={csrf}
-    >
-      <div className="mb-2">
-        <label className="form-label small">Nom *</label>
-        <input
-          type="text"
-          data-qa-field="name"
-          data-qa-required
-          className="form-control form-control-sm"
-          placeholder="ex: SIRH, GLPI, Office 365…"
-        />
-      </div>
-      <div className="form-text">
-        Détails (éditeur, serveurs, contrat…) à compléter ensuite sur la fiche du logiciel.
       </div>
     </QaModal>
   );

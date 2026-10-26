@@ -2,7 +2,7 @@
 
 import { PiedForm } from "@/components/formulaire";
 import { Icone, Lucide } from "@/components/icones";
-import { QaButton } from "@/components/quick-add";
+import { nomChamp, QaButton, QaModal } from "@/components/quick-add";
 import { ScriptDiffere } from "@/components/scripts";
 import { Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
 import type {
@@ -29,6 +29,7 @@ import { softwareOverLicence } from "@/lib/statuts";
 import {
   authModeLabel,
   criticalityLabel,
+  formContextRapide,
   gdprLocationLabel,
   hostingLabel,
   lifecycleLabel,
@@ -78,6 +79,7 @@ function Sel({
   petit = true,
   disabled,
   classes = "",
+  rapide,
 }: {
   name: string;
   labels: Record<string, string>;
@@ -87,10 +89,12 @@ function Sel({
   petit?: boolean;
   disabled?: boolean;
   classes?: string;
+  /** Dans la modale d'ajout rapide : relevé par quick-add.js, hors formulaire. */
+  rapide?: boolean;
 }) {
   return (
     <select
-      name={name}
+      {...nomChamp(name, rapide)}
       id={id}
       className={`${petit ? "form-select form-select-sm" : "form-select"}${classes ? ` ${classes}` : ""}`}
       defaultValue={current ?? ""}
@@ -139,19 +143,27 @@ function Carte({
   );
 }
 
-function Nature({ item }: { item: Software | null }) {
+function Nature({
+  item,
+  rapide,
+  prefixe = "",
+}: {
+  item: Software | null;
+  rapide?: boolean;
+  prefixe?: string;
+}) {
   return (
     <div className="d-flex flex-wrap align-items-center gap-2">
       <input
         type="checkbox"
         className="btn-check"
-        name="is_docker"
-        id="isDocker"
+        {...nomChamp("is_docker", rapide)}
+        id={`${prefixe}isDocker`}
         defaultChecked={Boolean(item?.isDocker)}
       />
       <label
         className="btn btn-outline-primary btn-sm"
-        htmlFor="isDocker"
+        htmlFor={`${prefixe}isDocker`}
         title="Conteneurisé (Docker) — cumulable avec tout hébergement"
       >
         <i className="icon-docker me-1" />
@@ -160,13 +172,13 @@ function Nature({ item }: { item: Software | null }) {
       <input
         type="checkbox"
         className="btn-check"
-        name="internal_dev"
-        id="internalDev"
+        {...nomChamp("internal_dev", rapide)}
+        id={`${prefixe}internalDev`}
         defaultChecked={Boolean(item?.internalDev)}
       />
       <label
         className="btn btn-outline-primary btn-sm"
-        htmlFor="internalDev"
+        htmlFor={`${prefixe}internalDev`}
         title="Fait et maintenu par la DSI : ni éditeur, ni support, ni contrat"
       >
         <Icone bi="bi-code-slash" taille="1em" classes="me-1" />
@@ -175,13 +187,13 @@ function Nature({ item }: { item: Software | null }) {
       <input
         type="checkbox"
         className="btn-check"
-        name="no_server"
-        id="noServer"
+        {...nomChamp("no_server", rapide)}
+        id={`${prefixe}noServer`}
         defaultChecked={Boolean(item?.noServer)}
       />
       <label
         className="btn btn-outline-primary btn-sm"
-        htmlFor="noServer"
+        htmlFor={`${prefixe}noServer`}
         title="Ne s’installe sur aucune machine du parc : SaaS, ou postes des agents"
       >
         <Icone bi="bi-slash-circle" taille="1em" classes="me-1" />
@@ -191,9 +203,401 @@ function Nature({ item }: { item: Software | null }) {
   );
 }
 
+/**
+ * Les champs d'un logiciel : le corps du formulaire d'une fiche (création, modification) et
+ * celui de la modale « Nouvelle application » de l'ajout rapide, à l'identique.
+ */
+export function CorpsChamps({
+  item,
+  suppliers,
+  technologies,
+  gdpr,
+  plusFournisseur,
+  rapide = false,
+  prefixe = "",
+}: {
+  item: Software | null;
+  suppliers: Supplier[];
+  technologies: Referential[];
+  gdpr: boolean;
+  /** Le bouton + à côté de l'éditeur (modale fournisseur à monter par l'appelant). */
+  plusFournisseur: boolean;
+  /** Modale d'ajout rapide : champs relevés par quick-add.js, hors formulaire. */
+  rapide?: boolean;
+  /** Préfixe des identifiants, pour ne pas heurter ceux de la page. */
+  prefixe?: string;
+}) {
+  const v = (s: string | null | undefined) => s ?? "";
+  return (
+    <div className="data-card mb-3">
+      <Carte titre="Logiciel" bi="bi-window-stack" couleur="indigo">
+        <div className="grille grille-identite">
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swNom`}>
+              Nom du logiciel <span className="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              {...nomChamp("name", rapide)}
+              id={`${prefixe}swNom`}
+              className="form-control form-control-sm"
+              {...(rapide ? { "data-qa-required": true } : { required: true })}
+              defaultValue={item?.name ?? ""}
+              placeholder="ex : GLPI, Office 365…"
+            />
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swVersion`}>
+              Version
+            </label>
+            <input
+              type="text"
+              {...nomChamp("version", rapide)}
+              id={`${prefixe}swVersion`}
+              className="form-control form-control-sm"
+              defaultValue={v(item?.version)}
+            />
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swSupplier`}>
+              Éditeur
+            </label>
+            <div className="d-flex align-items-center gap-1">
+              <select
+                {...nomChamp("supplier_id", rapide)}
+                id={`${prefixe}swSupplier`}
+                className="form-select form-select-sm min-w-0 flex-grow-1"
+                defaultValue={item?.supplierId ?? ""}
+              >
+                <option value="">— aucun —</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              {plusFournisseur ? (
+                <QaButton
+                  modalId="qaModalSupplier"
+                  targetId={`${prefixe}swSupplier`}
+                  title="Ajouter un éditeur"
+                />
+              ) : null}
+            </div>
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swUrl`}>
+              URL application
+            </label>
+            <input
+              type="url"
+              {...nomChamp("url", rapide)}
+              id={`${prefixe}swUrl`}
+              className="form-control form-control-sm"
+              defaultValue={v(item?.url)}
+              placeholder="https://…"
+            />
+          </div>
+        </div>
+
+        <div className="grille grille-usage">
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swStatut`}>
+              Statut
+            </label>
+            <Sel
+              rapide={rapide}
+              name="lifecycle"
+              labels={LIFECYCLE_LABELS}
+              current={item ? item.lifecycle : "production"}
+              id={`${prefixe}swStatut`}
+            />
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swCriticite`}>
+              Criticité
+            </label>
+            <select
+              {...nomChamp("criticality", rapide)}
+              id={`${prefixe}swCriticite`}
+              className="form-select form-select-sm"
+              defaultValue={item?.criticality ?? ""}
+            >
+              {[
+                ["", "—"],
+                ["1", "Faible"],
+                ["2", "Moyenne"],
+                ["3", "Élevée"],
+                ["4", "Critique"],
+              ].map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swUtilisateurs`}>
+              Utilisateurs
+            </label>
+            <input
+              type="number"
+              min={0}
+              {...nomChamp("users_count", rapide)}
+              id={`${prefixe}swUtilisateurs`}
+              className="form-control form-control-sm"
+              defaultValue={item?.usersCount ?? ""}
+            />
+          </div>
+          <div>
+            <label
+              className="form-label small mb-1"
+              htmlFor={`${prefixe}swMax`}
+              title="Plafond contractuel : au-delà, dépassement de licence"
+            >
+              Max
+            </label>
+            <input
+              type="number"
+              min={0}
+              {...nomChamp("users_max", rapide)}
+              id={`${prefixe}swMax`}
+              className="form-control form-control-sm"
+              defaultValue={item?.usersMax ?? ""}
+            />
+          </div>
+          <div className="d-flex align-items-end gap-3">
+            <div className="flex-grow-1 min-w-0">
+              <label className="form-label small mb-1" htmlFor={`${prefixe}swAuth`}>
+                Authentification
+              </label>
+              <Sel
+                rapide={rapide}
+                name="auth_mode"
+                labels={AUTH_MODE_LABELS}
+                current={item?.authMode ?? null}
+                blank="— inconnue —"
+                id={`${prefixe}swAuth`}
+              />
+            </div>
+            <div className="text-center">
+              <label
+                className="form-label small mb-1 d-block"
+                htmlFor={`${prefixe}authStrong`}
+                title="Double authentification"
+              >
+                2FA
+              </label>
+              <input
+                type="checkbox"
+                className="form-check-input case-2fa"
+                {...nomChamp("auth_strong", rapide)}
+                id={`${prefixe}authStrong`}
+                defaultChecked={Boolean(item?.authStrong)}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swMiseEnService`}>
+              Mise en service
+            </label>
+            <input
+              type="date"
+              {...nomChamp("service_date", rapide)}
+              id={`${prefixe}swMiseEnService`}
+              className="form-control form-control-sm champ-date"
+              defaultValue={item?.serviceDate ? isoDate(item.serviceDate) : ""}
+            />
+          </div>
+        </div>
+        <div className="grille grille-technique">
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swHebergement`}>
+              Hébergement
+            </label>
+            <Sel
+              rapide={rapide}
+              name="hosting"
+              labels={HOSTING_LABELS}
+              current={item ? item.hosting : "on_premise"}
+              id={`${prefixe}swHebergement`}
+              classes="champ-ajuste"
+            />
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swTechno`}>
+              Technologie
+            </label>
+            <select
+              {...nomChamp("technology_id", rapide)}
+              id={`${prefixe}swTechno`}
+              className="form-select form-select-sm champ-ajuste"
+              defaultValue={item?.technologyId ?? ""}
+            >
+              <option value="">— non renseignée —</option>
+              {technologies.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swSource`}>
+              Type licence
+            </label>
+            <Sel
+              rapide={rapide}
+              name="source_type"
+              labels={SOURCE_TYPE_LABELS}
+              current={item ? item.sourceType : "proprietaire"}
+              id={`${prefixe}swSource`}
+              classes="champ-ajuste"
+            />
+          </div>
+          <div className="grille-contenu">
+            <span className="form-label small mb-1 d-block">Nature</span>
+            <Nature item={item} rapide={rapide} prefixe={prefixe} />
+          </div>
+        </div>
+        <div className="grille grille-contacts">
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swRefMetier`}>
+              Référent métier
+            </label>
+            <input
+              type="text"
+              {...nomChamp("responsible", rapide)}
+              id={`${prefixe}swRefMetier`}
+              className="form-control form-control-sm"
+              defaultValue={v(item?.responsible)}
+              data-ad-search=""
+              data-ad-email="responsible_email"
+              placeholder="Rechercher dans l'annuaire…"
+            />
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swMailMetier`}>
+              Courriel réf. métier
+            </label>
+            <input
+              type="email"
+              {...nomChamp("responsible_email", rapide)}
+              id={`${prefixe}swMailMetier`}
+              className="form-control form-control-sm"
+              defaultValue={v(item?.responsibleEmail)}
+            />
+          </div>
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swRefTech`}>
+              Référent technique
+            </label>
+            <input
+              type="text"
+              {...nomChamp("tech_responsible", rapide)}
+              id={`${prefixe}swRefTech`}
+              className="form-control form-control-sm"
+              defaultValue={v(item?.techResponsible)}
+              data-ad-search=""
+              data-ad-email="tech_responsible_email"
+              placeholder="Rechercher dans l'annuaire…"
+            />
+          </div>
+
+          <div>
+            <label className="form-label small mb-1" htmlFor={`${prefixe}swMailTech`}>
+              Courriel réf. technique
+            </label>
+            <input
+              type="email"
+              {...nomChamp("tech_responsible_email", rapide)}
+              id={`${prefixe}swMailTech`}
+              className="form-control form-control-sm"
+              defaultValue={v(item?.techResponsibleEmail)}
+            />
+          </div>
+        </div>
+      </Carte>
+
+      {gdpr ? (
+        <Carte titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
+          <div className="grille grille-rgpd">
+            <div>
+              <span className="form-label small mb-1 d-block">RGPD</span>
+              <div className="form-check case-rgpd">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  {...nomChamp("gdpr_personal_data", rapide)}
+                  id={`${prefixe}gdprPd`}
+                  defaultChecked={Boolean(item?.gdprPersonalData)}
+                />
+                <label className="form-check-label small" htmlFor={`${prefixe}gdprPd`}>
+                  Traite des données personnelles
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="form-label small mb-1" htmlFor={`${prefixe}swRgpdCategories`}>
+                Catégories de données
+              </label>
+              <input
+                type="text"
+                {...nomChamp("gdpr_categories", rapide)}
+                id={`${prefixe}swRgpdCategories`}
+                className="form-control form-control-sm"
+                defaultValue={v(item?.gdprCategories)}
+                placeholder="état civil, coordonnées, santé, NIR…"
+              />
+            </div>
+            <div>
+              <label className="form-label small mb-1" htmlFor={`${prefixe}swRgpdRegistre`}>
+                Réf. registre
+              </label>
+              <input
+                type="text"
+                {...nomChamp("gdpr_registry_ref", rapide)}
+                id={`${prefixe}swRgpdRegistre`}
+                className="form-control form-control-sm"
+                defaultValue={v(item?.gdprRegistryRef)}
+                placeholder="n° du traitement"
+              />
+            </div>
+            <div>
+              <label className="form-label small mb-1" htmlFor={`${prefixe}swRgpdLieu`}>
+                Localisation des données
+              </label>
+              <Sel
+                rapide={rapide}
+                name="gdpr_location"
+                labels={DATA_LOCATION_LABELS}
+                current={item ? item.gdprLocation : "inconnue"}
+                id={`${prefixe}swRgpdLieu`}
+              />
+            </div>
+          </div>
+        </Carte>
+      ) : null}
+
+      <Carte titre="Descriptif" bi="bi-journal-text" couleur="slate">
+        <label className="form-label small mb-1" htmlFor={`${prefixe}swDescriptif`}>
+          Périmètre fonctionnel, dépendances, particularités
+        </label>
+        <textarea
+          {...nomChamp("description", rapide)}
+          id={`${prefixe}swDescriptif`}
+          className="form-control form-control-sm"
+          rows={3}
+          placeholder="Périmètre fonctionnel, dépendances, particularités…"
+          defaultValue={v(item?.description)}
+        />
+      </Carte>
+    </div>
+  );
+}
+
 /** software/_form_corps.html : la grille de SoftInventory. */
 export function FormCorps({ item, suppliers, technologies, user, csrf, retour, gdpr }: FormProps) {
-  const v = (s: string | null | undefined) => s ?? "";
   return (
     <div className="form-seul">
       <form
@@ -204,367 +608,13 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
         action={item ? `/inventory/logiciels/${item.id}/edit` : "/inventory/logiciels/create"}
       >
         <input type="hidden" name="csrf_token" value={csrf} />
-
-        <div className="data-card mb-3">
-          <Carte titre="Logiciel" bi="bi-window-stack" couleur="indigo">
-            <div className="grille grille-identite">
-              <div>
-                <label className="form-label small mb-1" htmlFor="swNom">
-                  Nom du logiciel <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  id="swNom"
-                  className="form-control form-control-sm"
-                  required
-                  defaultValue={item?.name ?? ""}
-                  placeholder="ex : GLPI, Office 365…"
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swVersion">
-                  Version
-                </label>
-                <input
-                  type="text"
-                  name="version"
-                  id="swVersion"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.version)}
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swSupplier">
-                  Éditeur
-                </label>
-                <div className="d-flex align-items-center gap-1">
-                  <select
-                    name="supplier_id"
-                    id="swSupplier"
-                    className="form-select form-select-sm min-w-0 flex-grow-1"
-                    defaultValue={item?.supplierId ?? ""}
-                  >
-                    <option value="">— aucun —</option>
-                    {suppliers.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
-                  {user.canEdit("suppliers") ? (
-                    <QaButton
-                      modalId="qaModalSupplier"
-                      targetId="swSupplier"
-                      title="Ajouter un éditeur"
-                    />
-                  ) : null}
-                </div>
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swUrl">
-                  URL application
-                </label>
-                <input
-                  type="url"
-                  name="url"
-                  id="swUrl"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.url)}
-                  placeholder="https://…"
-                />
-              </div>
-            </div>
-
-            <div className="grille grille-usage">
-              <div>
-                <label className="form-label small mb-1" htmlFor="swStatut">
-                  Statut
-                </label>
-                <Sel
-                  name="lifecycle"
-                  labels={LIFECYCLE_LABELS}
-                  current={item ? item.lifecycle : "production"}
-                  id="swStatut"
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swCriticite">
-                  Criticité
-                </label>
-                <select
-                  name="criticality"
-                  id="swCriticite"
-                  className="form-select form-select-sm"
-                  defaultValue={item?.criticality ?? ""}
-                >
-                  {[
-                    ["", "—"],
-                    ["1", "Faible"],
-                    ["2", "Moyenne"],
-                    ["3", "Élevée"],
-                    ["4", "Critique"],
-                  ].map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swUtilisateurs">
-                  Utilisateurs
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  name="users_count"
-                  id="swUtilisateurs"
-                  className="form-control form-control-sm"
-                  defaultValue={item?.usersCount ?? ""}
-                />
-              </div>
-              <div>
-                <label
-                  className="form-label small mb-1"
-                  htmlFor="swMax"
-                  title="Plafond contractuel : au-delà, dépassement de licence"
-                >
-                  Max
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  name="users_max"
-                  id="swMax"
-                  className="form-control form-control-sm"
-                  defaultValue={item?.usersMax ?? ""}
-                />
-              </div>
-              <div className="d-flex align-items-end gap-3">
-                <div className="flex-grow-1 min-w-0">
-                  <label className="form-label small mb-1" htmlFor="swAuth">
-                    Authentification
-                  </label>
-                  <Sel
-                    name="auth_mode"
-                    labels={AUTH_MODE_LABELS}
-                    current={item?.authMode ?? null}
-                    blank="— inconnue —"
-                    id="swAuth"
-                  />
-                </div>
-                <div className="text-center">
-                  <label
-                    className="form-label small mb-1 d-block"
-                    htmlFor="authStrong"
-                    title="Double authentification"
-                  >
-                    2FA
-                  </label>
-                  <input
-                    type="checkbox"
-                    className="form-check-input case-2fa"
-                    name="auth_strong"
-                    id="authStrong"
-                    defaultChecked={Boolean(item?.authStrong)}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swMiseEnService">
-                  Mise en service
-                </label>
-                <input
-                  type="date"
-                  name="service_date"
-                  id="swMiseEnService"
-                  className="form-control form-control-sm champ-date"
-                  defaultValue={item?.serviceDate ? isoDate(item.serviceDate) : ""}
-                />
-              </div>
-            </div>
-            <div className="grille grille-technique">
-              <div>
-                <label className="form-label small mb-1" htmlFor="swHebergement">
-                  Hébergement
-                </label>
-                <Sel
-                  name="hosting"
-                  labels={HOSTING_LABELS}
-                  current={item ? item.hosting : "on_premise"}
-                  id="swHebergement"
-                  classes="champ-ajuste"
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swTechno">
-                  Technologie
-                </label>
-                <select
-                  name="technology_id"
-                  id="swTechno"
-                  className="form-select form-select-sm champ-ajuste"
-                  defaultValue={item?.technologyId ?? ""}
-                >
-                  <option value="">— non renseignée —</option>
-                  {technologies.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swSource">
-                  Type licence
-                </label>
-                <Sel
-                  name="source_type"
-                  labels={SOURCE_TYPE_LABELS}
-                  current={item ? item.sourceType : "proprietaire"}
-                  id="swSource"
-                  classes="champ-ajuste"
-                />
-              </div>
-              <div className="grille-contenu">
-                <span className="form-label small mb-1 d-block">Nature</span>
-                <Nature item={item} />
-              </div>
-            </div>
-            <div className="grille grille-contacts">
-              <div>
-                <label className="form-label small mb-1" htmlFor="swRefMetier">
-                  Référent métier
-                </label>
-                <input
-                  type="text"
-                  name="responsible"
-                  id="swRefMetier"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.responsible)}
-                  data-ad-search=""
-                  data-ad-email="responsible_email"
-                  placeholder="Rechercher dans l'annuaire…"
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swMailMetier">
-                  Courriel réf. métier
-                </label>
-                <input
-                  type="email"
-                  name="responsible_email"
-                  id="swMailMetier"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.responsibleEmail)}
-                />
-              </div>
-              <div>
-                <label className="form-label small mb-1" htmlFor="swRefTech">
-                  Référent technique
-                </label>
-                <input
-                  type="text"
-                  name="tech_responsible"
-                  id="swRefTech"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.techResponsible)}
-                  data-ad-search=""
-                  data-ad-email="tech_responsible_email"
-                  placeholder="Rechercher dans l'annuaire…"
-                />
-              </div>
-
-              <div>
-                <label className="form-label small mb-1" htmlFor="swMailTech">
-                  Courriel réf. technique
-                </label>
-                <input
-                  type="email"
-                  name="tech_responsible_email"
-                  id="swMailTech"
-                  className="form-control form-control-sm"
-                  defaultValue={v(item?.techResponsibleEmail)}
-                />
-              </div>
-            </div>
-          </Carte>
-
-          {gdpr ? (
-            <Carte titre="RGPD" bi="bi-shield-lock" couleur="rose" onglet="rgpd">
-              <div className="grille grille-rgpd">
-                <div>
-                  <span className="form-label small mb-1 d-block">RGPD</span>
-                  <div className="form-check case-rgpd">
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      name="gdpr_personal_data"
-                      id="gdprPd"
-                      defaultChecked={Boolean(item?.gdprPersonalData)}
-                    />
-                    <label className="form-check-label small" htmlFor="gdprPd">
-                      Traite des données personnelles
-                    </label>
-                  </div>
-                </div>
-                <div>
-                  <label className="form-label small mb-1" htmlFor="swRgpdCategories">
-                    Catégories de données
-                  </label>
-                  <input
-                    type="text"
-                    name="gdpr_categories"
-                    id="swRgpdCategories"
-                    className="form-control form-control-sm"
-                    defaultValue={v(item?.gdprCategories)}
-                    placeholder="état civil, coordonnées, santé, NIR…"
-                  />
-                </div>
-                <div>
-                  <label className="form-label small mb-1" htmlFor="swRgpdRegistre">
-                    Réf. registre
-                  </label>
-                  <input
-                    type="text"
-                    name="gdpr_registry_ref"
-                    id="swRgpdRegistre"
-                    className="form-control form-control-sm"
-                    defaultValue={v(item?.gdprRegistryRef)}
-                    placeholder="n° du traitement"
-                  />
-                </div>
-                <div>
-                  <label className="form-label small mb-1" htmlFor="swRgpdLieu">
-                    Localisation des données
-                  </label>
-                  <Sel
-                    name="gdpr_location"
-                    labels={DATA_LOCATION_LABELS}
-                    current={item ? item.gdprLocation : "inconnue"}
-                    id="swRgpdLieu"
-                  />
-                </div>
-              </div>
-            </Carte>
-          ) : null}
-
-          <Carte titre="Descriptif" bi="bi-journal-text" couleur="slate">
-            <label className="form-label small mb-1" htmlFor="swDescriptif">
-              Périmètre fonctionnel, dépendances, particularités
-            </label>
-            <textarea
-              name="description"
-              id="swDescriptif"
-              className="form-control form-control-sm"
-              rows={3}
-              placeholder="Périmètre fonctionnel, dépendances, particularités…"
-              defaultValue={v(item?.description)}
-            />
-          </Carte>
-        </div>
-
+        <CorpsChamps
+          item={item}
+          suppliers={suppliers}
+          technologies={technologies}
+          gdpr={gdpr}
+          plusFournisseur={user.canEdit("suppliers")}
+        />
         <PiedForm
           retour={retour}
           libelle={item ? "Enregistrer" : "Ajouter"}
@@ -575,6 +625,39 @@ export function FormCorps({ item, suppliers, technologies, user, csrf, retour, g
         />
       </form>
     </div>
+  );
+}
+
+/**
+ * La modale « Nouvelle application » de l'ajout rapide (bouton + d'une fiche compte) : le
+ * formulaire complet d'un logiciel, dans une fenêtre, sans quitter la fiche. Les champs sont
+ * relevés par quick-add.js et envoyés à /inventory/logiciels/quick-create.
+ */
+export async function QaModalSoftware({ csrf, gdpr }: { csrf: string; gdpr: boolean }) {
+  const ctx = await formContextRapide();
+  return (
+    <QaModal
+      id="qaModalSoftware"
+      endpoint="/inventory/logiciels/quick-create"
+      titre="Nouvelle application"
+      icone="bi-window-stack"
+      csrf={csrf}
+      taille="xl"
+      classes="qa-modal-fiche"
+      libelle="Ajouter"
+    >
+      <div className="logiciel-saisie">
+        <CorpsChamps
+          item={null}
+          suppliers={ctx.suppliers}
+          technologies={ctx.technologies}
+          gdpr={gdpr}
+          plusFournisseur={false}
+          rapide
+          prefixe="qaSw-"
+        />
+      </div>
+    </QaModal>
   );
 }
 
