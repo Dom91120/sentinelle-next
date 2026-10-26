@@ -132,46 +132,6 @@ export function QaModal({
   );
 }
 
-export function QaModalSupplier({ csrf }: { csrf: string }) {
-  return (
-    <QaModal
-      id="qaModalSupplier"
-      endpoint="/suppliers/quick-create"
-      titre="Nouveau fournisseur"
-      icone="bi-truck"
-      csrf={csrf}
-    >
-      <div className="mb-2">
-        <label className="form-label small">Nom *</label>
-        <input
-          type="text"
-          data-qa-field="name"
-          data-qa-required
-          className="form-control form-control-sm"
-        />
-      </div>
-      <div className="row g-2">
-        <div className="col-md-6">
-          <label className="form-label small">Contact</label>
-          <input
-            type="text"
-            data-qa-field="contact_name"
-            className="form-control form-control-sm"
-          />
-        </div>
-        <div className="col-md-6">
-          <label className="form-label small">Téléphone</label>
-          <input type="text" data-qa-field="phone" className="form-control form-control-sm" />
-        </div>
-        <div className="col-12">
-          <label className="form-label small">E-mail</label>
-          <input type="email" data-qa-field="email" className="form-control form-control-sm" />
-        </div>
-      </div>
-    </QaModal>
-  );
-}
-
 /** La modale « Nouveau serveur » de SoftInventory. */
 export function QaModalServer({ csrf }: { csrf: string }) {
   return (

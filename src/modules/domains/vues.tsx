@@ -2,12 +2,13 @@
 
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
 import { Icone } from "@/components/icones";
-import { QaButton, QaModalSupplier } from "@/components/quick-add";
+import { QaButton } from "@/components/quick-add";
 import { ScriptDiffere } from "@/components/scripts";
 import { Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
 import type { Domain, Supplier } from "@/generated/prisma/client";
 import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
+import { QaModalSupplier } from "@/modules/suppliers/vues";
 import type { CurrentUser } from "@/server/guards";
 
 export type DomaineComplet = Domain & { registrarSupplier: Supplier | null };

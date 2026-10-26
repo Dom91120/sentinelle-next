@@ -1,9 +1,9 @@
 /** contracts/form.html : la grille et l'ajout rapide d'un fournisseur. */
 
-import { QaModalSupplier } from "@/components/quick-add";
 import type { Contract } from "@/generated/prisma/client";
 import type { Couverts, FormContext } from "@/modules/contracts/server";
 import { FormCorps } from "@/modules/contracts/vues";
+import { QaModalSupplier } from "@/modules/suppliers/vues";
 import type { Page } from "@/server/page";
 
 export function FormulaireContrat({

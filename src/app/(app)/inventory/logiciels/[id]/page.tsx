@@ -6,7 +6,7 @@ import { Icone, Lucide } from "@/components/icones";
 import { StatusBadge } from "@/components/macros";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
-import { QaModalServer, QaModalSupplier } from "@/components/quick-add";
+import { QaModalServer } from "@/components/quick-add";
 import { EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { couleurIcone } from "@/lib/navigation";
@@ -34,6 +34,7 @@ import {
 } from "@/modules/software/server";
 import { Contacts, type Flux, FluxCarte, Partages, Synthese } from "@/modules/software/vues";
 import { Consultations, Contrats } from "@/modules/software/vues-contrats";
+import { QaModalSupplier } from "@/modules/suppliers/vues";
 import { seuilsDe } from "@/server/config-store";
 import { prisma } from "@/server/db";
 import { docCategories, documentsEnabled, forParent } from "@/server/documents";

@@ -1,8 +1,9 @@
 /** software/form.html : la grille de SoftInventory et sa modale d'ajout rapide d'un éditeur. */
-import { QaModalSupplier } from "@/components/quick-add";
+
 import type { Software } from "@/generated/prisma/client";
 import type { FormContext } from "@/modules/software/server";
 import { FormCorps } from "@/modules/software/vues";
+import { QaModalSupplier } from "@/modules/suppliers/vues";
 import type { Page } from "@/server/page";
 
 export type Rattachements = { contractIds: number[]; equipmentIds: number[]; serviceIds: number[] };

@@ -28,3 +28,7 @@ pnpm db:reprise          # reprise de la base SQLite de Sentinelle (voir .env.ex
 - Schéma : `prisma/schema.prisma` garde les noms de tables et colonnes de Sentinelle
   (`@@map` / `@map`). Toute évolution passe par une migration Prisma.
 - Compte admin : mot de passe aléatoire affiché en console, jamais de mot de passe par défaut.
+- Ajout rapide (bouton +) : la modale d'un équipement, d'un logiciel ou d'un fournisseur rend
+  le même `CorpsChamps` que la fiche et sa route passe par le même `depuisFormulaire` ; une
+  évolution de la fiche vaut donc pour la modale. Seule une nouvelle liste à charger pour le
+  logiciel s'ajoute aussi à `formContextRapide` (`src/modules/software/server.ts`).

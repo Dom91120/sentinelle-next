@@ -12,12 +12,12 @@ import {
 } from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
-import { QaModalSupplier } from "@/components/quick-add";
 import { dateCourte } from "@/lib/libelles";
 import { contractActionDeadline, contractStatus } from "@/lib/statuts";
 import { FormulaireContrat } from "@/modules/contracts/form-page";
 import { couvertsDe, formContext, natureLabel } from "@/modules/contracts/server";
 import { Synthese } from "@/modules/contracts/vues";
+import { QaModalSupplier } from "@/modules/suppliers/vues";
 import { seuilsDe } from "@/server/config-store";
 import { prisma } from "@/server/db";
 import { documentsEnabled, forParent } from "@/server/documents";

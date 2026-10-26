@@ -1,7 +1,7 @@
 /** Les gabarits des comptes (port de accounts/_form_corps.html et _synthese.html). */
 
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
-import { QaButton, QaModalSupplier } from "@/components/quick-add";
+import { QaButton } from "@/components/quick-add";
 import { Lu, LuBloc, Pastille, Rangee, Rubrique } from "@/components/synthese";
 import type { Account, Equipment, Software, Supplier } from "@/generated/prisma/client";
 import { EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
@@ -9,6 +9,7 @@ import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
 import { QaModalEquipment } from "@/modules/inventory/vues";
 import { QaModalSoftware } from "@/modules/software/vues";
+import { QaModalSupplier } from "@/modules/suppliers/vues";
 import { enabledIn } from "@/server/features";
 import type { CurrentUser } from "@/server/guards";
 

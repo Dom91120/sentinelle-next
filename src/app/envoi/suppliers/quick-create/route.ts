@@ -1,10 +1,15 @@
-import { champ, champOuNull } from "@/lib/forms-util";
+import type { Prisma } from "@/generated/prisma/client";
+import { depuisFormulaire } from "@/modules/suppliers/server";
 import { auditRecord } from "@/server/audit";
 import { prisma } from "@/server/db";
 import { reponseApi, requireEditApi } from "@/server/guards";
 import { json, lireFormulaire, verifierCsrf } from "@/server/http";
 
-/** POST /suppliers/quick-create : création rapide (AJAX) d'un fournisseur minimal. */
+/**
+ * POST /suppliers/quick-create : création (AJAX) d'un fournisseur depuis un autre formulaire.
+ * Les champs sont ceux du formulaire d'une fiche : la modale « Nouveau fournisseur » les
+ * reprend tous.
+ */
 export async function POST(req: Request) {
   const form = await lireFormulaire(req);
   if (!(await verifierCsrf(req, form)))
@@ -12,16 +17,9 @@ export async function POST(req: Request) {
   const f = form ?? new FormData();
   return reponseApi(async () => {
     const user = await requireEditApi("suppliers");
-    const name = champ(f, "name");
-    if (!name) return json({ ok: false, error: "Le nom est obligatoire." }, 400);
-    const s = await prisma.supplier.create({
-      data: {
-        name,
-        contactName: champOuNull(f, "contact_name"),
-        phone: champOuNull(f, "phone"),
-        email: champOuNull(f, "email"),
-      },
-    });
+    const data = depuisFormulaire(f) as Prisma.SupplierUncheckedCreateInput;
+    if (!data.name) return json({ ok: false, error: "Le nom est obligatoire." }, 400);
+    const s = await prisma.supplier.create({ data });
     await auditRecord(
       "creation fournisseur",
       `${s.name} (ajout rapide)`,

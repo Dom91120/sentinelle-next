@@ -2,7 +2,7 @@
 
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
 import { Icone } from "@/components/icones";
-import { nomChamp, QaButton, QaModal, QaModalSupplier } from "@/components/quick-add";
+import { nomChamp, QaButton, QaModal } from "@/components/quick-add";
 import { Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
 import type { Equipment, Software, SoftwareEquipment, Supplier } from "@/generated/prisma/client";
 import {
@@ -15,6 +15,7 @@ import {
 import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
 import { ENV_CHOICES, formContext, KIND_CHOICES } from "@/modules/inventory/server";
+import { QaModalSupplier } from "@/modules/suppliers/vues";
 import type { CurrentUser } from "@/server/guards";
 
 export type EquipementComplet = Equipment & {
