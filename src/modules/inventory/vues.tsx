@@ -594,7 +594,7 @@ export function Synthese({ item }: { item: EquipementComplet }) {
         </Rangee>
         {porte("virtualisation") ? (
           <Rangee>
-            <LuBloc label="Outils" pleine facultatif>
+            <LuBloc label="Outils" facultatif>
               {item.supervised ? <Coche libelle="Supervision" /> : null}
               {item.cyberwatch ? <Coche libelle="Cyberwatch" /> : null}
               {item.ninjaOne ? <Coche libelle="Ninja One" /> : null}
@@ -617,7 +617,7 @@ export function Synthese({ item }: { item: EquipementComplet }) {
             </Rangee>
             {porte("administration") ? (
               <Rangee>
-                <LuBloc label="Administration" pleine facultatif>
+                <LuBloc label="Administration" facultatif>
                   {item.managementUrl ? (
                     <a
                       href={item.managementUrl}
