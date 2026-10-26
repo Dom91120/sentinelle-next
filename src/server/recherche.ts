@@ -33,18 +33,272 @@ const CAT_PERM: Record<string, string> = {
   devis: "contracts",
 };
 
-type Mode = { contains: string; mode: "insensitive" };
+/**
+ * Les colonnes texte fouillées, par table, et les fiches liées dont le nom compte
+ * aussi (une sous-requête EXISTS par lien). Tout est comparé via sans_accent()
+ * (migration « recherche_sans_accent ») : ni la casse ni les accents ne comptent.
+ * Les secrets (mots de passe, jetons, code de révocation) ne sont jamais fouillés.
+ */
+type Lien = { table: string; via: string; colonnes: string[]; join?: string };
+type Cible = { table: string; colonnes: string[]; actif?: string; liens?: Lien[] };
+
+const CIBLES: Record<string, Cible> = {
+  account: {
+    table: "account",
+    colonnes: ["service_name", "username", "url", "description"],
+    liens: [
+      { table: "software", via: "software_id", colonnes: ["name"] },
+      { table: "equipment", via: "equipment_id", colonnes: ["name"] },
+      { table: "supplier", via: "supplier_id", colonnes: ["name"] },
+    ],
+  },
+  certificate: {
+    table: "certificate",
+    colonnes: [
+      "service_name",
+      "domain",
+      "issuer",
+      "description",
+      "holder",
+      "first_name",
+      "holder_role",
+      "holder_email",
+      "level",
+      "serial_number",
+      "budget_code",
+    ],
+    liens: [
+      { table: "supplier", via: "supplier_id", colonnes: ["name"] },
+      { table: "equipment", via: "equipment_id", colonnes: ["name"] },
+      { table: "domain", via: "domain_id", colonnes: ["name"] },
+      { table: "user_service", via: "service_id", colonnes: ["name"] },
+      { table: "referential", via: "usage_id", colonnes: ["label"] },
+      { table: "referential", via: "support_id", colonnes: ["label"] },
+    ],
+  },
+  backup: {
+    table: "backup",
+    colonnes: [
+      "service_name",
+      "backup_type",
+      "location",
+      "frequency",
+      "expected_time",
+      "description",
+    ],
+    liens: [{ table: "equipment", via: "equipment_id", colonnes: ["name"] }],
+  },
+  test_task: { table: "test_task", colonnes: ["name", "test_type", "description", "result"] },
+  domain: {
+    table: "domain",
+    colonnes: ["name", "registrar", "description"],
+    liens: [{ table: "supplier", via: "registrar_id", colonnes: ["name"] }],
+  },
+  access_review: {
+    table: "access_review",
+    colonnes: ["application", "responsible", "responsible_email", "scope"],
+    liens: [{ table: "software", via: "software_id", colonnes: ["name"] }],
+  },
+  system_update: {
+    table: "system_update",
+    colonnes: [
+      "name",
+      "system_type",
+      "current_version",
+      "latest_version",
+      "updated_by",
+      "description",
+    ],
+    liens: [
+      { table: "software", via: "software_id", colonnes: ["name"] },
+      { table: "equipment", via: "equipment_id", colonnes: ["name"] },
+    ],
+  },
+  equipment: {
+    table: "equipment",
+    colonnes: [
+      "name",
+      "os",
+      "os_version",
+      "supervision",
+      "ip_address",
+      "vlan",
+      "host_server",
+      "hypervisor",
+      "manufacturer_model",
+      "serial_number",
+      "service_tag",
+      "maintenance_contract",
+      "location",
+      "management_url",
+      "protocols",
+      "role_principal",
+      "business_software",
+      "user_services",
+      "usage",
+      "pra_pca",
+      "backup1",
+      "backup2",
+      "observations",
+    ],
+    liens: [
+      {
+        table: "software_equipment",
+        via: "equipment_id",
+        colonnes: ["name"],
+        join: "software ON software.id = software_equipment.software_id",
+      },
+    ],
+  },
+  supplier: {
+    table: "supplier",
+    colonnes: [
+      "name",
+      "contact_name",
+      "phone",
+      "support_phone",
+      "email",
+      "support_url",
+      "support_email",
+      "customer_ref",
+      "address",
+      "postal_code",
+      "city",
+      "website",
+      "commercial_contact",
+      "commercial_phone",
+      "commercial_email",
+      "commercial_contact2",
+      "commercial_phone2",
+      "commercial_email2",
+      "admin_contact",
+      "admin_phone",
+      "admin_email",
+      "dpo_contact",
+      "dpo_phone",
+      "dpo_email",
+      "notes",
+    ],
+  },
+  contract: {
+    table: "contract",
+    colonnes: ["name", "nature", "reference", "supplier_reference", "budget_code", "description"],
+    liens: [
+      { table: "supplier", via: "supplier_id", colonnes: ["name"] },
+      { table: "referential", via: "kind_id", colonnes: ["label"] },
+      {
+        table: "contract_software",
+        via: "contract_id",
+        colonnes: ["name"],
+        join: "software ON software.id = contract_software.software_id",
+      },
+      {
+        table: "contract_equipment",
+        via: "contract_id",
+        colonnes: ["name"],
+        join: "equipment ON equipment.id = contract_equipment.equipment_id",
+      },
+    ],
+  },
+  software: {
+    table: "software",
+    colonnes: [
+      "name",
+      "version",
+      "url",
+      "responsible",
+      "responsible_email",
+      "tech_responsible",
+      "tech_responsible_email",
+      "no_contract_note",
+      "gdpr_categories",
+      "gdpr_registry_ref",
+      "description",
+    ],
+    liens: [
+      { table: "supplier", via: "supplier_id", colonnes: ["name"] },
+      { table: "referential", via: "technology_id", colonnes: ["label"] },
+      {
+        table: "software_equipment",
+        via: "software_id",
+        colonnes: ["name"],
+        join: "equipment ON equipment.id = software_equipment.equipment_id",
+      },
+      {
+        table: "software_service",
+        via: "software_id",
+        colonnes: ["name"],
+        join: "user_service ON user_service.id = software_service.user_service_id",
+      },
+      {
+        table: "contract_software",
+        via: "software_id",
+        colonnes: ["name", "reference"],
+        join: "contract ON contract.id = contract_software.contract_id",
+      },
+    ],
+  },
+  quote: {
+    table: "quote",
+    colonnes: ["supplier_name", "notes"],
+    actif: "TRUE",
+    liens: [
+      { table: "supplier", via: "supplier_id", colonnes: ["name"] },
+      { table: "consultation", via: "consultation_id", colonnes: ["subject", "notes"] },
+    ],
+  },
+  document: {
+    table: "document",
+    colonnes: ["filename", "uploaded_by"],
+    actif: "TRUE",
+    liens: [{ table: "referential", via: "category_id", colonnes: ["label"] }],
+  },
+};
+
+const ident = (n: string) => `"${n.replace(/"/g, "")}"`;
+
+/** Les identifiants des lignes d'une table dont un champ texte, ou le nom d'une fiche liée, contient le terme. */
+async function idsOu(cible: Cible, terme: string): Promise<number[]> {
+  const t = ident(cible.table);
+  const motif = `%${terme.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const clauses = cible.colonnes.map((c) => `sans_accent(${t}.${ident(c)}) LIKE $1`);
+  for (const l of cible.liens ?? []) {
+    const lt = ident(l.table);
+    // Lien direct (clé étrangère sur la table) : la table liée porte les colonnes.
+    // Lien par table de jointure : `join` nomme la table qui porte les colonnes.
+    const porteur = l.join ? l.join.split(" ")[0] : lt;
+    const cols = l.colonnes
+      .map((c) => `sans_accent(${ident(porteur)}.${ident(c)}) LIKE $1`)
+      .join(" OR ");
+    clauses.push(
+      l.join
+        ? `EXISTS (SELECT 1 FROM ${lt} JOIN ${l.join} WHERE ${lt}.${ident(l.via)} = ${t}.id AND (${cols}))`
+        : `EXISTS (SELECT 1 FROM ${lt} WHERE ${lt}.id = ${t}.${ident(l.via)} AND (${cols}))`,
+    );
+  }
+  const actif = cible.actif ?? `${t}.is_active`;
+  const sql = `SELECT ${t}.id FROM ${t} WHERE ${actif} AND (${clauses.join(" OR ")}) ORDER BY ${t}.id`;
+  const rows = await prisma.$queryRawUnsafe<{ id: number }[]>(sql, motif);
+  return rows.map((r) => r.id);
+}
+
+/** Le terme tel que la base le compare : sans casse ni accents. */
+function normaliser(q: string): string {
+  return q
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
 
 export async function rechercher(q: string, user: CurrentUser): Promise<Resultat[]> {
   const results: Resultat[] = [];
   if (q && q.length >= 2) {
-    const like: Mode = { contains: q, mode: "insensitive" };
+    const terme = normaliser(q);
+    const dans = async (cle: string) => ({ id: { in: await idsOu(CIBLES[cle], terme) } });
 
     for (const a of await prisma.account.findMany({
-      where: {
-        isActive: true,
-        OR: [{ serviceName: like }, { username: like }, { url: like }, { description: like }],
-      },
+      where: { ...(await dans("account")) },
     })) {
       results.push({
         type: "account",
@@ -56,10 +310,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const c of await prisma.certificate.findMany({
-      where: {
-        isActive: true,
-        OR: [{ serviceName: like }, { domain: like }, { issuer: like }, { description: like }],
-      },
+      where: { ...(await dans("certificate")) },
     })) {
       results.push({
         type: "certificate",
@@ -73,10 +324,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const b of await prisma.backup.findMany({
-      where: {
-        isActive: true,
-        OR: [{ serviceName: like }, { location: like }, { description: like }],
-      },
+      where: { ...(await dans("backup")) },
     })) {
       results.push({
         type: "backup",
@@ -88,7 +336,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const t of await prisma.testTask.findMany({
-      where: { isActive: true, OR: [{ name: like }, { description: like }, { testType: like }] },
+      where: { ...(await dans("test_task")) },
     })) {
       results.push({
         type: "test",
@@ -100,7 +348,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const d of await prisma.domain.findMany({
-      where: { isActive: true, OR: [{ name: like }, { registrar: like }, { description: like }] },
+      where: { ...(await dans("domain")) },
     })) {
       results.push({
         type: "domaine",
@@ -112,10 +360,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const r of await prisma.accessReview.findMany({
-      where: {
-        isActive: true,
-        OR: [{ application: like }, { responsible: like }, { scope: like }],
-      },
+      where: { ...(await dans("access_review")) },
     })) {
       results.push({
         type: "revue",
@@ -127,16 +372,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const u of await prisma.systemUpdate.findMany({
-      where: {
-        isActive: true,
-        OR: [
-          { name: like },
-          { currentVersion: like },
-          { latestVersion: like },
-          { updatedBy: like },
-          { description: like },
-        ],
-      },
+      where: { ...(await dans("system_update")) },
     })) {
       results.push({
         type: "mise à jour",
@@ -148,22 +384,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     const equipments = await prisma.equipment.findMany({
-      where: {
-        isActive: true,
-        OR: [
-          { name: like },
-          { os: like },
-          { ipAddress: like },
-          { hostServer: like },
-          { serialNumber: like },
-          { serviceTag: like },
-          { location: like },
-          { managementUrl: like },
-          { manufacturerModel: like },
-          { rolePrincipal: like },
-          { observations: like },
-        ],
-      },
+      where: { ...(await dans("equipment")) },
     });
     if (equipments.length) {
       const [cycles, backups] = await Promise.all([
@@ -191,19 +412,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       }
     }
     for (const s of await prisma.supplier.findMany({
-      where: {
-        isActive: true,
-        OR: [
-          { name: like },
-          { contactName: like },
-          { email: like },
-          { customerRef: like },
-          { city: like },
-          { commercialContact: like },
-          { adminContact: like },
-          { notes: like },
-        ],
-      },
+      where: { ...(await dans("supplier")) },
     })) {
       results.push({
         type: "fournisseur",
@@ -215,7 +424,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const c of await prisma.contract.findMany({
-      where: { isActive: true, OR: [{ name: like }, { reference: like }, { description: like }] },
+      where: { ...(await dans("contract")) },
       include: { supplier: true },
     })) {
       results.push({
@@ -228,18 +437,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
       });
     }
     for (const s of await prisma.software.findMany({
-      where: {
-        isActive: true,
-        OR: [
-          { name: like },
-          { version: like },
-          { url: like },
-          { responsible: like },
-          { techResponsible: like },
-          { description: like },
-          { supplier: { name: like } },
-        ],
-      },
+      where: { ...(await dans("software")) },
       include: { supplier: true, systemUpdates: { where: { isActive: true } } },
     })) {
       const editeur = s.supplier ? ` - ${s.supplier.name}` : "";
@@ -254,15 +452,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
     }
     if (enabledIn(user.settings, "quotes")) {
       const quotes = await prisma.quote.findMany({
-        where: {
-          consultation: { software: { isActive: true } },
-          OR: [
-            { supplierName: like },
-            { notes: like },
-            { supplier: { name: like } },
-            { consultation: { subject: like } },
-          ],
-        },
+        where: { ...(await dans("quote")), consultation: { software: { isActive: true } } },
         include: { supplier: true, consultation: { include: { software: true } } },
       });
       for (const qt of quotes) {
@@ -285,7 +475,7 @@ export async function rechercher(q: string, user: CurrentUser): Promise<Resultat
     }
     if (documentsEnabled(user.settings)) {
       const docs = await prisma.document.findMany({
-        where: { OR: [{ filename: like }, { category: { label: like } }] },
+        where: await dans("document"),
         include: {
           category: true,
           software: true,

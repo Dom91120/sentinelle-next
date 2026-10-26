@@ -37,6 +37,49 @@ describe("recherche", () => {
     expect(await rechercher(c, "dupuis")).toContain("e.magnus");
   });
 
+  it("la recherche ignore la casse et les accents", async () => {
+    const c = await clientAdmin();
+    await prisma.software.create({
+      data: { name: "Gestion des élections", description: "Châtillon" },
+    });
+    expect(await rechercher(c, "ELECTIONS")).toContain("Gestion des élections");
+    expect(await rechercher(c, "chatillon")).toContain("Gestion des élections");
+    expect(await rechercher(c, "Châtillon")).toContain("Gestion des élections");
+  });
+
+  it("un certificat électronique se trouve par son titulaire, un contrat par sa référence fournisseur", async () => {
+    const c = await clientAdmin();
+    const cert = await prisma.certificate.create({
+      data: { kind: "signature", serviceName: "DSI", holder: "ROLLAND", firstName: "David" },
+    });
+    const sup = await prisma.supplier.create({
+      data: { name: "Arpège", dpoEmail: "dpo@arpege.fr" },
+    });
+    const ct = await prisma.contract.create({
+      data: { name: "Maintenance", supplierId: sup.id, supplierReference: "ARP-2026-17" },
+    });
+    expect(await rechercher(c, "rolland")).toContain(`/certificates/${cert.id}`);
+    expect(await rechercher(c, "arp-2026")).toContain(`/contracts/${ct.id}`);
+    // Les fiches liées comptent : le contrat se trouve par son fournisseur, le fournisseur par le courriel de son DPO.
+    expect(await rechercher(c, "arpege")).toContain(`/contracts/${ct.id}`);
+    expect(await rechercher(c, "dpo@arpege")).toContain(`/suppliers/${sup.id}`);
+  });
+
+  it("un logiciel se trouve par le serveur, le service et le contrat qui lui sont liés", async () => {
+    const c = await clientAdmin();
+    const sw = await prisma.software.create({ data: { name: "Portail famille" } });
+    const srv = await prisma.equipment.create({ data: { name: "SRV-PORTAIL", kind: "vm" } });
+    const svc = await prisma.userService.create({ data: { name: "Petite enfance" } });
+    const ct = await prisma.contract.create({ data: { name: "Hébergement portail" } });
+    await prisma.softwareEquipment.create({ data: { softwareId: sw.id, equipmentId: srv.id } });
+    await prisma.softwareService.create({ data: { softwareId: sw.id, userServiceId: svc.id } });
+    await prisma.contractSoftware.create({ data: { softwareId: sw.id, contractId: ct.id } });
+    for (const q of ["srv-portail", "petite enfance", "hebergement portail"])
+      expect(await rechercher(c, q), q).toContain(`/inventory/logiciels/${sw.id}`);
+    // Et le matériel se trouve par le logiciel qu'il héberge.
+    expect(await rechercher(c, "portail famille")).toContain(`/inventory/${srv.id}`);
+  });
+
   it("un logiciel à la corbeille ne se trouve pas", async () => {
     const c = await clientAdmin();
     await prisma.software.create({ data: { name: "Antique", isActive: false } });

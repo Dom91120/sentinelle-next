@@ -181,7 +181,7 @@ Logique métier des modèles (à porter en TypeScript pur, `src/lib/statuts.ts` 
 - [x] `/audit` (ActionLog, plafond 3000), `/scheduler` (SchedulerRun)
 
 ### Recherche (`/search`), Connecteurs (`/connecteurs`), Référentiels (`/referentiels`), Pièces jointes
-- [x] `/search` (toutes entités, Ctrl K)
+- [x] `/search` (toutes entités, Ctrl K) ; depuis 2026-10-26 : tous les champs texte de chaque fiche et les noms des fiches liées, sans casse ni accents (`unaccent`, migration `recherche_sans_accent`)
 - [x] `/connecteurs` : cartes API (Sesame, chatIA), `/webhooks`, `/sesame`, `/chatia`
 - [x] `/referentiels` : `/add`, `/<id>/scope`, `/<id>/delete`, services `/services/add|edit|delete`
 - [x] `/documents/upload`, `/<id>/file`, `/<id>/download`, `/<id>/view` (INLINE_TYPES), `/<id>/edit`, `/<id>/delete` (ALLOWED_EXTENSIONS, DOCUMENT_MAX_MB)
