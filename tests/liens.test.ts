@@ -119,61 +119,169 @@ describe("comptes : rattachements", () => {
 });
 
 describe("mises à jour : la cible", () => {
-  it("le nom d'un logiciel relie la mise à jour", async () => {
+  it("le sélecteur propose les fiches par identifiant, filtrées par type", async () => {
+    const c = await clientAdmin();
+    const { sw, eq } = await fiches();
+    const html = (await c.get("/updates/create")).text;
+    expect(html).toContain('name="target"');
+    expect(html).toContain(
+      `<option value="application:${sw.id}" data-type="application">GLPI</option>`,
+    );
+    expect(html).toContain(`<option value="system:${eq.id}" data-type="system">srv-glpi</option>`);
+    expect(html).not.toContain('name="equipment_id"');
+  });
+
+  it("le logiciel choisi relie la mise à jour, le nom reste un libellé", async () => {
     const c = await clientAdmin();
     const { sw } = await fiches();
     await c.post(
       "/updates/create",
-      { name: "glpi", status: "up_to_date" },
+      { name: "MAJ GLPI", status: "up_to_date", target: `application:${sw.id}` },
       { followRedirects: true },
     );
     const u = await prisma.systemUpdate.findFirstOrThrow();
+    expect(u.name).toBe("MAJ GLPI");
     expect(u.softwareId).toBe(sw.id);
     expect(u.equipmentId).toBeNull();
     expect((await c.get(`/updates/${u.id}`)).text).toContain(`/inventory/logiciels/${sw.id}`);
     expect((await c.get(`/inventory/logiciels/${sw.id}`)).text).toContain(`/updates/${u.id}`);
   });
 
-  it("le nom d'un équipement relie sans choix explicite", async () => {
+  it("l'équipement choisi relie la mise à jour", async () => {
     const c = await clientAdmin();
     const { eq } = await fiches();
     await c.post(
       "/updates/create",
-      { name: "SRV-GLPI", status: "up_to_date" },
+      { name: "Windows Update", status: "up_to_date", target: `system:${eq.id}` },
       { followRedirects: true },
     );
     const u = await prisma.systemUpdate.findFirstOrThrow();
     expect(u.equipmentId).toBe(eq.id);
     expect(u.softwareId).toBeNull();
+    expect((await c.get(`/updates/${u.id}`)).text).toContain(`/inventory/${eq.id}`);
   });
 
-  it("l'équipement choisi prime sur le nom", async () => {
+  it("le nom seul ne relie rien", async () => {
     const c = await clientAdmin();
-    const { sw } = await fiches();
-    const autre = await prisma.equipment.create({ data: { name: "srv-autre", kind: "vm" } });
+    await fiches();
     await c.post(
       "/updates/create",
-      { name: "GLPI", status: "up_to_date", equipment_id: String(autre.id) },
+      { name: "glpi", status: "up_to_date" },
       { followRedirects: true },
     );
     const u = await prisma.systemUpdate.findFirstOrThrow();
-    expect(u.softwareId).toBe(sw.id);
-    expect(u.equipmentId).toBe(autre.id);
+    expect(u.softwareId).toBeNull();
+    expect(u.equipmentId).toBeNull();
   });
 
-  it("modifier le nom repose le lien", async () => {
+  it("une cible inconnue ou mal formée ne relie rien", async () => {
     const c = await clientAdmin();
-    const { sw } = await fiches();
-    const u = await prisma.systemUpdate.create({ data: { name: "GLPI", softwareId: sw.id } });
+    await fiches();
+    for (const target of ["application:9999", "system:9999", "application:abc", "glpi"]) {
+      await prisma.systemUpdate.deleteMany();
+      await c.post(
+        "/updates/create",
+        { name: "MAJ", status: "up_to_date", target },
+        { followRedirects: true },
+      );
+      const u = await prisma.systemUpdate.findFirstOrThrow();
+      expect(u.softwareId, target).toBeNull();
+      expect(u.equipmentId, target).toBeNull();
+    }
+  });
+
+  it("la modification garde, change ou retire le lien", async () => {
+    const c = await clientAdmin();
+    const { sw, eq } = await fiches();
+    const u = await prisma.systemUpdate.create({ data: { name: "MAJ GLPI", softwareId: sw.id } });
+    const html = (await c.get(`/updates/${u.id}/edit`)).text;
+    // L'ordre des attributs rendus par React n'est pas garanti : on vérifie l'option et son `selected`.
+    expect(html).toMatch(
+      new RegExp(`<option[^>]*value="application:${sw.id}"[^>]*selected=""[^>]*>GLPI</option>`),
+    );
+
     await c.post(
       `/updates/${u.id}/edit`,
-      { name: "Hors inventaire", status: "up_to_date" },
+      { name: "MAJ GLPI v11", status: "up_to_date", target: `application:${sw.id}` },
+      { followRedirects: true },
+    );
+    let maj = await prisma.systemUpdate.findUniqueOrThrow({ where: { id: u.id } });
+    expect(maj.name).toBe("MAJ GLPI v11");
+    expect(maj.softwareId).toBe(sw.id);
+
+    await c.post(
+      `/updates/${u.id}/edit`,
+      { name: "MAJ GLPI v11", status: "up_to_date", target: `system:${eq.id}` },
+      { followRedirects: true },
+    );
+    maj = await prisma.systemUpdate.findUniqueOrThrow({ where: { id: u.id } });
+    expect(maj.softwareId).toBeNull();
+    expect(maj.equipmentId).toBe(eq.id);
+
+    await c.post(
+      `/updates/${u.id}/edit`,
+      { name: "MAJ GLPI v11", status: "up_to_date", target: "" },
+      { followRedirects: true },
+    );
+    maj = await prisma.systemUpdate.findUniqueOrThrow({ where: { id: u.id } });
+    expect(maj.softwareId).toBeNull();
+    expect(maj.equipmentId).toBeNull();
+  });
+
+  it("l'intervenant : une personne (annuaire) ou un fournisseur (inventaire)", async () => {
+    const c = await clientAdmin();
+    const { sw, sup } = await fiches();
+    const html = (await c.get("/updates/create")).text;
+    expect(html).toContain('id="updatedByPerson"');
+    expect(html).toContain('data-ad-search=""');
+    expect(html).toContain(`<option value="${sup.name}">${sup.name}</option>`);
+
+    await c.post(
+      "/updates/create",
+      {
+        name: "MAJ GLPI",
+        status: "up_to_date",
+        target: `application:${sw.id}`,
+        updater_type: "prestataire",
+        updated_by: sup.name,
+      },
+      { followRedirects: true },
+    );
+    const u = await prisma.systemUpdate.findFirstOrThrow();
+    expect(u.updaterType).toBe("prestataire");
+    expect(u.updatedBy).toBe(sup.name);
+    const edition = (await c.get(`/updates/${u.id}/edit`)).text;
+    expect(edition).toMatch(new RegExp(`<option[^>]*value="${sup.name}"[^>]*selected=""`));
+    expect(edition).toContain(">Prestataire</label>");
+
+    // « Autre » : saisie libre, sans annuaire ni liste.
+    await c.post(
+      `/updates/${u.id}/edit`,
+      {
+        name: "MAJ GLPI",
+        status: "up_to_date",
+        updater_type: "autre",
+        updated_by: "Stagiaire DSI",
+      },
       { followRedirects: true },
     );
     const maj = await prisma.systemUpdate.findUniqueOrThrow({ where: { id: u.id } });
-    expect(maj.softwareId).toBeNull();
-    expect(maj.equipmentId).toBeNull();
-    expect(maj.name).toBe("Hors inventaire");
+    expect(maj.updaterType).toBe("autre");
+    expect(maj.updatedBy).toBe("Stagiaire DSI");
+    const libre = (await c.get(`/updates/${u.id}/edit`)).text;
+    expect(libre).toMatch(/<input[^>]*id="updatedByOther"[^>]*value="Stagiaire DSI"/);
+    expect(libre).toContain(">Intervenant</label>");
+    expect((await c.get(`/updates/${u.id}`)).text).toContain("Autre");
+
+    // Une valeur inconnue retombe sur « interne ».
+    await c.post(
+      `/updates/${u.id}/edit`,
+      { name: "MAJ GLPI", status: "up_to_date", updater_type: "robot", updated_by: "x" },
+      { followRedirects: true },
+    );
+    expect((await prisma.systemUpdate.findUniqueOrThrow({ where: { id: u.id } })).updaterType).toBe(
+      "interne",
+    );
   });
 
   it("la migration relie par nom sans homonyme", async () => {

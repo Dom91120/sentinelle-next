@@ -11,10 +11,18 @@ export const TYPE_CHOICES: [string, string][] = [
   ["application", "Application"],
   ["system", "Matériel"],
 ];
+/** Qui a réalisé la mise à jour : une personne (annuaire), un fournisseur (inventaire) ou autre (saisie libre). */
+export const UPDATER_CHOICES: [string, string][] = [
+  ["interne", "Interne"],
+  ["prestataire", "Prestataire"],
+  ["autre", "Autre"],
+];
 export const STATUS_LABELS: Record<string, string> = Object.fromEntries(STATUS_CHOICES);
 export const TYPE_LABELS: Record<string, string> = Object.fromEntries(TYPE_CHOICES);
+export const UPDATER_LABELS: Record<string, string> = Object.fromEntries(UPDATER_CHOICES);
 const VALID_STATUS = new Set(STATUS_CHOICES.map(([v]) => v));
 const VALID_TYPE = new Set(TYPE_CHOICES.map(([v]) => v));
+const VALID_UPDATER = new Set(UPDATER_CHOICES.map(([v]) => v));
 
 export function cleanStatus(value: unknown): string {
   return typeof value === "string" && VALID_STATUS.has(value) ? value : "up_to_date";
@@ -24,72 +32,77 @@ export function cleanType(value: unknown): string {
   return typeof value === "string" && VALID_TYPE.has(value) ? value : "application";
 }
 
-export type Asset = { name: string; assetType: "application" | "system" };
+export function cleanUpdater(value: unknown): string {
+  return typeof value === "string" && VALID_UPDATER.has(value) ? value : "interne";
+}
 
-/** Suggestions pour le champ « nom » : logiciels métiers (application) et équipements (système). */
+export type AssetType = "application" | "system";
+export type Asset = { id: number; name: string; assetType: AssetType };
+
+/** La valeur du sélecteur « Matériel / Application » pour une fiche. */
+export function cibleValeur(assetType: AssetType, id: number): string {
+  return `${assetType}:${id}`;
+}
+
+/** Les fiches proposées par le sélecteur : logiciels métiers (application) et équipements (système). */
 export async function activeAssets(): Promise<Asset[]> {
   const [apps, systems] = await Promise.all([
     prisma.software.findMany({
       where: { isActive: true },
       orderBy: { name: "asc" },
-      select: { name: true },
+      select: { id: true, name: true },
     }),
     prisma.equipment.findMany({
       where: { isActive: true },
       orderBy: { name: "asc" },
-      select: { name: true },
+      select: { id: true, name: true },
     }),
   ]);
   return [
-    ...apps.map((s) => ({ name: s.name, assetType: "application" as const })),
-    ...systems.map((e) => ({ name: e.name, assetType: "system" as const })),
+    ...apps.map((s) => ({ id: s.id, name: s.name, assetType: "application" as const })),
+    ...systems.map((e) => ({ id: e.id, name: e.name, assetType: "system" as const })),
   ];
 }
 
+export type Prestataire = { id: number; name: string };
+
 export async function formContext() {
-  const [assets, equipments] = await Promise.all([
+  const [assets, prestataires] = await Promise.all([
     activeAssets(),
-    prisma.equipment.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+    prisma.supplier.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
   ]);
-  return { assets, equipments };
+  return { assets, prestataires };
 }
 
 export type FormContext = Awaited<ReturnType<typeof formContext>>;
 
-/** (software_id, equipment_id) : l'équipement choisi prime ; sinon le nom cherche sa fiche quand UNE fiche active le porte. */
+/**
+ * (software_id, equipment_id) d'après le sélecteur « Matériel / Application » (`application:<id>`
+ * ou `system:<id>`). Le nom de la mise à jour n'est qu'un libellé : il ne relie rien. Une valeur
+ * absente, mal formée ou qui ne désigne aucune fiche ne pose aucun lien.
+ */
 export async function cible(
-  name: string,
-  equipmentForm: FormDataEntryValue | null,
+  cibleForm: FormDataEntryValue | null,
 ): Promise<[number | null, number | null]> {
-  const nom = (name ?? "").trim();
-  const logiciels = nom
-    ? await prisma.software.findMany({
-        where: { isActive: true, name: { equals: nom, mode: "insensitive" } },
-        select: { id: true },
-      })
-    : [];
-  const softwareId = logiciels.length === 1 ? logiciels[0].id : null;
-  let equipmentId: number | null = null;
-  const demande =
-    typeof equipmentForm === "string" ? Number.parseInt(equipmentForm, 10) : Number.NaN;
-  if (Number.isInteger(demande) && demande > 0) {
-    const e = await prisma.equipment.findUnique({ where: { id: demande }, select: { id: true } });
-    equipmentId = e ? demande : null;
+  const m = typeof cibleForm === "string" ? /^(application|system):(\d+)$/.exec(cibleForm) : null;
+  if (!m) return [null, null];
+  const id = Number.parseInt(m[2], 10);
+  if (!Number.isInteger(id) || id <= 0) return [null, null];
+  if (m[1] === "application") {
+    const s = await prisma.software.findUnique({ where: { id }, select: { id: true } });
+    return [s ? id : null, null];
   }
-  if (equipmentId === null && nom) {
-    const equipements = await prisma.equipment.findMany({
-      where: { isActive: true, name: { equals: nom, mode: "insensitive" } },
-      select: { id: true },
-    });
-    equipmentId = equipements.length === 1 ? equipements[0].id : null;
-  }
-  return [softwareId, equipmentId];
+  const e = await prisma.equipment.findUnique({ where: { id }, select: { id: true } });
+  return [null, e ? id : null];
 }
 
 /** Les champs d'une mise à jour depuis le formulaire (nom validé à part). */
 export async function depuisFormulaire(f: FormData, name: string) {
-  const [softwareId, equipmentId] = await cible(name, f.get("equipment_id"));
-  const updater = f.get("updater_type");
+  const [softwareId, equipmentId] = await cible(f.get("target"));
   return {
     name,
     systemType: cleanType(f.get("system_type")),
@@ -97,7 +110,7 @@ export async function depuisFormulaire(f: FormData, name: string) {
     latestVersion: champOuNull(f, "latest_version"),
     status: cleanStatus(f.get("status")),
     lastUpdate: parseDate(f.get("last_update")),
-    updaterType: typeof updater === "string" ? updater : "interne",
+    updaterType: cleanUpdater(f.get("updater_type")),
     updatedBy: champOuNull(f, "updated_by"),
     description: typeof f.get("description") === "string" ? (f.get("description") as string) : null,
     softwareId,

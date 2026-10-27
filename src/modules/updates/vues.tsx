@@ -1,7 +1,6 @@
 /** Les gabarits des mises à jour (port de updates/_form_corps.html et _synthese.html). */
 
 import { PiedForm, RubriqueForm } from "@/components/formulaire";
-import { EquipmentSelect } from "@/components/partials";
 import { ScriptDiffere } from "@/components/scripts";
 import { Lu, Pastille, Rangee, Rubrique } from "@/components/synthese";
 import type { Equipment, Software, SystemUpdate } from "@/generated/prisma/client";
@@ -10,10 +9,15 @@ import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
 import {
   type Asset,
+  cibleValeur,
+  cleanUpdater,
+  type Prestataire,
   STATUS_CHOICES,
   STATUS_LABELS,
   TYPE_CHOICES,
   TYPE_LABELS,
+  UPDATER_CHOICES,
+  UPDATER_LABELS,
 } from "@/modules/updates/server";
 import type { CurrentUser } from "@/server/guards";
 
@@ -22,6 +26,10 @@ export type UpdateComplete = SystemUpdate & {
   equipment: Equipment | null;
 };
 
+/**
+ * Le sélecteur « Matériel / Application » ne propose que les fiches du type choisi ; choisir une
+ * fiche propose son nom comme libellé tant que le champ « Nom » est vide (le nom reste libre).
+ */
 const PICKER_JS = `(function () {
     var typeSel = document.getElementById('systemType');
     var picker = document.getElementById('assetPicker');
@@ -35,15 +43,55 @@ const PICKER_JS = `(function () {
         });
         if (picker.selectedOptions[0] && picker.selectedOptions[0].hidden) picker.value = '';
     }
-    picker.addEventListener('change', function () { if (picker.value) nameInput.value = picker.value; });
+    picker.addEventListener('change', function () {
+        var opt = picker.selectedOptions[0];
+        if (opt && opt.value && !nameInput.value.trim()) nameInput.value = opt.text;
+    });
     typeSel.addEventListener('change', filterPicker);
     filterPicker();
+})();
+(function () {
+    var qui = document.getElementById('updaterType');
+    var label = document.getElementById('updatedByLabel');
+    if (!qui || !label) return;
+    var controles = {
+        interne: { el: document.getElementById('updatedByPerson'), libelle: 'Nom de la personne' },
+        prestataire: { el: document.getElementById('updatedBySupplier'), libelle: 'Prestataire' },
+        autre: { el: document.getElementById('updatedByOther'), libelle: 'Intervenant' }
+    };
+    function basculer(vider) {
+        var choix = controles[qui.value] ? qui.value : 'interne';
+        label.textContent = controles[choix].libelle;
+        label.htmlFor = controles[choix].el.id;
+        Object.keys(controles).forEach(function (k) {
+            var el = controles[k].el;
+            if (!el) return;
+            el.hidden = (k !== choix); el.disabled = (k !== choix);
+            if (vider) el.value = '';
+        });
+    }
+    qui.addEventListener('change', function () { basculer(true); });
+    basculer(false);
 })();`;
+
+/** Le contrôle « intervenant » affiché pour chaque choix de « Réalisée par ». */
+const INTERVENANT: Record<string, { id: string; libelle: string }> = {
+  interne: { id: "updatedByPerson", libelle: "Nom de la personne" },
+  prestataire: { id: "updatedBySupplier", libelle: "Prestataire" },
+  autre: { id: "updatedByOther", libelle: "Intervenant" },
+};
+
+/** La valeur du sélecteur pour la fiche déjà rattachée (logiciel, sinon équipement). */
+function cibleActuelle(update: SystemUpdate | null): string {
+  if (update?.softwareId) return cibleValeur("application", update.softwareId);
+  if (update?.equipmentId) return cibleValeur("system", update.equipmentId);
+  return "";
+}
 
 export type FormProps = {
   update: SystemUpdate | null;
   assets: Asset[];
-  equipments: Equipment[];
+  prestataires: Prestataire[];
   user: CurrentUser;
   csrf: string;
   nonce?: string;
@@ -55,13 +103,21 @@ export type FormProps = {
 export function FormCorps({
   update,
   assets,
-  equipments,
+  prestataires,
   user,
   csrf,
   nonce,
   retour,
   actionForm,
 }: FormProps) {
+  const qui = cleanUpdater(update?.updaterType);
+  const intervenant = update?.updatedBy ?? "";
+  const valeur = (choix: string) => (qui === choix ? intervenant : "");
+  // Un prestataire saisi autrefois en texte libre reste proposé, sans le perdre.
+  const choixPrestataires =
+    qui === "prestataire" && intervenant && !prestataires.some((p) => p.name === intervenant)
+      ? [{ id: 0, name: intervenant }, ...prestataires]
+      : prestataires;
   return (
     <>
       <div className="form-seul">
@@ -76,6 +132,18 @@ export function FormCorps({
           <div className="data-card mb-3">
             <RubriqueForm titre="Mise à jour" icone="bi-arrow-up-circle" couleur="sky">
               <div className="row">
+                <div className="col-md mb-3">
+                  <label className="form-label fw-medium">Nom *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    id="assetName"
+                    className="form-control"
+                    required
+                    defaultValue={update?.name ?? ""}
+                    placeholder="Libellé de la mise à jour"
+                  />
+                </div>
                 <div className="col-md-auto mb-3">
                   <label className="form-label fw-medium">Type</label>
                   <select
@@ -92,31 +160,26 @@ export function FormCorps({
                   </select>
                 </div>
                 <div className="col-md-auto mb-3">
-                  <label className="form-label fw-medium">Matériel / Application</label>
-                  <select id="assetPicker" className="form-select l-contenu" defaultValue="">
-                    <option value="">— Sélectionner —</option>
+                  <label className="form-label fw-medium" htmlFor="assetPicker">
+                    Matériel / Application
+                  </label>
+                  <select
+                    name="target"
+                    id="assetPicker"
+                    className="form-select l-contenu"
+                    defaultValue={cibleActuelle(update)}
+                  >
+                    <option value="">— Aucun —</option>
                     {assets.map((a) => (
                       <option
-                        key={`${a.assetType}:${a.name}`}
-                        value={a.name}
+                        key={cibleValeur(a.assetType, a.id)}
+                        value={cibleValeur(a.assetType, a.id)}
                         data-type={a.assetType}
                       >
                         {a.name}
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="col-md mb-3">
-                  <label className="form-label fw-medium">Nom *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    id="assetName"
-                    className="form-control"
-                    required
-                    defaultValue={update?.name ?? ""}
-                    placeholder="ou saisie libre"
-                  />
                 </div>
               </div>
               <div className="row">
@@ -170,34 +233,70 @@ export function FormCorps({
               </div>
               <div className="row">
                 <div className="col-md-auto mb-3">
-                  <label className="form-label fw-medium">Réalisée par</label>
+                  <label className="form-label fw-medium" htmlFor="updaterType">
+                    Réalisée par
+                  </label>
                   <select
                     name="updater_type"
+                    id="updaterType"
                     className="form-select l-contenu"
-                    defaultValue={update?.updaterType === "prestataire" ? "prestataire" : "interne"}
+                    defaultValue={qui}
                   >
-                    <option value="interne">Interne</option>
-                    <option value="prestataire">Prestataire</option>
+                    {UPDATER_CHOICES.map(([val, lbl]) => (
+                      <option key={val} value={val}>
+                        {lbl}
+                      </option>
+                    ))}
                   </select>
                 </div>
+                {/* Interne : une personne de l'annuaire (AD) ; prestataire : un fournisseur de
+                    l'inventaire ; autre : saisie libre. Le script bascule libellé et contrôle, les
+                    contrôles masqués sont désactivés (non envoyés). */}
                 <div className="col-md mb-3">
-                  <label className="form-label fw-medium">Nom de la personne</label>
+                  <label
+                    className="form-label fw-medium"
+                    id="updatedByLabel"
+                    htmlFor={INTERVENANT[qui].id}
+                  >
+                    {INTERVENANT[qui].libelle}
+                  </label>
                   <input
                     type="text"
                     name="updated_by"
+                    id="updatedByPerson"
+                    data-ad-search=""
                     className="form-control"
-                    defaultValue={update?.updatedBy ?? ""}
-                    placeholder="ex: Jean Dupont (DSI) ou Société XYZ"
+                    defaultValue={valeur("interne")}
+                    placeholder="Rechercher dans l'annuaire (AD)..."
+                    hidden={qui !== "interne"}
+                    disabled={qui !== "interne"}
+                  />
+                  <select
+                    name="updated_by"
+                    id="updatedBySupplier"
+                    className="form-select"
+                    defaultValue={valeur("prestataire")}
+                    hidden={qui !== "prestataire"}
+                    disabled={qui !== "prestataire"}
+                  >
+                    <option value="">— Sélectionner un fournisseur —</option>
+                    {choixPrestataires.map((p) => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    name="updated_by"
+                    id="updatedByOther"
+                    className="form-control"
+                    defaultValue={valeur("autre")}
+                    placeholder="ex: stagiaire, éditeur, collectivité voisine..."
+                    hidden={qui !== "autre"}
+                    disabled={qui !== "autre"}
                   />
                 </div>
-              </div>
-              <div className="mb-3">
-                <EquipmentSelect
-                  equipments={equipments}
-                  selectedId={update?.equipmentId}
-                  user={user}
-                  csrf={csrf}
-                />
               </div>
             </RubriqueForm>
 
@@ -246,13 +345,7 @@ export function Synthese({ update }: { update: UpdateComplete }) {
           <Lu label="Réalisée par" valeur={update.updatedBy} />
           <Lu
             label="Intervenant"
-            valeur={
-              update.updatedBy
-                ? update.updaterType === "prestataire"
-                  ? "Prestataire"
-                  : "Interne"
-                : null
-            }
+            valeur={update.updatedBy ? UPDATER_LABELS[cleanUpdater(update.updaterType)] : null}
             facultatif
           />
           <Lu
