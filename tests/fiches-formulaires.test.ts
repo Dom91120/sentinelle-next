@@ -215,6 +215,38 @@ describe("fiches", () => {
   });
 });
 
+/**
+ * Le HTML d'une page sans ses fenêtres modales (ajout rapide, confirmation). Les modales
+ * d'ajout rapide reprennent le formulaire complet d'une autre fiche, avec ses propres
+ * rubriques : leurs couleurs ne sont pas celles du formulaire de la page.
+ */
+function sansModales(html: string): string {
+  const ouverture = /<div class="modal fade[^"]*"/g;
+  let dehors = "";
+  let pos = 0;
+  for (;;) {
+    ouverture.lastIndex = pos;
+    const m = ouverture.exec(html);
+    if (!m) {
+      dehors += html.slice(pos);
+      return dehors;
+    }
+    dehors += html.slice(pos, m.index);
+    // Jusqu'au </div> qui ferme la modale, en comptant les <div> imbriqués.
+    const balise = /<div\b|<\/div>/g;
+    balise.lastIndex = m.index;
+    let profondeur = 0;
+    pos = html.length;
+    for (let t = balise.exec(html); t; t = balise.exec(html)) {
+      profondeur += t[0] === "</div>" ? -1 : 1;
+      if (profondeur === 0) {
+        pos = t.index + t[0].length;
+        break;
+      }
+    }
+  }
+}
+
 const CREATIONS = [
   "/accounts/create",
   "/backups/create",
@@ -269,7 +301,7 @@ describe("formulaires", () => {
     const c = await clientAdmin();
     await jeuMinimal();
     for (const url of CREATIONS) {
-      const html = (await c.get(url)).text;
+      const html = sansModales((await c.get(url)).text);
       let sections = [...html.matchAll(/class="form-section form-section--(\w+)/g)].map(
         (m) => m[1],
       );
