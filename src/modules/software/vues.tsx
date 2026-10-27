@@ -1039,6 +1039,8 @@ function ChoixSens({ valeur }: { valeur: string }) {
         type="button"
         className="btn btn-sm btn-outline-primary dropdown-toggle"
         data-bs-toggle="dropdown"
+        // Positionnement fixe : la carte (.data-card) rogne son contenu, le menu doit en sortir.
+        data-bs-popper-config='{"strategy":"fixed"}'
         aria-expanded="false"
         title={`Sens du flux : ${courant[2]}`}
         aria-label={`Sens du flux : ${courant[2]}`}
