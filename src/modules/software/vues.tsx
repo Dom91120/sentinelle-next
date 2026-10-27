@@ -1019,6 +1019,53 @@ const CHOIX_SENS: [string, string, string][] = [
   ["double", "double", "Double sens"],
 ];
 
+/** La valeur du choix de sens (`vers` / `depuis` / `double`) d'un flux lu depuis une fiche. */
+const SENS_VALEUR: Record<Flux["sens"], string> = {
+  sortant: "vers",
+  entrant: "depuis",
+  double: "double",
+};
+
+/**
+ * Le bouton-liste du sens d'un flux : un champ caché `sens` et une icône qui suit le choix
+ * (FLUX_JS). Sert à déclarer un flux comme à le corriger.
+ */
+function ChoixSens({ valeur }: { valeur: string }) {
+  const courant = CHOIX_SENS.find(([v]) => v === valeur) ?? CHOIX_SENS[0];
+  return (
+    <div className="dropdown flux-sens-choix">
+      <input type="hidden" name="sens" value={courant[0]} />
+      <button
+        type="button"
+        className="btn btn-sm btn-outline-primary dropdown-toggle"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+        title={`Sens du flux : ${courant[2]}`}
+        aria-label={`Sens du flux : ${courant[2]}`}
+      >
+        <span className="js-sens-icone">
+          <Lucide nom={FLUX_ICONE[courant[1]]} taille={14} />
+        </span>
+      </button>
+      <ul className="dropdown-menu">
+        {CHOIX_SENS.map(([v, sens, libelle]) => (
+          <li key={v}>
+            <button
+              type="button"
+              className={`dropdown-item d-flex align-items-center gap-2${v === courant[0] ? " active" : ""}`}
+              data-sens={v}
+              data-libelle={libelle}
+            >
+              <Lucide nom={FLUX_ICONE[sens]} taille={14} />
+              {libelle}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function FluxCarte({
   item,
   flux,
@@ -1071,8 +1118,8 @@ export function FluxCarte({
                           className="btn btn-sm btn-ghost btn-icone"
                           data-bs-toggle="collapse"
                           data-bs-target={`#fluxEdit${lien.id}`}
-                          title="Modifier la description du flux"
-                          aria-label="Modifier la description du flux"
+                          title="Modifier le flux (sens, description)"
+                          aria-label="Modifier le flux (sens, description)"
                         >
                           <Lucide nom="pencil" taille={16} />
                         </button>
@@ -1104,6 +1151,8 @@ export function FluxCarte({
                     >
                       <input type="hidden" name="csrf_token" value={csrf} />
                       <input type="hidden" name="from_id" value={item.id} />
+                      <ChoixSens valeur={SENS_VALEUR[sens]} />
+                      <span className="small text-muted">{autre.name}</span>
                       <input
                         type="text"
                         name="description"
@@ -1132,36 +1181,7 @@ export function FluxCarte({
               className="d-flex flex-wrap align-items-center gap-2"
             >
               <input type="hidden" name="csrf_token" value={csrf} />
-              <div className="dropdown flux-sens-choix">
-                <input type="hidden" name="sens" value="vers" />
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-primary dropdown-toggle"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  title="Sens du flux : Vers"
-                  aria-label="Sens du flux : Vers"
-                >
-                  <span className="js-sens-icone">
-                    <Lucide nom={FLUX_ICONE.sortant} taille={14} />
-                  </span>
-                </button>
-                <ul className="dropdown-menu">
-                  {CHOIX_SENS.map(([valeur, sens, libelle], i) => (
-                    <li key={valeur}>
-                      <button
-                        type="button"
-                        className={`dropdown-item d-flex align-items-center gap-2${i === 0 ? " active" : ""}`}
-                        data-sens={valeur}
-                        data-libelle={libelle}
-                      >
-                        <Lucide nom={FLUX_ICONE[sens]} taille={14} />
-                        {libelle}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ChoixSens valeur="vers" />
               <select
                 name="other_id"
                 className="form-select form-select-sm w-auto"

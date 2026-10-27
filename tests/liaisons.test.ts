@@ -183,6 +183,68 @@ describe("flux entre logiciels", () => {
     expect(await prisma.softwareLink.count()).toBe(0);
   });
 
+  it("le sens et la description d'un flux se corrigent en place", async () => {
+    const c = await clientAdmin();
+    const [a, b] = await deux();
+    await c.post(`/inventory/logiciels/${a.id}/links/add`, {
+      other_id: String(b.id),
+      description: "export",
+    });
+    const lien = await prisma.softwareLink.findFirstOrThrow();
+    const url = `/inventory/logiciels/links/${lien.id}/edit`;
+    const relu = () => prisma.softwareLink.findUniqueOrThrow({ where: { id: lien.id } });
+
+    // Le formulaire de modification propose le sens courant, lu depuis chaque fiche.
+    expect((await c.get(`/inventory/logiciels/${a.id}`)).text).toMatch(
+      /id="fluxEdit\d+"[\s\S]*?name="sens" value="vers"/,
+    );
+    expect((await c.get(`/inventory/logiciels/${b.id}`)).text).toMatch(
+      /id="fluxEdit\d+"[\s\S]*?name="sens" value="depuis"/,
+    );
+
+    // Depuis A : « depuis » retourne le flux, B alimente A.
+    await c.post(url, { from_id: String(a.id), sens: "depuis", description: "import" });
+    let maj = await relu();
+    expect([maj.sourceId, maj.targetId, maj.description]).toEqual([b.id, a.id, "import"]);
+    expect(maj.bidirectional).toBeFalsy();
+
+    // Depuis B : « double » garde les deux bouts et pose le double sens.
+    await c.post(url, { from_id: String(b.id), sens: "double", description: "import" });
+    maj = await relu();
+    expect(maj.bidirectional).toBe(true);
+    expect(linkSensDepuis(maj, a.id)).toBe("double");
+
+    // Depuis B : « vers » revient à un sens unique, B alimente A.
+    await c.post(url, { from_id: String(b.id), sens: "vers", description: "import" });
+    maj = await relu();
+    expect([maj.sourceId, maj.targetId]).toEqual([b.id, a.id]);
+    expect(maj.bidirectional).toBe(false);
+
+    // Sans sens envoyé, seule la description change.
+    await c.post(url, { from_id: String(a.id), description: "import quotidien" });
+    maj = await relu();
+    expect([maj.sourceId, maj.targetId, maj.description]).toEqual([b.id, a.id, "import quotidien"]);
+  });
+
+  it("retourner un flux ne peut pas doubler un flux existant", async () => {
+    const c = await clientAdmin();
+    const [a, b] = await deux();
+    await c.post(`/inventory/logiciels/${a.id}/links/add`, { other_id: String(b.id) });
+    await c.post(`/inventory/logiciels/${b.id}/links/add`, { other_id: String(a.id) });
+    const [ab, ba] = await prisma.softwareLink.findMany({ orderBy: { id: "asc" } });
+    expect([ab.sourceId, ba.sourceId]).toEqual([a.id, b.id]);
+    const url = `/inventory/logiciels/links/${ab.id}/edit`;
+
+    await c.post(url, { from_id: String(a.id), sens: "depuis" });
+    let maj = await prisma.softwareLink.findUniqueOrThrow({ where: { id: ab.id } });
+    expect([maj.sourceId, maj.targetId]).toEqual([a.id, b.id]);
+
+    await c.post(url, { from_id: String(a.id), sens: "double" });
+    maj = await prisma.softwareLink.findUniqueOrThrow({ where: { id: ab.id } });
+    expect(maj.bidirectional).toBeFalsy();
+    expect(await prisma.softwareLink.count()).toBe(2);
+  });
+
   it("supprimer un logiciel emporte ses flux", async () => {
     const [a, b] = await deux("A", "B");
     await prisma.softwareLink.create({ data: { sourceId: a.id, targetId: b.id } });
