@@ -24,8 +24,9 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
   const q = String(params.q ?? "").trim();
   const host = String(params.host ?? "").trim();
   const tous = await chargerLogiciels();
-  // Software.query.filter_by(is_active=True).order_by(Software.name) : ordre binaire de SQLite.
-  tous.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  // Tri français, insensible à la casse et aux accents (le tri par code de caractère plaçait
+  // « MLM » avant « Maarch »).
+  tous.sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
   const totalAll = tous.length;
   const match: Record<string, (s: (typeof tous)[number]) => boolean> = {
     docker: (s) => s.isDocker,
