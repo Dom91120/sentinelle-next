@@ -230,7 +230,7 @@ export function CorpsChamps({
           <Champ
             rapide={rapide}
             prefixe={prefixe}
-            label="Courriel"
+            label="Courriel support"
             name="support_email"
             valeur={s?.supportEmail}
             type="email"
