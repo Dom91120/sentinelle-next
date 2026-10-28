@@ -16,10 +16,13 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let accounts = await chargerComptes();
-  // Par libellé, ordre alphabétique (Sentinelle triait par échéance puis statut : les pastilles
-  // Urgent / OK filtrent, l'ordre reste celui des libellés).
-  accounts.sort((a, b) =>
-    a.serviceName.localeCompare(b.serviceName, "fr", { sensitivity: "base" }),
+  // Par date du prochain changement, la plus proche en tête ; un compte sans échéance
+  // (« à renseigner ») passe devant. À date égale, par libellé.
+  accounts.sort(
+    (a, b) =>
+      (a.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY) -
+        (b.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY) ||
+      a.serviceName.localeCompare(b.serviceName, "fr", { sensitivity: "base" }),
   );
   accounts = textSearch(accounts, q, ["serviceName", "username", "url", "description"]);
   const perPage = await resolvePerPage(params, page.user, "accounts.list");
