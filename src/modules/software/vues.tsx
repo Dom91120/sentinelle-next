@@ -821,7 +821,8 @@ export function Synthese({ item, gdpr }: { item: LogicielComplet; gdpr: boolean 
 
 // ── Contacts (_contacts.html) ──
 
-function Tel({ numero }: { numero: string }) {
+/** Un numéro de téléphone cliquable, groupé par deux chiffres quand il en a dix. */
+export function Tel({ numero }: { numero: string }) {
   const chiffres = numero.replace(/[ .]/g, "");
   const paires =
     chiffres.length === 10 && /^\d+$/.test(chiffres) ? chiffres.match(/.{2}/g)?.join(" ") : numero;
@@ -877,6 +878,8 @@ type LigneContact = {
   large?: boolean;
   /** null : rien de renseigné. */
   valeur: React.ReactNode | null;
+  /** Toujours affichée sur la fiche du fournisseur, même vide (les canaux du support). */
+  toujours?: boolean;
 };
 
 /**
@@ -901,8 +904,9 @@ export function Contacts({
         retrouver ici ses contacts.
       </div>
     );
-  // Sur la fiche du fournisseur (seulementRenseigne), l'interlocuteur, le standard et le
-  // courriel ont leurs propres lignes ; sur un logiciel, ils servent de repli au support.
+  // Sur la fiche du fournisseur (seulementRenseigne), le standard et le courriel sont dans le
+  // bloc « Fournisseur » et l'interlocuteur (fiches anciennes) a sa ligne ; sur un logiciel, le
+  // standard et le courriel servent de repli au support.
   const telSupport = sup.supportPhone || (seulementRenseigne ? null : sup.phone);
   const mailSupport = sup.supportEmail || (seulementRenseigne ? null : sup.email);
   const horaires = [sup.hours, sup.hours2].filter(Boolean).join(" · ");
@@ -911,23 +915,20 @@ export function Contacts({
   const mail = (a: string | null) => (a ? <a href={`mailto:${a}`}>{a}</a> : null);
   const assistance: LigneContact[] = [
     ...(seulementRenseigne
-      ? [
-          { label: "Interlocuteur", icone: "user", valeur: sup.contactName || null },
-          { label: "Standard", icone: "phone", valeur: tel(sup.phone) },
-          { label: "Courriel", icone: "mail", valeur: mail(sup.email) },
-        ]
+      ? [{ label: "Interlocuteur", icone: "user", valeur: sup.contactName || null }]
       : []),
     {
       label: "Portail de support",
       icone: "life-buoy",
+      toujours: true,
       valeur: sup.supportUrl ? (
         <a href={sup.supportUrl} target="_blank" rel="noopener">
           {sup.supportUrl}
         </a>
       ) : null,
     },
-    { label: "Tél du support", icone: "phone", valeur: tel(telSupport) },
-    { label: "Mail du support", icone: "mail", valeur: mail(mailSupport) },
+    { label: "Hotline", icone: "phone", toujours: true, valeur: tel(telSupport) },
+    { label: "Mail du support", icone: "mail", toujours: true, valeur: mail(mailSupport) },
     { label: "N° de client", icone: "badge-check", valeur: sup.customerRef || null },
     { label: "Horaires du support", icone: "clock", large: true, valeur: horaires || null },
   ];
@@ -950,7 +951,7 @@ export function Contacts({
     { label: "Mail DPO", icone: "mail", valeur: mail(sup.dpoEmail) },
   ];
   const garder = (l: LigneContact[]) =>
-    seulementRenseigne ? l.filter((x) => x.valeur !== null) : l;
+    seulementRenseigne ? l.filter((x) => x.toujours || x.valeur !== null) : l;
   const haut = garder(assistance);
   const bas = garder(contacts);
   const rien = !(
@@ -959,7 +960,7 @@ export function Contacts({
     mailSupport ||
     sup.customerRef ||
     horaires ||
-    (seulementRenseigne && (sup.contactName || sup.phone || sup.email)) ||
+    (seulementRenseigne && sup.contactName) ||
     supplierHasContacts(sup)
   );
   const ligne = (l: LigneContact) => (

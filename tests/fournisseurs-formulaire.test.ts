@@ -67,7 +67,8 @@ describe("fournisseurs", () => {
     const html = (await c.get(`/suppliers/${sup.id}`)).text;
     const s = synthese(html);
     expect(s).toContain('class="data-card mb-3 synthese synthese--cases"');
-    for (const v of ["MOREAU", "factu@arpege.fr", "CLI-9"]) expect(s).toContain(v);
+    for (const v of ["MOREAU", "factu@arpege.fr", "CLI-9", "contact@arpege.fr", "01 02 03 04 05"])
+      expect(s).toContain(v);
     expect(html).not.toContain('id="ong-contacts"');
     expect(html).toContain('id="ong-details"');
   });
@@ -162,13 +163,16 @@ describe("fournisseurs", () => {
       },
     });
     // Le bloc de la synthèse est celui de l'onglet Contacts d'un logiciel, réduit aux lignes
-    // renseignées : pas de « Non renseigné », pas de second commercial s'il n'existe pas.
+    // renseignées : pas de second commercial s'il n'existe pas. Seuls les trois canaux du
+    // support (portail, hotline, mail) restent affichés vides, « Non renseigné ».
     const s = (await c.get(`/suppliers/${sup.id}`)).text.split('id="vol-details"', 2)[0];
     expect(s).toContain("Tél commercial");
     expect(s).toContain("01 00 00 00 01");
     expect(s).toContain("Mail DPO");
     expect(s).toContain("dpo@a.fr");
-    expect(s).not.toContain("Non renseigné");
+    for (const canal of ["Portail de support", "Hotline", "Mail du support"])
+      expect(s).toContain(canal);
+    expect(s.split("Non renseigné").length - 1).toBe(3);
     expect(s).not.toContain("Mail commercial");
     expect(s).not.toContain("Contact commercial 2");
   });

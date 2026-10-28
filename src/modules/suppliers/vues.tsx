@@ -5,7 +5,7 @@ import { nomChamp, QaModal } from "@/components/quick-add";
 import { Lu, LuBloc, Rangee, Rubrique } from "@/components/synthese";
 import type { Supplier } from "@/generated/prisma/client";
 import { SUPPLIER_KIND_LABELS } from "@/lib/constantes";
-import { Contacts } from "@/modules/software/vues";
+import { Contacts, Tel } from "@/modules/software/vues";
 import { kindLabel } from "@/modules/suppliers/server";
 import type { CurrentUser } from "@/server/guards";
 
@@ -444,6 +444,16 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
                 </a>
               ) : null}
             </LuBloc>
+          </Rangee>
+          <Rangee>
+            <LuBloc label="Courriel">
+              {s.email ? (
+                <a href={`mailto:${s.email}`} className="text-truncate d-block">
+                  {s.email}
+                </a>
+              ) : null}
+            </LuBloc>
+            <LuBloc label="Standard">{s.phone ? <Tel numero={s.phone} /> : null}</LuBloc>
           </Rangee>
           <Rangee>
             <LuBloc label="Adresse" pleine>
