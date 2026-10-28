@@ -426,7 +426,7 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
     <div className="cartes-collees">
       <div
         className="data-card mb-3 synthese synthese--cases"
-        style={{ "--lu-intitule": "80px" } as React.CSSProperties}
+        style={{ "--lu-intitule": "70px" } as React.CSSProperties}
       >
         <Rubrique titre="Fournisseur" bi="bi-building" couleur="indigo">
           <Rangee>
@@ -461,7 +461,7 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
 
       <div
         className="data-card mb-3 synthese synthese--cases"
-        style={{ "--lu-intitule": "80px" } as React.CSSProperties}
+        style={{ "--lu-intitule": "70px" } as React.CSSProperties}
       >
         <Rubrique titre="Notes" bi="bi-journal-text" couleur="slate">
           <Rangee>
