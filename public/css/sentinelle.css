@@ -2494,10 +2494,16 @@ fieldset.edition-verrou[disabled] .puce:has(> a:hover) { border-color: var(--pri
 .fournisseur-saisie .grille { display: grid; gap: 8px 12px; align-items: end; margin-bottom: 8px; }
 .fournisseur-saisie .grille:last-child { margin-bottom: 0; }
 .fournisseur-saisie .grille > * { min-width: 0; }
-.fournisseur-saisie .grille-identite { grid-template-columns: 2fr 1fr 2fr; }
+/* Un téléphone tient dans une colonne fixe, à la largeur d'un numéro international
+   (« +33 6 12 34 56 78 »). */
+.fournisseur-saisie { --tel-largeur: 10.5rem; }
+.fournisseur-saisie .grille-identite { grid-template-columns: 2fr 1fr 2fr 2fr var(--tel-largeur); }
 .fournisseur-saisie .grille-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.fournisseur-saisie .grille-adresse { grid-template-columns: 3fr 1fr 2fr; }
-.fournisseur-saisie .grille-contact { grid-template-columns: 170px repeat(3, minmax(0, 1fr)); }
+/* Le code postal : une colonne à la largeur de son intitulé ; le champ, sans largeur propre
+   (width 0, min-width 100 %), ne pèse pas dans la mesure et remplit la colonne. */
+.fournisseur-saisie .grille-adresse { grid-template-columns: 3fr auto 2fr; }
+.fournisseur-saisie .grille-adresse > :nth-child(2) .form-control { width: 0; min-width: 100%; }
+.fournisseur-saisie .grille-contact { grid-template-columns: 170px minmax(0, 1fr) var(--tel-largeur) minmax(0, 1fr); }
 .fournisseur-saisie .contact-role { font-size: 0.82rem; font-weight: 600; padding-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fournisseur-saisie .form-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
 /* Les intitules des contacts, une fois en tete de colonnes : les lignes n'ont

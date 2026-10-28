@@ -14,9 +14,12 @@ export const SEARCH_FIELDS = [
   "notes",
 ];
 
-/** Champs texte simples du formulaire, versés tels quels : nom de champ → colonne. */
+/**
+ * Champs texte simples du formulaire, versés tels quels : nom de champ → colonne. L'ancien
+ * « interlocuteur » (contactName) n'est plus saisi : les contacts nommés le remplacent ; la
+ * valeur des fiches anciennes reste affichée mais n'est plus touchée.
+ */
 const TEXT_FIELDS: [string, keyof Prisma.SupplierUncheckedUpdateInput][] = [
-  ["contact_name", "contactName"],
   ["phone", "phone"],
   ["support_phone", "supportPhone"],
   ["email", "email"],

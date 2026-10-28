@@ -10,7 +10,6 @@ const CHAMPS: Record<string, string> = {
   name: "Arpège",
   kind: "provider",
   website: "https://arpege.fr",
-  contact_name: "Léa",
   email: "contact@arpege.fr",
   phone: "0102030405",
   address: "1 rue du Port",
@@ -54,9 +53,13 @@ describe("fournisseurs", () => {
 
   it("le nouveau formulaire enregistre et la synthèse relit", async () => {
     const c = await clientAdmin();
-    let sup = await prisma.supplier.create({ data: { name: "Arpège" } });
+    let sup = await prisma.supplier.create({ data: { name: "Arpège", contactName: "Léa" } });
     await c.post(`/suppliers/${sup.id}/edit`, CHAMPS);
     sup = await prisma.supplier.findUniqueOrThrow({ where: { id: sup.id } });
+    // L'interlocuteur d'une fiche ancienne n'est plus saisi, l'enregistrement ne l'efface pas.
+    expect(sup.contactName).toBe("Léa");
+    expect(sup.email).toBe("contact@arpege.fr");
+    expect(sup.phone).toBe("0102030405");
     expect(sup.commercialContact2).toBe("MOREAU");
     expect(sup.dpoEmail).toBe("dpo@arpege.fr");
     expect(sup.customerRef).toBe("CLI-9");

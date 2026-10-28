@@ -164,6 +164,21 @@ export function CorpsChamps({
             type="url"
             placeholder="https://…"
           />
+          <Champ
+            rapide={rapide}
+            prefixe={prefixe}
+            label="Courriel"
+            name="email"
+            valeur={s?.email}
+            type="email"
+          />
+          <Champ
+            rapide={rapide}
+            prefixe={prefixe}
+            label="Standard"
+            name="phone"
+            valeur={s?.phone}
+          />
         </div>
         <div className="grille grille-adresse">
           <Champ
@@ -186,30 +201,6 @@ export function CorpsChamps({
 
       {/* Le même intitulé que le bloc Contacts de la synthèse : l'assistance, puis les contacts. */}
       <Rubrique titre="Contacts" bi="bi-person-lines-fill" couleur="rose" onglet="contacts">
-        <div className="grille grille-3">
-          <Champ
-            rapide={rapide}
-            prefixe={prefixe}
-            label="Interlocuteur"
-            name="contact_name"
-            valeur={s?.contactName}
-          />
-          <Champ
-            rapide={rapide}
-            prefixe={prefixe}
-            label="Courriel"
-            name="email"
-            valeur={s?.email}
-            type="email"
-          />
-          <Champ
-            rapide={rapide}
-            prefixe={prefixe}
-            label="Standard"
-            name="phone"
-            valeur={s?.phone}
-          />
-        </div>
         <div className="grille grille-3">
           <Champ
             rapide={rapide}
