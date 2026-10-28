@@ -1,7 +1,6 @@
 import { Icone } from "@/components/icones";
 import { Barre, Cellule, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
 import { DelaiBadge, StatusBadge } from "@/components/macros";
-import { statusRank } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { chargerComptes } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
@@ -17,14 +16,12 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let accounts = await chargerComptes();
-  // Account.next_password_change.asc() (NULL en tête, comme SQLite), puis par statut (tri stable).
-  accounts.sort(
-    (a, b) =>
-      (a.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY) -
-      (b.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY),
+  // Par libellé, ordre alphabétique (Sentinelle triait par échéance puis statut : les pastilles
+  // Urgent / OK filtrent, l'ordre reste celui des libellés).
+  accounts.sort((a, b) =>
+    a.serviceName.localeCompare(b.serviceName, "fr", { sensitivity: "base" }),
   );
   accounts = textSearch(accounts, q, ["serviceName", "username", "url", "description"]);
-  accounts.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "accounts.list");
   const [rows, p] = paginate(accounts, params, perPage);
   const { user, csrf } = page;
