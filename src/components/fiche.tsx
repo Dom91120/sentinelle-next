@@ -206,18 +206,36 @@ export function MenuSep() {
   );
 }
 
-/** Le bouton principal, qui ouvre la fenêtre d'action. */
+/**
+ * Le bouton principal, qui ouvre la fenêtre d'action. `sansTexte` : l'icône seule, comme le
+ * crayon de la barre des onglets, le libellé en info-bulle et pour les lecteurs d'écran.
+ */
 export function BoutonModal({
   id,
   libelle,
   icone = "bi-check-lg",
   classe = "btn-primary",
+  sansTexte = false,
 }: {
   id: string;
   libelle: string;
   icone?: string;
   classe?: string;
+  sansTexte?: boolean;
 }) {
+  if (sansTexte)
+    return (
+      <button
+        type="button"
+        className="btn btn-ghost btn-icone"
+        data-bs-toggle="modal"
+        data-bs-target={`#${id}`}
+        title={libelle}
+        aria-label={libelle}
+      >
+        <Icone bi={icone} taille={16} />
+      </button>
+    );
   return (
     <button
       type="button"

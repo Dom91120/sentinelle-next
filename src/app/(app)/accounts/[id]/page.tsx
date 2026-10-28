@@ -63,11 +63,6 @@ export default async function AccountDetail({ params }: { params: Promise<{ id: 
           </>
         }
         statut={statut}
-        primaire={
-          peutEditer ? (
-            <BoutonModal id="mdp-change" libelle="Mot de passe changé" icone="bi-key" />
-          ) : null
-        }
         voisins={voisins}
         base="/accounts"
         bandeau={
@@ -86,6 +81,11 @@ export default async function AccountDetail({ params }: { params: Promise<{ id: 
         id="ficheAccount"
         modifier={peutEditer ? `/accounts/${id}/edit` : null}
         surPlace
+        commandes={
+          peutEditer ? (
+            <BoutonModal id="mdp-change" libelle="Mot de passe changé" icone="bi-key" sansTexte />
+          ) : null
+        }
       >
         <Onglet cible="detail" libelle="Synthèse" icone="bi-card-text" actif />
         {peutEditer ? <Onglet cible="details" libelle="Détails" icone="bi-pencil-square" /> : null}

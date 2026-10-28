@@ -3293,7 +3293,7 @@ a.marche-doc-nom:hover { color: var(--primary); }
 /* Le crayon « Modifier », au bout de la rangee (SoftInventory) : une icone
    seule de 34 px, fantome, calee sur le texte des onglets par un retrait bas
    de 3 px ; elle prend la couleur d'accent au survol. */
-.fiche-onglets .fiche-onglets-commandes { margin-left: auto; align-self: flex-end; padding-bottom: 3px; }
+.fiche-onglets .fiche-onglets-commandes { margin-left: auto; align-self: flex-end; padding-bottom: 3px; display: flex; align-items: center; gap: 8px; }
 .fiche-onglets .fiche-onglets-commandes .btn-icone { padding: 8px; border-radius: 8px; }
 .fiche-onglets .fiche-onglets-commandes .btn-icone:hover { color: var(--primary); }
 

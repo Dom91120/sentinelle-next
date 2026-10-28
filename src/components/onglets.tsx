@@ -1,16 +1,21 @@
 /** Onglets de fiche (port de _onglets.html). */
 import { Icone, Lucide } from "@/components/icones";
 
-/** `barre(id, modifier, sur_place)` */
+/**
+ * `barre(id, modifier, sur_place)`. `commandes` : les actions de la fiche (un bouton « Mot de
+ * passe changé », par exemple), rangées à droite de la barre, à gauche du crayon.
+ */
 export function BarreOnglets({
   id,
   modifier,
   surPlace = false,
+  commandes,
   children,
 }: {
   id: string;
   modifier?: string | null;
   surPlace?: boolean;
+  commandes?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -22,9 +27,10 @@ export function BarreOnglets({
       {...(modifier && surPlace ? { "data-edition": "" } : {})}
     >
       {children}
-      {modifier ? (
+      {modifier || commandes ? (
         <li className="nav-item fiche-onglets-commandes" role="presentation">
-          {surPlace ? (
+          {commandes}
+          {!modifier ? null : surPlace ? (
             <button
               type="button"
               className="btn btn-ghost btn-icone js-edition"
