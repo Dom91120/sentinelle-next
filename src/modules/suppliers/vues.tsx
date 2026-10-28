@@ -432,7 +432,7 @@ export function Synthese({ supplier: s }: { supplier: Supplier }) {
           <Rangee>
             <Lu label="Nom" valeur={s.name} />
             <Lu label="Type" valeur={kindLabel(s)} />
-            <LuBloc label="Site Internet">
+            <LuBloc label="Site web">
               {s.website ? (
                 <a
                   href={s.website}
