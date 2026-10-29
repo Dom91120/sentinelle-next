@@ -781,7 +781,7 @@ export function TableauContrats({
         key={c.id}
         className={`${filtrable ? `row-${statut}` : ""}${!courant ? " contrat-hors-periode" : ""}`}
       >
-        <td className={`small text-nowrap${c.reference ? " fw-medium" : ""}`}>
+        <td className={`small text-nowrap cell-ref${c.reference ? " fw-medium" : ""}`}>
           {c.reference ? (
             <a href={`/contracts/${c.id}`} className="text-decoration-none">
               {c.reference}
@@ -791,17 +791,21 @@ export function TableauContrats({
           )}
         </td>
         <td>
-          <a href={`/contracts/${c.id}`} className="fw-medium text-decoration-none">
+          {/* Un nom trop long se coupe par « … » et se lit en entier au survol (texte-tronque.js). */}
+          <a
+            href={`/contracts/${c.id}`}
+            className="d-block fw-medium text-decoration-none text-truncate"
+          >
             {c.name}
           </a>
-          <small className="d-block text-muted">
+          <small className="d-block text-muted text-truncate">
             {[natureLabel(c), contractKindLabel(c)].filter(Boolean).join(" · ")}
             {!courant
               ? ` · ${c.endDate && c.endDate.getTime() < today.getTime() ? "échu" : "à venir"}`
               : ""}
           </small>
         </td>
-        <td className="small">
+        <td className="small cell-fournisseur">
           {c.supplier ? (
             <a href={`/suppliers/${c.supplierId}`} className="fw-medium text-decoration-none">
               {c.supplier.name}
@@ -841,7 +845,7 @@ export function TableauContrats({
           {c.startDate || c.endDate ? (
             <>
               <span className="d-block">{c.startDate ? dateCourte(c.startDate) : "…"}</span>
-              <span className="d-block mt-1">{c.endDate ? dateCourte(c.endDate) : "…"}</span>
+              <span className="d-block">{c.endDate ? dateCourte(c.endDate) : "…"}</span>
             </>
           ) : (
             "—"
@@ -886,6 +890,17 @@ export function TableauContrats({
     <table
       className={`table table-hover mb-0 contrats-fournisseur${filtrable ? " js-filterable" : ""}`}
     >
+      {/* Colonnes fixes : le nom du contrat se tronque au lieu de pousser les autres. */}
+      <colgroup>
+        <col style={{ width: "10%" }} />
+        <col style={{ width: "29%" }} />
+        <col style={{ width: "11%" }} />
+        <col style={{ width: "12%" }} />
+        <col style={{ width: "9%" }} />
+        <col style={{ width: "11%" }} />
+        <col style={{ width: "9%" }} />
+        <col style={{ width: "9%" }} />
+      </colgroup>
       <thead>
         <tr>
           <th>Réf.</th>

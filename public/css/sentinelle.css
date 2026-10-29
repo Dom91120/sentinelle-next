@@ -1313,7 +1313,7 @@ body.dash-editing .stat-toggle { display: inline-flex; }
    cellules (le montant, l'echeance a agir), alignees a gauche sous leur titre
    comme les autres colonnes : centrees, elles s'en decalaient des que la
    colonne s'elargit. */
-.contrats-fournisseur .cell-periode { text-align: left; white-space: nowrap; line-height: 1.15; }
+.contrats-fournisseur .cell-periode { text-align: left; white-space: nowrap; line-height: 1.2; }
 .tableau-contrats .cell-montant { text-align: right; white-space: nowrap; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 .tableau-contrats .cell-etat { text-align: center; padding-right: 0; }
 .tableau-contrats .cell-etat .delai { display: block; margin-top: 3px; font-size: 0.72rem; line-height: 1.15; white-space: normal; }
@@ -3187,7 +3187,14 @@ a.marche-doc-nom:hover { color: var(--primary); }
 .fiche-lie:hover { background: var(--inset); color: inherit; }
 /* L'onglet Contrats d'un fournisseur : un acte echu ou a venir se lit en grise. */
 .contrats-fournisseur tr.contrat-hors-periode > td { opacity: 0.6; }
-.contrats-fournisseur td { vertical-align: top; }
+/* Colonnes fixes (colgroup) : quand la place manque, le nom du contrat et la
+   reference se coupent par "..." (l'infobulle les donne en entier) au lieu de
+   passer a la ligne ou d'ecraser les autres colonnes. */
+.contrats-fournisseur { table-layout: fixed; }
+.contrats-fournisseur td { vertical-align: top; overflow: hidden; }
+.contrats-fournisseur .cell-ref { text-overflow: ellipsis; }
+/* Un nom de fournisseur sur deux ou trois lignes reste compact : interligne 1. */
+.contrats-fournisseur .cell-fournisseur { line-height: 1; }
 /* Le delai sous le statut : du texte en couleur, l'icone du calendrier devant. */
 .contrats-fournisseur .delai-contrat { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
 /* ... dans la couleur exacte du badge de statut au-dessus (--danger, --info...),
