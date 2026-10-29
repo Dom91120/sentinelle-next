@@ -14,8 +14,9 @@
 // Enregistrer ramenait au premier onglet, apres qu'on avait ouvert le
 // cinquieme. D'ou le second role de ce script : FAIRE VOYAGER l'ancre.
 //
-//   - sur une fiche, chaque formulaire envoye et le bouton Modifier emportent
-//     l'onglet ouvert dans l'ancre de leur adresse ;
+//   - sur une fiche, chaque formulaire envoye, le bouton Modifier et les
+//     chevrons precedente / suivante emportent l'onglet ouvert dans l'ancre
+//     de leur adresse ;
 //   - sur un formulaire arrive avec une ancre, Annuler et l'envoi la rendent a
 //     la fiche.
 //
@@ -132,6 +133,20 @@ function principal() {
         lien.addEventListener('click', function () {
             var cible = courant();
             if (cible) lien.href = avecAncre(lien.getAttribute('href'), cible);
+        });
+    });
+
+    // Les chevrons precedente / suivante aussi : on feuillette les fiches en
+    // restant sur l'onglet ouvert (les Contrats de chaque logiciel, par
+    // exemple). Une fiche ouverte depuis une liste, elle, arrive sans ancre et
+    // s'affiche donc sur son premier onglet. Quand c'est deja le premier qui
+    // est ouvert, l'adresse reste nue.
+    var premier = barre.querySelector('.nav-link[data-bs-toggle="tab"]');
+    var premiere = premier ? (premier.getAttribute('data-bs-target') || '').replace('#vol-', '') : '';
+    document.querySelectorAll('.fiche-voisins a[href]').forEach(function (lien) {
+        lien.addEventListener('click', function () {
+            var cible = courant();
+            if (cible && cible !== premiere) lien.href = avecAncre(lien.getAttribute('href'), cible);
         });
     });
 }
