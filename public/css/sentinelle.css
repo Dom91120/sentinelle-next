@@ -3207,7 +3207,7 @@ a.marche-doc-nom:hover { color: var(--primary); }
 .delai-contrat--info    { color: var(--info); }
 /* Ce que couvre un contrat : une ligne par element, en plus petit que le
    reste de la ligne -- une liste, pas une valeur. */
-.contrats-fournisseur .cell-couvre a { font-size: 0.8rem; line-height: 1.35; }
+.contrats-fournisseur .cell-couvre a { font-size: 0.8rem; line-height: 1.2; }
 /* Le filet de la ligne de total : au-dessus d'elle, pas dessous. */
 .contrats-fournisseur tfoot td { border-top: 1px solid var(--line); border-bottom: 0; }
 .fiche-lie > i, .fiche-lie > svg { font-size: 1rem; flex: 0 0 auto; }
