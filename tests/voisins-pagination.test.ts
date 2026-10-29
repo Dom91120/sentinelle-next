@@ -27,6 +27,25 @@ describe("voisins", () => {
     expect(html).toContain("Suivante : Zimbra");
   });
 
+  it("les chevrons suivent l'ordre de la liste : le plus urgent en tête", async () => {
+    const c = await clientAdmin();
+    const compte = (serviceName: string, nextPasswordChange: Date | null) =>
+      prisma.account.create({
+        data: { serviceName, username: "admin", rotationDays: 90, nextPasswordChange },
+      });
+    // Expiré (rouge), sans date (orange, « à renseigner »), lointain (vert).
+    const expire = await compte("Zimbra", new Date(Date.UTC(2020, 0, 1)));
+    const sansDate = await compte("Nextcloud", null);
+    const lointain = await compte("alfresco", d2030);
+    const liste = (await c.get("/accounts")).text;
+    const pos = (id: number) => liste.indexOf(`href="/accounts/${id}"`);
+    expect(pos(expire.id)).toBeLessThan(pos(sansDate.id));
+    expect(pos(sansDate.id)).toBeLessThan(pos(lointain.id));
+    const html = (await c.get(`/accounts/${sansDate.id}`)).text;
+    expect(html).toContain("Précédente : Zimbra");
+    expect(html).toContain("Suivante : alfresco");
+  });
+
   it("un bout garde son chevron grisé", async () => {
     const c = await clientAdmin();
     const o = await comptes();

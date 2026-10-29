@@ -47,7 +47,7 @@ export default async function ReviewDetail({ params }: { params: Promise<{ id: s
   const peutEditer = user.canEdit("reviews");
   const [histories, voisins, ctx, snooze] = await Promise.all([
     prisma.reviewHistory.findMany({ where: { reviewId: id }, orderBy: { performedAt: "desc" } }),
-    voisinsDe("accessReview", id, "application", page),
+    voisinsDe("accessReview", id, page),
     peutEditer ? formContext() : Promise.resolve({ assets: [] }),
     getActiveSnooze("review", id),
   ]);

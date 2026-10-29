@@ -1,6 +1,5 @@
 import { Icone } from "@/components/icones";
 import { Barre, PaginationBar, Vide } from "@/components/liste";
-import { statusRank } from "@/lib/constantes";
 import { aujourdhui } from "@/lib/libelles";
 import { contractStatus } from "@/lib/statuts";
 import { TableauContrats } from "@/modules/contracts/vues";
@@ -8,6 +7,7 @@ import { seuilsDe } from "@/server/config-store";
 import { prisma } from "@/server/db";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triContrats } from "@/server/tri-fiches";
 
 export const metadata = { title: "Contrats - Sentinelle" };
 
@@ -23,7 +23,6 @@ export default async function ContractsList({ searchParams }: { searchParams: Pa
   const [tous, agregat] = await Promise.all([
     prisma.contract.findMany({
       where: { isActive: true },
-      orderBy: [{ endDate: { sort: "asc", nulls: "last" } }],
       include: {
         kindRef: true,
         supplier: true,
@@ -35,9 +34,10 @@ export default async function ContractsList({ searchParams }: { searchParams: Pa
   ]);
   const totalCost = agregat._sum.costYearly ?? 0;
   let contracts = textSearch(tous, q, ["name", "reference", "description"]);
+  // Par jours restants (la colonne Statut), le plus urgent en tête (le même ordre que les chevrons).
   contracts = contracts
-    .map((c) => ({ ...c, statut: contractStatus(c, seuils, today) }))
-    .sort((a, b) => statusRank(a.statut) - statusRank(b.statut));
+    .map((c) => ({ ...c, status: contractStatus(c, seuils, today) }))
+    .sort(triContrats(today));
   const perPage = await resolvePerPage(params, page.user, "contracts.list");
   const [rows, p] = paginate(contracts, params, perPage);
   const { user } = page;

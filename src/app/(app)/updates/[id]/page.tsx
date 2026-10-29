@@ -45,7 +45,7 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
   const peutEditer = user.canEdit("updates");
   const [histories, voisins, ctx, snooze] = await Promise.all([
     prisma.updateHistory.findMany({ where: { updateId: id }, orderBy: { performedAt: "desc" } }),
-    voisinsDe("systemUpdate", id, "name", page),
+    voisinsDe("systemUpdate", id, page),
     peutEditer ? formContext() : Promise.resolve({ assets: [], prestataires: [] }),
     getActiveSnooze("update", id),
   ]);

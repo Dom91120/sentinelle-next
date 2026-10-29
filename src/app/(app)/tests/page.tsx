@@ -1,11 +1,12 @@
 import { Icone } from "@/components/icones";
 import { Barre, Cellule, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
 import { DelaiBadge, StatusBadge } from "@/components/macros";
-import { statusRank, TEST_TYPE_LABELS } from "@/lib/constantes";
+import { TEST_TYPE_LABELS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { chargerTests } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triTests } from "@/server/tri-fiches";
 
 export const metadata = { title: "Tests - Sentinelle" };
 
@@ -17,14 +18,9 @@ export default async function TestsList({ searchParams }: { searchParams: Params
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let tests = await chargerTests();
-  // TestTask.next_due.asc().nullsfirst(), puis par statut (tri stable).
-  tests.sort(
-    (a, b) =>
-      (a.nextDue?.getTime() ?? Number.NEGATIVE_INFINITY) -
-      (b.nextDue?.getTime() ?? Number.NEGATIVE_INFINITY),
-  );
+  // Par statut puis prochaine échéance, le plus urgent en tête (le même ordre que les chevrons).
+  tests.sort(triTests);
   tests = textSearch(tests, q, ["name", "testType", "description"]);
-  tests.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "tests.list");
   const [rows, p] = paginate(tests, params, perPage);
   const { user, csrf } = page;

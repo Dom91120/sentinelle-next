@@ -50,7 +50,7 @@ export default async function DomainDetail({ params }: { params: Promise<{ id: s
     prisma.ctLogEntry.findMany({ where: { domainId: id }, orderBy: { crtshId: "desc" }, take: 50 }),
     prisma.ctLogEntry.count({ where: { domainId: id, status: "new" } }),
     prisma.certificate.findMany({ where: { domainId: id, isActive: true } }),
-    voisinsDe("domain", id, "name", page),
+    voisinsDe("domain", id, page),
     peutEditer ? formContext() : Promise.resolve({ suppliers: [] }),
     getActiveSnooze("domain", id),
   ]);

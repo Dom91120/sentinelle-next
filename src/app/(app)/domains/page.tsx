@@ -1,11 +1,11 @@
 import { Icone } from "@/components/icones";
 import { Barre, Cellule, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
 import { DelaiBadge, StatusBadge } from "@/components/macros";
-import { statusRank } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { chargerDomaines } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triDomaines } from "@/server/tri-fiches";
 
 export const metadata = { title: "Domaines - Sentinelle" };
 
@@ -17,14 +17,9 @@ export default async function DomainsList({ searchParams }: { searchParams: Para
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let domains = await chargerDomaines();
-  // Domain.expiry_date.asc().nullslast(), puis par statut (tri stable).
-  domains.sort(
-    (a, b) =>
-      (a.expiryDate?.getTime() ?? Number.POSITIVE_INFINITY) -
-      (b.expiryDate?.getTime() ?? Number.POSITIVE_INFINITY),
-  );
+  // Par date d'expiration, le plus urgent en tête (le même ordre que les chevrons).
+  domains.sort(triDomaines);
   domains = textSearch(domains, q, ["name", "registrar", "description"]);
-  domains.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "domains.list");
   const [rows, p] = paginate(domains, params, perPage);
   const { user, csrf } = page;

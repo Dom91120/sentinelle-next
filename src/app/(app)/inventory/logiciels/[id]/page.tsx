@@ -103,7 +103,7 @@ export default async function SoftwareDetail({ params }: { params: Promise<{ id:
     categories,
     rattachements,
   ] = await Promise.all([
-    voisinsDe("software", id, "name", page),
+    voisinsDe("software", id, page),
     peutEditer
       ? formContext()
       : prisma.supplier

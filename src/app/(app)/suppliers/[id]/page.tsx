@@ -81,7 +81,7 @@ export default async function SupplierDetail({ params }: { params: Promise<{ id:
   const today = aujourdhui();
   const docsOn = documentsEnabled(user.settings);
   const [voisins, pieces] = await Promise.all([
-    voisinsDe("supplier", id, "name", page),
+    voisinsDe("supplier", id, page),
     docsOn ? forParent("supplier", id) : Promise.resolve([]),
   ]);
   const equipments = supplier.equipments;

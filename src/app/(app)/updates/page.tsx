@@ -1,12 +1,11 @@
 import { Icone } from "@/components/icones";
 import { Barre, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
-import { statusRank } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
-import { updateStatusColor } from "@/lib/statuts";
 import { STATUS_LABELS, TYPE_LABELS } from "@/modules/updates/server";
-import { prisma } from "@/server/db";
+import { chargerMisesAJour } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triMisesAJour } from "@/server/tri-fiches";
 
 export const metadata = { title: "Mises à jour - Sentinelle" };
 
@@ -17,9 +16,7 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
   const page = await contexteModule("updates");
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
-  let updates = (
-    await prisma.systemUpdate.findMany({ where: { isActive: true }, orderBy: { name: "asc" } })
-  ).map((u) => ({ ...u, couleur: updateStatusColor(u) }));
+  let updates = await chargerMisesAJour();
   updates = textSearch(updates, q, [
     "name",
     "currentVersion",
@@ -27,7 +24,8 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
     "updatedBy",
     "description",
   ]);
-  updates.sort((a, b) => statusRank(a.couleur) - statusRank(b.couleur));
+  // Par statut puis date de dernière mise à jour, le plus urgent en tête (le même ordre que les chevrons).
+  updates.sort(triMisesAJour);
   const perPage = await resolvePerPage(params, page.user, "updates.list");
   const [rows, p] = paginate(updates, params, perPage);
   const { user, csrf } = page;
@@ -69,7 +67,7 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
             <tbody>
               {rows.length ? (
                 rows.map((u) => (
-                  <tr key={u.id} className={`row-${u.couleur}`}>
+                  <tr key={u.id} className={`row-${u.status}`}>
                     <td>
                       <a href={`/updates/${u.id}`} className="fw-medium text-decoration-none">
                         {u.name}
@@ -86,8 +84,8 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
                     </td>
                     <td>{u.lastUpdate ? dateCourte(u.lastUpdate) : "—"}</td>
                     <td>
-                      <span className={`badge-status badge-${u.couleur}`}>
-                        {STATUS_LABELS[u.status ?? ""] ?? u.status}
+                      <span className={`badge-status badge-${u.status}`}>
+                        {STATUS_LABELS[u.brut ?? ""] ?? u.brut}
                       </span>
                     </td>
                   </tr>

@@ -259,6 +259,10 @@ les liens et les champs de formulaire.
 - Le limiteur de requêtes global (Flask-Limiter) n'est pas porté : voir la section 4.
 - Les attributs booléens s'écrivent `selected=""`, `checked=""`, `data-x="true"` (rendu React) :
   même comportement, HTML légèrement différent.
+- Les listes et les chevrons précédente / suivante partagent un même ordre
+  (`src/server/tri-fiches.ts`) : le plus urgent en tête pour les fiches à échéance (statut, puis
+  date, puis nom), alphabétique français pour le matériel, les logiciels et les fournisseurs.
+  Flask triait les voisins par `lower(nom)` quel que soit l'ordre de la liste.
 
 ### Non porté, avec raison
 

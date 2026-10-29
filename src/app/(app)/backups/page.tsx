@@ -1,12 +1,12 @@
 import { Icone } from "@/components/icones";
 import { Barre, Cellule, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
 import { StatusBadge } from "@/components/macros";
-import { statusRank } from "@/lib/constantes";
 import { backupSuccessRate, backupTodayCheck } from "@/lib/statuts";
 import { BACKUP_TYPE_LABELS, FREQ_LABELS } from "@/modules/backups/server";
 import { chargerSauvegardes } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triSauvegardes } from "@/server/tri-fiches";
 
 export const metadata = { title: "Sauvegardes - Sentinelle" };
 
@@ -19,7 +19,8 @@ export default async function BackupsList({ searchParams }: { searchParams: Para
   const q = String(params.q ?? "").trim();
   let backups = await chargerSauvegardes();
   backups = textSearch(backups, q, ["serviceName", "location", "backupType", "description"]);
-  backups.sort((a, b) => statusRank(a.status) - statusRank(b.status));
+  // Par statut puis prochaine date attendue, le plus urgent en tête (le même ordre que les chevrons).
+  backups.sort(triSauvegardes);
   const perPage = await resolvePerPage(params, page.user, "backups.list");
   const [rows, p] = paginate(backups, params, perPage);
   const { user, csrf } = page;

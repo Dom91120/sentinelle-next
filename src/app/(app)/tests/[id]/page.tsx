@@ -43,7 +43,7 @@ export default async function TestDetail({ params }: { params: Promise<{ id: str
   const peutEditer = user.canEdit("tests");
   const [histories, voisins, ctx, snooze] = await Promise.all([
     prisma.testHistory.findMany({ where: { testId: id }, orderBy: { performedAt: "desc" } }),
-    voisinsDe("testTask", id, "name", page),
+    voisinsDe("testTask", id, page),
     peutEditer ? formContext() : Promise.resolve({ softwareList: [] }),
     getActiveSnooze("test", id),
   ]);

@@ -20,6 +20,7 @@ import { prisma } from "@/server/db";
 import { chargerEquipements } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triNoms } from "@/server/tri-fiches";
 
 export const metadata = { title: "Matériel - Sentinelle" };
 
@@ -153,8 +154,8 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
   if (!(famille in EQUIPMENT_FAMILIES)) famille = "serveurs";
   const natures = EQUIPMENT_FAMILIES[famille];
   const tous = await chargerEquipements();
-  // `_actifs()` : order_by(Equipment.name), ordre binaire de SQLite.
-  tous.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  // Par nom (le même ordre que les chevrons), sauf tri demandé par l'en-tête d'une colonne.
+  tous.sort(triNoms);
   let items = tous.filter((e) => equipmentFamily(e.kind || "vm") === famille);
   const q = str(params, "q");
   let kind = str(params, "kind");
@@ -212,7 +213,6 @@ export default async function InventoryList({ searchParams }: { searchParams: Pa
     });
   } else {
     sort = "";
-    items.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   }
 
   const perPage = await resolvePerPage(params, page.user, "inventory.list");

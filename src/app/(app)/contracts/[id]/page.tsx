@@ -58,7 +58,7 @@ export default async function ContractDetail({ params }: { params: Promise<{ id:
       where: { contractId: id },
       orderBy: { performedAt: "desc" },
     }),
-    voisinsDe("contract", id, "name", page),
+    voisinsDe("contract", id, page),
     peutEditer ? formContext() : Promise.resolve(null),
     couvertsDe(id),
     getActiveSnooze("contract", id),

@@ -5,6 +5,7 @@ import { dateCourte } from "@/lib/libelles";
 import { chargerComptes } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triComptes } from "@/server/tri-fiches";
 
 export const metadata = { title: "Comptes - Sentinelle" };
 
@@ -16,14 +17,8 @@ export default async function AccountsList({ searchParams }: { searchParams: Par
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let accounts = await chargerComptes();
-  // Par date du prochain changement, la plus proche en tête ; un compte sans échéance
-  // (« à renseigner ») passe devant. À date égale, par libellé.
-  accounts.sort(
-    (a, b) =>
-      (a.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY) -
-        (b.nextPasswordChange?.getTime() ?? Number.NEGATIVE_INFINITY) ||
-      a.serviceName.localeCompare(b.serviceName, "fr", { sensitivity: "base" }),
-  );
+  // Par date du prochain changement, le plus urgent en tête (le même ordre que les chevrons).
+  accounts.sort(triComptes);
   accounts = textSearch(accounts, q, ["serviceName", "username", "url", "description"]);
   const perPage = await resolvePerPage(params, page.user, "accounts.list");
   const [rows, p] = paginate(accounts, params, perPage);

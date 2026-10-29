@@ -93,7 +93,7 @@ export default async function CertificateDetail({ params }: { params: Promise<{ 
       where: { certificateId: id },
       orderBy: { performedAt: "desc" },
     }),
-    voisinsDe("certificate", id, "serviceName", page),
+    voisinsDe("certificate", id, page),
     peutEditer
       ? formContext()
       : Promise.resolve({

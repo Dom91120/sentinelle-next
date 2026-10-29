@@ -48,7 +48,7 @@ export default async function BackupDetail({ params }: { params: Promise<{ id: s
       orderBy: { performedAt: "desc" },
       take: 200,
     }),
-    voisinsDe("backup", id, "serviceName", page),
+    voisinsDe("backup", id, page),
     peutEditer ? formContext() : Promise.resolve({ equipments: [] }),
     getActiveSnooze("backup", id),
   ]);

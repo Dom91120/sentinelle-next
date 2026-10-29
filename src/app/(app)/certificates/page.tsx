@@ -1,6 +1,6 @@
 import { Icone, Lucide } from "@/components/icones";
 import { Barre, CsvToolbar, PaginationBar, SegTabs, Vide } from "@/components/liste";
-import { CERT_KIND_LABELS, statusRank } from "@/lib/constantes";
+import { CERT_KIND_LABELS } from "@/lib/constantes";
 import { dateCourte, delai, jours } from "@/lib/libelles";
 import {
   certificateHolderLabel,
@@ -12,6 +12,7 @@ import { prisma } from "@/server/db";
 import { chargerCertificats } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triCertificats } from "@/server/tri-fiches";
 
 export const metadata = { title: "Certificats - Sentinelle" };
 
@@ -25,12 +26,8 @@ export default async function CertificatesList({ searchParams }: { searchParams:
   const kindParam = String(params.kind ?? "").trim();
   const kind = kindParam in CERT_KIND_LABELS ? kindParam : "";
   const tous = await chargerCertificats();
-  // Certificate.expiry_date.asc() (NULL en tête, comme SQLite), puis par statut (tri stable).
-  tous.sort(
-    (a, b) =>
-      (a.expiryDate?.getTime() ?? Number.NEGATIVE_INFINITY) -
-      (b.expiryDate?.getTime() ?? Number.NEGATIVE_INFINITY),
-  );
+  // Par jours restants, le plus urgent en tête (le même ordre que les chevrons).
+  tous.sort(triCertificats);
   const services = new Map(
     (await prisma.userService.findMany({ select: { id: true, name: true } })).map((s) => [
       s.id,
@@ -55,7 +52,6 @@ export default async function CertificatesList({ searchParams }: { searchParams:
     "serialNumber",
     "description",
   ]);
-  certificates.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "certificates.list");
   const [rows, p] = paginate(certificates, params, perPage);
   const { user, csrf } = page;

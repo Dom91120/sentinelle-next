@@ -63,7 +63,7 @@ export default async function InventoryDetail({ params }: { params: Promise<{ id
   const seuils = seuilsDe(user.settings);
   const [statuts, voisins, ctx] = await Promise.all([
     chargerEquipements(),
-    voisinsDe("equipment", id, "name", page),
+    voisinsDe("equipment", id, page),
     formContext(brut),
   ]);
   const calc = statuts.find((e) => e.id === id);

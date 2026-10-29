@@ -4,6 +4,7 @@ import { kindLabel, SEARCH_FIELDS } from "@/modules/suppliers/server";
 import { prisma } from "@/server/db";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triNoms } from "@/server/tri-fiches";
 
 export const metadata = { title: "Fournisseurs - Sentinelle" };
 
@@ -14,10 +15,8 @@ export default async function SuppliersList({ searchParams }: { searchParams: Pa
   const page = await contexteModule("suppliers");
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
-  let suppliers = await prisma.supplier.findMany({
-    where: { isActive: true },
-    orderBy: { name: "asc" },
-  });
+  // Par nom, en français sans casse ni accents (le même ordre que les chevrons).
+  let suppliers = (await prisma.supplier.findMany({ where: { isActive: true } })).sort(triNoms);
   suppliers = textSearch(suppliers, q, SEARCH_FIELDS as (keyof (typeof suppliers)[number])[]);
   const perPage = await resolvePerPage(params, page.user, "suppliers.list");
   const [rows, p] = paginate(suppliers, params, perPage);

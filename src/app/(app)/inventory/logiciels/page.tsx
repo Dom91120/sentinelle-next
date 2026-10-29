@@ -1,6 +1,5 @@
 import { Icone } from "@/components/icones";
 import { Barre, PaginationBar } from "@/components/liste";
-import { statusRank } from "@/lib/constantes";
 import {
   criticalityColor,
   criticalityLabel,
@@ -12,6 +11,7 @@ import { prisma } from "@/server/db";
 import { chargerLogiciels } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triNoms } from "@/server/tri-fiches";
 
 export const metadata = { title: "Logiciels métiers - Sentinelle" };
 
@@ -24,9 +24,8 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
   const q = String(params.q ?? "").trim();
   const host = String(params.host ?? "").trim();
   const tous = await chargerLogiciels();
-  // Tri français, insensible à la casse et aux accents (le tri par code de caractère plaçait
-  // « MLM » avant « Maarch »).
-  tous.sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
+  // Par nom, en français sans casse ni accents (le même ordre que les chevrons).
+  tous.sort(triNoms);
   const totalAll = tous.length;
   const match: Record<string, (s: (typeof tous)[number]) => boolean> = {
     docker: (s) => s.isDocker,
@@ -38,7 +37,6 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
   );
   let items = host in match ? tous.filter(match[host]) : tous;
   items = textSearch(items, q, SEARCH_FIELDS as (keyof (typeof items)[number])[]);
-  items.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "software.list");
   const [rows, p] = paginate(items, params, perPage);
   const ids = rows.map((s) => s.id);

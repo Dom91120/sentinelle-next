@@ -1,11 +1,11 @@
 import { Icone } from "@/components/icones";
 import { Barre, Cellule, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
 import { DelaiBadge, StatusBadge } from "@/components/macros";
-import { statusRank } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
 import { chargerRevues } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
+import { triRevues } from "@/server/tri-fiches";
 
 export const metadata = { title: "Revues de droits - Sentinelle" };
 
@@ -17,13 +17,9 @@ export default async function ReviewsList({ searchParams }: { searchParams: Para
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
   let reviews = await chargerRevues();
-  reviews.sort(
-    (a, b) =>
-      (a.nextReview?.getTime() ?? Number.NEGATIVE_INFINITY) -
-      (b.nextReview?.getTime() ?? Number.NEGATIVE_INFINITY),
-  );
+  // Par statut puis prochaine revue, le plus urgent en tête (le même ordre que les chevrons).
+  reviews.sort(triRevues);
   reviews = textSearch(reviews, q, ["application", "responsible", "scope"]);
-  reviews.sort((a, b) => statusRank(a.status) - statusRank(b.status));
   const perPage = await resolvePerPage(params, page.user, "reviews.list");
   const [rows, p] = paginate(reviews, params, perPage);
   const { user, csrf } = page;
