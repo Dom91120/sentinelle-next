@@ -790,7 +790,7 @@ export function TableauContrats({
             "—"
           )}
         </td>
-        <td>
+        <td className="cell-contrat">
           {/* Un nom trop long se coupe par « … » et se lit en entier au survol (texte-tronque.js). */}
           <a
             href={`/contracts/${c.id}`}

@@ -3195,6 +3195,8 @@ a.marche-doc-nom:hover { color: var(--primary); }
 .contrats-fournisseur .cell-ref { text-overflow: ellipsis; }
 /* Un nom de fournisseur sur deux ou trois lignes reste compact : interligne 1. */
 .contrats-fournisseur .cell-fournisseur { line-height: 1; }
+/* Le nom du contrat et son sous-titre : interligne 1,2. */
+.contrats-fournisseur .cell-contrat { line-height: 1.2; }
 /* Le delai sous le statut : du texte en couleur, l'icone du calendrier devant. */
 .contrats-fournisseur .delai-contrat { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
 /* ... dans la couleur exacte du badge de statut au-dessus (--danger, --info...),
