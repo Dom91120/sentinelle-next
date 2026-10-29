@@ -890,14 +890,16 @@ export function TableauContrats({
     <table
       className={`table table-hover mb-0 contrats-fournisseur${filtrable ? " js-filterable" : ""}`}
     >
-      {/* Colonnes fixes : le nom du contrat se tronque au lieu de pousser les autres. */}
+      {/* Colonnes fixes : le nom du contrat (colonne sans largeur, qui prend le reste) se
+          tronque au lieu de pousser les autres. Période et Agir avant ont la largeur d'une
+          date (77 px + 2 × 12 px de marge). */}
       <colgroup>
         <col style={{ width: "10%" }} />
-        <col style={{ width: "29%" }} />
+        <col />
         <col style={{ width: "11%" }} />
         <col style={{ width: "12%" }} />
-        <col style={{ width: "9%" }} />
-        <col style={{ width: "11%" }} />
+        <col style={{ width: "102px" }} />
+        <col style={{ width: "102px" }} />
         <col style={{ width: "9%" }} />
         <col style={{ width: "9%" }} />
       </colgroup>
