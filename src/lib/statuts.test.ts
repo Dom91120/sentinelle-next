@@ -14,6 +14,7 @@ import {
   osUpdateStale,
   reviewComputedStatus,
   testComputedStatus,
+  updateEffectiveStatus,
   updateStatusColor,
   warrantyStatus,
 } from "./statuts";
@@ -86,7 +87,35 @@ describe("seuils à date (comptes, certificats, domaines, tests, revues)", () =>
       ["inconnu", "info"],
     ];
     for (const [status, attendu] of cas)
-      expect(updateStatusColor({ status }), status).toBe(attendu);
+      expect(updateStatusColor({ status, currentVersion: null, latestVersion: null }), status).toBe(
+        attendu,
+      );
+  });
+
+  it("mise à jour : « À jour » avec une dernière version différente vaut « disponible »", () => {
+    const u = { status: "up_to_date", currentVersion: "8.5.3.4", latestVersion: "8.5.3.8" };
+    expect(updateEffectiveStatus(u)).toBe("update_available");
+    expect(updateStatusColor(u)).toBe("warning");
+    expect(
+      updateEffectiveStatus({ status: "up_to_date", currentVersion: null, latestVersion: "1" }),
+    ).toBe("update_available");
+    // Versions alignées (espaces ignorés) ou dernière inconnue : le statut saisi reste.
+    expect(
+      updateEffectiveStatus({ status: "up_to_date", currentVersion: "1", latestVersion: " 1 " }),
+    ).toBe("up_to_date");
+    expect(
+      updateEffectiveStatus({ status: "up_to_date", currentVersion: "1", latestVersion: null }),
+    ).toBe("up_to_date");
+    expect(
+      updateEffectiveStatus({ status: "up_to_date", currentVersion: "1", latestVersion: "" }),
+    ).toBe("up_to_date");
+    // Un autre statut saisi n'est jamais réécrit.
+    expect(
+      updateEffectiveStatus({ status: "critical", currentVersion: "1", latestVersion: "1" }),
+    ).toBe("critical");
+    expect(updateEffectiveStatus({ status: null, currentVersion: "1", latestVersion: "2" })).toBe(
+      "",
+    );
   });
 });
 

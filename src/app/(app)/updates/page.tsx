@@ -85,7 +85,7 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
                     <td>{u.lastUpdate ? dateCourte(u.lastUpdate) : "—"}</td>
                     <td>
                       <span className={`badge-status badge-${u.status}`}>
-                        {STATUS_LABELS[u.brut ?? ""] ?? u.brut}
+                        {STATUS_LABELS[u.effectif] ?? u.effectif}
                       </span>
                     </td>
                   </tr>

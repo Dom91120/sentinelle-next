@@ -36,6 +36,7 @@ import {
   type Seuils,
   softwareComputedStatus,
   testComputedStatus,
+  updateEffectiveStatus,
   updateStatusColor,
 } from "@/lib/statuts";
 import { type AppSettings, getSettings, seuilsDe } from "@/server/config-store";
@@ -147,7 +148,12 @@ export async function chargerRevues(
 
 export async function chargerMisesAJour(): Promise<
   AvecStatut<
-    SystemUpdate & { equipment: Equipment | null; software: Software | null; brut: string | null }
+    SystemUpdate & {
+      equipment: Equipment | null;
+      software: Software | null;
+      brut: string | null;
+      effectif: string;
+    }
   >[]
 > {
   const rows = await prisma.systemUpdate.findMany({
@@ -155,7 +161,12 @@ export async function chargerMisesAJour(): Promise<
     orderBy: { id: "asc" }, // `query.filter_by(is_active=True).all()` : ordre des id
     include: { equipment: true, software: true },
   });
-  return rows.map((u) => ({ ...u, brut: u.status, status: updateStatusColor(u) }));
+  return rows.map((u) => ({
+    ...u,
+    brut: u.status,
+    effectif: updateEffectiveStatus(u),
+    status: updateStatusColor(u),
+  }));
 }
 
 export async function chargerEquipements(

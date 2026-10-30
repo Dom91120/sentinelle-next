@@ -9,10 +9,11 @@
    - Entrer depuis la Synthèse ouvre l'onglet Détails : la Synthèse n'a rien à
      modifier, le formulaire est à côté.
    - Le mode survit aux rechargements (sessionStorage, par fiche) : rattacher un
-     serveur ou déposer une pièce renvoie la page, la fiche reste ouverte.
+     serveur ou déposer une pièce renvoie la page, la fiche reste ouverte. Quitter
+     la fiche par un lien (autre page, fiche voisine) le termine.
    - Enregistrer le formulaire de l'onglet Détails termine la modification ;
-     Annuler (ou le crayon recliqué) aussi, après confirmation s'il y a une
-     saisie en cours, qui est alors oubliée. */
+     Annuler (ou le crayon recliqué) aussi, après confirmation (modale de
+     confirm-modal.js) s'il y a une saisie en cours, qui est alors oubliée. */
 (function () {
     'use strict';
 
@@ -65,12 +66,24 @@
             }
         }
 
-        function sortir() {
-            if (saisieEnCours() && !confirm('Abandonner les modifications non enregistrées ?')) return;
+        // Une saisie abandonnée : le formulaire reprend ses valeurs d'origine, puis la
+        // page la plus simple à remettre en état est celle que le serveur renvoie.
+        function abandonner() {
             memoire(false);
-            // Une saisie abandonnée : la page la plus simple à remettre en état
-            // est celle que le serveur renvoie.
-            if (saisieEnCours()) { location.reload(); return; }
+            if (form) form.reset();
+            location.reload();
+        }
+
+        function sortir() {
+            if (saisieEnCours()) {
+                var question = 'Abandonner les modifications non enregistrées ?';
+                // La modale du projet plutôt que confirm() : certains navigateurs intégrés
+                // ferment confirm() d'eux-mêmes (réponse « non »), et rien ne se passait.
+                if (window.confirmerModal && window.confirmerModal(question, abandonner)) return;
+                if (confirm(question)) abandonner();
+                return;
+            }
+            memoire(false);
             main.classList.remove('en-edition');
             verrous.forEach(function (f) { f.disabled = true; });
             bouton.setAttribute('aria-pressed', 'false');
@@ -95,6 +108,20 @@
                 });
             });
         }
+
+        // Quitter la fiche par un lien termine la modification : au retour, elle est en
+        // lecture. Les envois de formulaire (pièce jointe, serveur rattaché) renvoient la
+        // même page et gardent le mode, comme un rechargement.
+        document.addEventListener('click', function (e) {
+            var lien = e.target.closest('a[href]');
+            if (!lien || e.defaultPrevented || e.button !== 0) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            if (lien.target && lien.target !== '_self') return;
+            var url;
+            try { url = new URL(lien.href, location.href); } catch (err) { return; }
+            if (url.origin === location.origin && url.pathname === location.pathname) return;
+            memoire(false);
+        });
 
         if (memorise()) entrer(false);
     });

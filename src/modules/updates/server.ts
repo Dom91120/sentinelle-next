@@ -1,5 +1,8 @@
 /** Mises à jour (port de app/updates.py). */
-import { champ, champOuNull, parseDate } from "@/lib/forms-util";
+import { champ, champOuNull, coche, parseDate } from "@/lib/forms-util";
+import { aujourdhui, dateCourte } from "@/lib/libelles";
+import { updateEffectiveStatus } from "@/lib/statuts";
+import { auditRecord } from "@/server/audit";
 import { prisma } from "@/server/db";
 
 export const STATUS_CHOICES: [string, string][] = [
@@ -20,13 +23,8 @@ export const UPDATER_CHOICES: [string, string][] = [
 export const STATUS_LABELS: Record<string, string> = Object.fromEntries(STATUS_CHOICES);
 export const TYPE_LABELS: Record<string, string> = Object.fromEntries(TYPE_CHOICES);
 export const UPDATER_LABELS: Record<string, string> = Object.fromEntries(UPDATER_CHOICES);
-const VALID_STATUS = new Set(STATUS_CHOICES.map(([v]) => v));
 const VALID_TYPE = new Set(TYPE_CHOICES.map(([v]) => v));
 const VALID_UPDATER = new Set(UPDATER_CHOICES.map(([v]) => v));
-
-export function cleanStatus(value: unknown): string {
-  return typeof value === "string" && VALID_STATUS.has(value) ? value : "up_to_date";
-}
 
 export function cleanType(value: unknown): string {
   return typeof value === "string" && VALID_TYPE.has(value) ? value : "application";
@@ -103,12 +101,14 @@ export async function cible(
 /** Les champs d'une mise à jour depuis le formulaire (nom validé à part). */
 export async function depuisFormulaire(f: FormData, name: string) {
   const [softwareId, equipmentId] = await cible(f.get("target"));
+  const currentVersion = champOuNull(f, "current_version");
+  const latestVersion = champOuNull(f, "latest_version");
   return {
     name,
     systemType: cleanType(f.get("system_type")),
-    currentVersion: champOuNull(f, "current_version"),
-    latestVersion: champOuNull(f, "latest_version"),
-    status: cleanStatus(f.get("status")),
+    currentVersion,
+    latestVersion,
+    status: statutEnregistre(coche(f, "critical"), currentVersion, latestVersion),
     lastUpdate: parseDate(f.get("last_update")),
     updaterType: cleanUpdater(f.get("updater_type")),
     updatedBy: champOuNull(f, "updated_by"),
@@ -120,4 +120,109 @@ export async function depuisFormulaire(f: FormData, name: string) {
 
 export function nomDe(f: FormData): string {
   return champ(f, "name");
+}
+
+/** Ce qu'écrit « Marquer à jour » : la version actuelle rejoint la dernière disponible (ou
+ * reste telle quelle si aucune n'est saisie) et, quand la mise à jour est rattachée à un
+ * logiciel, sa fiche reçoit la même version. Une version vide n'écrase rien. */
+export function marquage(update: {
+  currentVersion: string | null;
+  latestVersion: string | null;
+  softwareId: number | null;
+}): { currentVersion: string | null; logiciel: { id: number; version: string } | null } {
+  const currentVersion = update.latestVersion ? update.latestVersion : update.currentVersion;
+  const logiciel =
+    update.softwareId && currentVersion ? { id: update.softwareId, version: currentVersion } : null;
+  return { currentVersion, logiciel };
+}
+
+/** Une mise à jour reste à faire tant que le statut n'est pas « À jour », ou qu'une dernière
+ * version est connue et diffère de la version installée : le statut est saisi à la main et
+ * peut rester sur « À jour » après la publication d'une nouvelle version. */
+export function miseAJourAFaire(update: {
+  status: string | null;
+  currentVersion: string | null;
+  latestVersion: string | null;
+}): boolean {
+  return updateEffectiveStatus(update) !== "up_to_date";
+}
+
+/** Le statut enregistré depuis le formulaire : la case « Critique / sécurité » vaut `critical` ;
+ * sinon il se déduit des versions, comme à l'affichage, pour que la base dise la même chose que
+ * l'écran (« disponible » quand une dernière version différente est connue, « à jour » sinon). */
+export function statutEnregistre(
+  critique: boolean,
+  currentVersion: string | null,
+  latestVersion: string | null,
+): string {
+  if (critique) return "critical";
+  return updateEffectiveStatus({ status: "up_to_date", currentVersion, latestVersion });
+}
+
+/** Données d'un enregistrement sans marquage : « Date MAJ » laissée vide conserve la date mémorisée. */
+export function donneesSimples<T extends { lastUpdate: Date | null }>(
+  saisie: T,
+): Omit<T, "lastUpdate"> | T {
+  if (saisie.lastUpdate) return saisie;
+  const { lastUpdate: _vide, ...reste } = saisie;
+  return reste;
+}
+
+/** La ligne d'historique d'un marquage : « Mis à jour de la version X en version Y le date », la
+ * version de départ (celle qu'affichait « Version actuelle ») et la date seulement si connues. */
+export function commentaireMarquage(
+  depuis: string | null,
+  vers: string | null,
+  date: Date | null,
+): string {
+  const avant = (depuis ?? "").trim();
+  const apres = (vers ?? "").trim();
+  let texte = "Mis à jour";
+  if (avant !== "" && avant !== apres) texte += ` de la version ${avant}`;
+  texte += ` en version ${apres || "?"}`;
+  if (date) texte += ` le ${dateCourte(date)}`;
+  return texte;
+}
+
+/** Enregistre la fiche telle que saisie. Si « Mise à jour effectuée » est actif, la marque dans le
+ * même mouvement : la version actuelle rejoint la dernière disponible, le statut passe à « À jour »,
+ * « Date MAJ » fait foi (aujourd'hui si vide), une ligne d'historique est écrite et la fiche
+ * Logiciel liée reçoit la version. Tout ou rien. */
+export async function enregistrerSaisie(
+  id: number,
+  saisie: Awaited<ReturnType<typeof depuisFormulaire>>,
+  effectuee: boolean,
+  username: string,
+): Promise<void> {
+  if (!effectuee) {
+    await prisma.systemUpdate.update({ where: { id }, data: donneesSimples(saisie) });
+    return;
+  }
+  const { currentVersion, logiciel } = marquage(saisie);
+  const lastUpdate = saisie.lastUpdate ?? aujourdhui();
+  const comment = commentaireMarquage(saisie.currentVersion, currentVersion, saisie.lastUpdate);
+  await prisma.$transaction([
+    prisma.systemUpdate.update({
+      where: { id },
+      data: { ...saisie, currentVersion, status: "up_to_date", lastUpdate },
+    }),
+    prisma.updateHistory.create({
+      data: { updateId: id, action: "updated", comment, performedBy: username },
+    }),
+    ...(logiciel
+      ? [
+          prisma.software.update({
+            where: { id: logiciel.id },
+            data: { version: logiciel.version },
+          }),
+        ]
+      : []),
+  ]);
+  if (logiciel) {
+    const s = await prisma.software.findUnique({
+      where: { id: logiciel.id },
+      select: { name: true },
+    });
+    if (s) await auditRecord("modification logiciel", s.name, "inventory", username);
+  }
 }

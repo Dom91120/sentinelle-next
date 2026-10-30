@@ -5,14 +5,14 @@ import { ScriptDiffere } from "@/components/scripts";
 import { Lu, Pastille, Rangee, Rubrique } from "@/components/synthese";
 import type { Equipment, Software, SystemUpdate } from "@/generated/prisma/client";
 import { EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
-import { isoDate } from "@/lib/forms-util";
 import { dateCourte } from "@/lib/libelles";
+import { updateEffectiveStatus } from "@/lib/statuts";
 import {
   type Asset,
   cibleValeur,
   cleanUpdater,
+  miseAJourAFaire,
   type Prestataire,
-  STATUS_CHOICES,
   STATUS_LABELS,
   TYPE_CHOICES,
   TYPE_LABELS,
@@ -30,6 +30,41 @@ export type UpdateComplete = SystemUpdate & {
  * Le sélecteur « Matériel / Application » ne propose que les fiches du type choisi ; choisir une
  * fiche propose son nom comme libellé tant que le champ « Nom » est vide (le nom reste libre).
  */
+/** « MAJ effectuée » et « Date MAJ » n'apparaissent que s'il y a quelque chose à marquer : dernière
+ * version saisie différente de la version actuelle, ou « Critique » cochée (même règle que
+ * miseAJourAFaire côté serveur, suivie en direct pendant la saisie) ; masqués, ils sont remis à
+ * zéro. L'interrupteur activé place la date du jour (locale) dans « Date MAJ » si elle est vide ;
+ * l'utilisateur peut ensuite la corriger. Repassé sur off, il vide « Date MAJ ». */
+const DONE_JS = `(function () {
+    var done = document.getElementById('upd_done');
+    var date = document.getElementById('upd_last_update');
+    if (!done || !date || !done.form) return;
+    var form = done.form;
+    var actuelle = form.querySelector('[name="current_version"]');
+    var derniere = form.querySelector('[name="latest_version"]');
+    var critique = document.getElementById('upd_critical');
+    var blocs = form.querySelectorAll('[data-marquage]');
+    function aFaire() {
+        var d = derniere ? derniere.value.trim() : '';
+        var a = actuelle ? actuelle.value.trim() : '';
+        return (d !== '' && d !== a) || !!(critique && critique.checked);
+    }
+    function rafraichir() {
+        var visible = aFaire();
+        blocs.forEach(function (b) { b.hidden = !visible; });
+        if (!visible) { done.checked = false; date.value = ''; }
+    }
+    [actuelle, derniere].forEach(function (c) { if (c) c.addEventListener('input', rafraichir); });
+    if (critique) critique.addEventListener('change', rafraichir);
+    done.addEventListener('change', function () {
+        if (!done.checked) { date.value = ''; return; }
+        if (date.value) return;
+        var d = new Date();
+        var mm = String(d.getMonth() + 1).padStart(2, '0');
+        var jj = String(d.getDate()).padStart(2, '0');
+        date.value = d.getFullYear() + '-' + mm + '-' + jj;
+    });
+})();`;
 const PICKER_JS = `(function () {
     var typeSel = document.getElementById('systemType');
     var picker = document.getElementById('assetPicker');
@@ -97,6 +132,9 @@ export type FormProps = {
   nonce?: string;
   retour: string;
   actionForm?: string;
+  /** Sur une fiche enregistrée : l'interrupteur « MAJ effectuée » et « Date MAJ », visibles dès
+   * qu'il y a quelque chose à marquer (versions différentes ou « Critique »), aussi pendant la saisie. */
+  peutMarquer?: boolean;
 };
 
 /** updates/_form_corps.html */
@@ -109,9 +147,12 @@ export function FormCorps({
   nonce,
   retour,
   actionForm,
+  peutMarquer,
 }: FormProps) {
   const qui = cleanUpdater(update?.updaterType);
   const intervenant = update?.updatedBy ?? "";
+  // État initial du bloc de marquage ; le script le suit ensuite pendant la saisie.
+  const aMarquer = update ? miseAJourAFaire(update) : false;
   const valeur = (choix: string) => (qui === choix ? intervenant : "");
   // Un prestataire saisi autrefois en texte libre reste proposé, sans le perdre.
   const choixPrestataires =
@@ -205,31 +246,59 @@ export function FormCorps({
                     placeholder="ex: 1.3.0"
                   />
                 </div>
-                <div className="col-md-auto mb-3">
-                  <label className="form-label fw-medium" title="Dernière mise à jour">
-                    Dernière MAJ
+                <div className="col-md-auto mb-3 text-center">
+                  <label
+                    className="form-label fw-medium d-block"
+                    htmlFor="upd_critical"
+                    title="Passe la fiche en rouge et envoie une alerte chaque jour tant que la mise à jour n'est pas faite"
+                  >
+                    Critique
                   </label>
                   <input
-                    type="date"
-                    name="last_update"
-                    className="form-control l-date"
-                    defaultValue={update?.lastUpdate ? isoDate(update.lastUpdate) : ""}
+                    type="checkbox"
+                    className="form-check-input"
+                    name="critical"
+                    id="upd_critical"
+                    defaultChecked={update?.status === "critical"}
                   />
                 </div>
-                <div className="col-md-auto mb-3">
-                  <label className="form-label fw-medium">Statut *</label>
-                  <select
-                    name="status"
-                    className="form-select l-contenu"
-                    defaultValue={update?.status ?? STATUS_CHOICES[0][0]}
-                  >
-                    {STATUS_CHOICES.map(([val, lbl]) => (
-                      <option key={val} value={val}>
-                        {lbl}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {peutMarquer ? (
+                  <>
+                    <div className="col-md-auto mb-3 text-center" data-marquage hidden={!aMarquer}>
+                      <label
+                        className="form-label fw-medium d-block"
+                        htmlFor="upd_done"
+                        title="Activé, place la date du jour dans « Date MAJ » (modifiable, vidée si l'on désactive) ; à l'enregistrement, aligne la version actuelle sur la dernière disponible et passe le statut à « À jour »"
+                      >
+                        MAJ effectuée
+                      </label>
+                      <div className="form-check form-switch d-inline-block m-0 p-0">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          className="form-check-input ms-0"
+                          name="done"
+                          id="upd_done"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-auto mb-3" data-marquage hidden={!aMarquer}>
+                      <label
+                        className="form-label fw-medium"
+                        htmlFor="upd_last_update"
+                        title="Date de la mise à jour (aujourd'hui dès que l'interrupteur est activé, modifiable)"
+                      >
+                        Date MAJ
+                      </label>
+                      <input
+                        type="date"
+                        name="last_update"
+                        id="upd_last_update"
+                        className="form-control l-date"
+                      />
+                    </div>
+                  </>
+                ) : null}
               </div>
               <div className="row">
                 <div className="col-md-auto mb-3">
@@ -324,6 +393,7 @@ export function FormCorps({
       </div>
 
       <ScriptDiffere code={PICKER_JS} nonce={nonce} />
+      <ScriptDiffere code={DONE_JS} nonce={nonce} />
     </>
   );
 }
@@ -339,7 +409,10 @@ export function Synthese({ update }: { update: UpdateComplete }) {
       <Rubrique titre="Mise à jour" bi="bi-arrow-up-circle" couleur="sky">
         <Rangee>
           <Lu label="Type" valeur={TYPE_LABELS[update.systemType ?? ""] ?? update.systemType} />
-          <Lu label="Statut" valeur={STATUS_LABELS[update.status ?? ""] ?? update.status} />
+          <Lu
+            label="Statut"
+            valeur={STATUS_LABELS[updateEffectiveStatus(update)] ?? update.status}
+          />
         </Rangee>
         <Rangee>
           <Lu label="Réalisée par" valeur={update.updatedBy} />

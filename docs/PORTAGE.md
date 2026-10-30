@@ -153,7 +153,7 @@ Logique métier des modèles (à porter en TypeScript pur, `src/lib/statuts.ts` 
 - [x] liste, création / édition (logiciel lié), fiche, `/complete`, `/delete`
 
 ### Mises à jour (`/updates`)
-- [x] liste, création / édition (équipement / logiciel cible), fiche, `/mark-updated`, `/delete`
+- [x] liste, création / édition (équipement / logiciel cible), fiche, marquage à l'enregistrement (interrupteur « Mise à jour effectuée »), `/delete`
 
 ### Inventaire matériel (`/inventory`)
 - [x] liste (filtres par famille / type / environnement / criticité, colonnes, tri, `filtres-colonnes.js`, `_inventory_nav`), `/quick-create`

@@ -1,19 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  Activite,
-  BoutonModal,
-  Entete,
-  Fait,
-  FaitBloc,
-  Faits,
-  Historique,
-  ModalAction,
-} from "@/components/fiche";
+import { Activite, Entete, Fait, FaitBloc, Faits, Historique } from "@/components/fiche";
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
 import { dateCourte } from "@/lib/libelles";
-import { updateStatusColor } from "@/lib/statuts";
+import { updateEffectiveStatus, updateStatusColor } from "@/lib/statuts";
 import { formContext, STATUS_LABELS, TYPE_LABELS } from "@/modules/updates/server";
 import { FormCorps, Synthese } from "@/modules/updates/vues";
 import { prisma } from "@/server/db";
@@ -50,21 +41,15 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
     getActiveSnooze("update", id),
   ]);
   const couleur = updateStatusColor(update);
-  const pasAJour = update.status !== "up_to_date";
   const sousTitre = `${TYPE_LABELS[update.systemType ?? ""] ?? update.systemType ?? ""}${update.currentVersion ? ` · version ${update.currentVersion}` : ""}`;
   return (
     <>
       <Entete
         titre={update.name}
         sousTitre={sousTitre}
-        primaire={
-          peutEditer && pasAJour ? (
-            <BoutonModal id="a-jour" libelle="Marquer à jour" icone="bi-check-lg" />
-          ) : null
-        }
         badges={
           <span className={`badge-status badge-${couleur}`}>
-            {STATUS_LABELS[update.status ?? ""] ?? update.status}
+            {STATUS_LABELS[updateEffectiveStatus(update)] ?? update.status}
           </span>
         }
         voisins={voisins}
@@ -128,6 +113,7 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
                 nonce={nonce}
                 retour={`/updates/${id}#details`}
                 actionForm={`/updates/${id}/edit`}
+                peutMarquer
               />
             </fieldset>
           </Volet>
@@ -137,30 +123,6 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
           <Historique histories={histories} />
         </Volet>
       </Volets>
-
-      {peutEditer && pasAJour ? (
-        <ModalAction
-          id="a-jour"
-          titre="Marquer à jour"
-          action={`/updates/${id}/mark-updated`}
-          csrf={csrf}
-          bouton="Marquer à jour"
-          aide="Passe le statut à « À jour », aligne la version actuelle sur la dernière disponible et date la mise à jour à aujourd'hui."
-        >
-          <div>
-            <label className="form-label" htmlFor="upd_comment">
-              Commentaire <span className="text-muted">(optionnel)</span>
-            </label>
-            <input
-              type="text"
-              name="comment"
-              id="upd_comment"
-              className="form-control"
-              placeholder="qui, quoi, comment…"
-            />
-          </div>
-        </ModalAction>
-      ) : null}
     </>
   );
 }
