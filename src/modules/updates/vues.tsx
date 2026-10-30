@@ -6,12 +6,11 @@ import { Lu, Pastille, Rangee, Rubrique } from "@/components/synthese";
 import type { Equipment, Software, SystemUpdate } from "@/generated/prisma/client";
 import { EQUIPMENT_KIND_ICONS, EQUIPMENT_KIND_LABELS } from "@/lib/constantes";
 import { dateCourte } from "@/lib/libelles";
-import { updateEffectiveStatus } from "@/lib/statuts";
+import { nouvelleVersionDisponible, updateEffectiveStatus } from "@/lib/statuts";
 import {
   type Asset,
   cibleValeur,
   cleanUpdater,
-  miseAJourAFaire,
   type Prestataire,
   STATUS_LABELS,
   TYPE_CHOICES,
@@ -30,11 +29,11 @@ export type UpdateComplete = SystemUpdate & {
  * Le sélecteur « Matériel / Application » ne propose que les fiches du type choisi ; choisir une
  * fiche propose son nom comme libellé tant que le champ « Nom » est vide (le nom reste libre).
  */
-/** « MAJ effectuée » et « Date MAJ » n'apparaissent que s'il y a quelque chose à marquer : dernière
- * version saisie différente de la version actuelle, ou « Critique » cochée (même règle que
- * miseAJourAFaire côté serveur, suivie en direct pendant la saisie) ; masqués, ils sont remis à
- * zéro. L'interrupteur activé place la date du jour (locale) dans « Date MAJ » si elle est vide ;
- * l'utilisateur peut ensuite la corriger. Repassé sur off, il vide « Date MAJ ». */
+/** « MAJ effectuée » et « Date MAJ » n'apparaissent que si la dernière version saisie diffère de la
+ * version actuelle (même règle que nouvelleVersionDisponible côté serveur, suivie en direct pendant
+ * la saisie ; « Critique » n'y change rien) ; masqués, ils sont remis à zéro. L'interrupteur activé
+ * place la date du jour (locale) dans « Date MAJ » si elle est vide ; l'utilisateur peut ensuite la
+ * corriger. Repassé sur off, il vide « Date MAJ ». */
 const DONE_JS = `(function () {
     var done = document.getElementById('upd_done');
     var date = document.getElementById('upd_last_update');
@@ -42,12 +41,11 @@ const DONE_JS = `(function () {
     var form = done.form;
     var actuelle = form.querySelector('[name="current_version"]');
     var derniere = form.querySelector('[name="latest_version"]');
-    var critique = document.getElementById('upd_critical');
     var blocs = form.querySelectorAll('[data-marquage]');
     function aFaire() {
         var d = derniere ? derniere.value.trim() : '';
         var a = actuelle ? actuelle.value.trim() : '';
-        return (d !== '' && d !== a) || !!(critique && critique.checked);
+        return d !== '' && d !== a;
     }
     function rafraichir() {
         var visible = aFaire();
@@ -55,7 +53,6 @@ const DONE_JS = `(function () {
         if (!visible) { done.checked = false; date.value = ''; }
     }
     [actuelle, derniere].forEach(function (c) { if (c) c.addEventListener('input', rafraichir); });
-    if (critique) critique.addEventListener('change', rafraichir);
     done.addEventListener('change', function () {
         if (!done.checked) { date.value = ''; return; }
         if (date.value) return;
@@ -152,7 +149,9 @@ export function FormCorps({
   const qui = cleanUpdater(update?.updaterType);
   const intervenant = update?.updatedBy ?? "";
   // État initial du bloc de marquage ; le script le suit ensuite pendant la saisie.
-  const aMarquer = update ? miseAJourAFaire(update) : false;
+  const aMarquer = update
+    ? nouvelleVersionDisponible(update.currentVersion, update.latestVersion)
+    : false;
   const valeur = (choix: string) => (qui === choix ? intervenant : "");
   // Un prestataire saisi autrefois en texte libre reste proposé, sans le perdre.
   const choixPrestataires =

@@ -197,6 +197,15 @@ export function reviewComputedStatus(
 }
 
 // ── Mises à jour ──
+/** Une dernière version est connue et diffère de la version installée (espaces ignorés). */
+export function nouvelleVersionDisponible(
+  currentVersion: string | null,
+  latestVersion: string | null,
+): boolean {
+  const derniere = (latestVersion ?? "").trim();
+  return derniere !== "" && derniere !== (currentVersion ?? "").trim();
+}
+
 /** Le statut est saisi à la main et peut rester sur « À jour » après la publication d'une
  * nouvelle version : dès qu'une dernière version est connue et diffère de la version installée,
  * la fiche vaut « Mise à jour disponible ». Les autres statuts (critique…) restent tels quels. */
@@ -207,10 +216,7 @@ export function updateEffectiveStatus(u: {
 }): string {
   const status = u.status ?? "";
   if (status !== "up_to_date") return status;
-  const derniere = (u.latestVersion ?? "").trim();
-  return derniere !== "" && derniere !== (u.currentVersion ?? "").trim()
-    ? "update_available"
-    : status;
+  return nouvelleVersionDisponible(u.currentVersion, u.latestVersion) ? "update_available" : status;
 }
 
 export function updateStatusColor(u: {

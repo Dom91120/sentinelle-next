@@ -11,6 +11,7 @@ import {
   domainStatus,
   equipmentComputedStatus,
   missingBackup,
+  nouvelleVersionDisponible,
   osUpdateStale,
   reviewComputedStatus,
   testComputedStatus,
@@ -241,5 +242,16 @@ describe("inventaire", () => {
     expect(osUpdateStale(equip({ os: "Debian" }))).toBe(true); // OS sans date
     expect(osUpdateStale(equip({ os: "Debian", osLastUpdate: jour(-400) }))).toBe(true);
     expect(osUpdateStale(equip({ os: "Debian", osLastUpdate: jour(-100) }))).toBe(false);
+  });
+});
+
+describe("nouvelleVersionDisponible", () => {
+  it("vrai seulement si une dernière version connue diffère de l'actuelle", () => {
+    expect(nouvelleVersionDisponible("8.5.3.4", "8.5.3.8")).toBe(true);
+    expect(nouvelleVersionDisponible(null, "8.5.3.8")).toBe(true);
+    expect(nouvelleVersionDisponible("8.5.3.8", "8.5.3.8")).toBe(false);
+    expect(nouvelleVersionDisponible("8.5.3.8", " 8.5.3.8 ")).toBe(false);
+    expect(nouvelleVersionDisponible("8.5.3.8", null)).toBe(false);
+    expect(nouvelleVersionDisponible("8.5.3.8", "")).toBe(false);
   });
 });

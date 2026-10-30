@@ -1,12 +1,6 @@
 /** « Marquer à jour » : la règle de recopie des versions (partie pure de la route). */
 import { describe, expect, it } from "vitest";
-import {
-  commentaireMarquage,
-  donneesSimples,
-  marquage,
-  miseAJourAFaire,
-  statutEnregistre,
-} from "./server";
+import { commentaireMarquage, donneesSimples, marquage, statutEnregistre } from "./server";
 
 describe("marquage", () => {
   it("la version actuelle rejoint la dernière disponible", () => {
@@ -45,54 +39,6 @@ describe("marquage", () => {
       currentVersion: "",
       logiciel: null,
     });
-  });
-});
-
-describe("miseAJourAFaire", () => {
-  it("tout statut autre que « À jour » est à faire", () => {
-    expect(
-      miseAJourAFaire({ status: "update_available", currentVersion: "1", latestVersion: "1" }),
-    ).toBe(true);
-    expect(miseAJourAFaire({ status: "critical", currentVersion: null, latestVersion: null })).toBe(
-      true,
-    );
-    expect(miseAJourAFaire({ status: null, currentVersion: "1", latestVersion: null })).toBe(true);
-  });
-
-  it("« À jour » mais une dernière version différente : à faire", () => {
-    expect(
-      miseAJourAFaire({
-        status: "up_to_date",
-        currentVersion: "8.5.3.4",
-        latestVersion: "8.5.3.8",
-      }),
-    ).toBe(true);
-    expect(
-      miseAJourAFaire({ status: "up_to_date", currentVersion: null, latestVersion: "8.5.3.8" }),
-    ).toBe(true);
-  });
-
-  it("« À jour » et versions alignées ou dernière inconnue : rien à faire", () => {
-    expect(
-      miseAJourAFaire({
-        status: "up_to_date",
-        currentVersion: "8.5.3.8",
-        latestVersion: "8.5.3.8",
-      }),
-    ).toBe(false);
-    expect(
-      miseAJourAFaire({
-        status: "up_to_date",
-        currentVersion: "8.5.3.8",
-        latestVersion: " 8.5.3.8 ",
-      }),
-    ).toBe(false);
-    expect(
-      miseAJourAFaire({ status: "up_to_date", currentVersion: "8.5.3.8", latestVersion: null }),
-    ).toBe(false);
-    expect(
-      miseAJourAFaire({ status: "up_to_date", currentVersion: "8.5.3.8", latestVersion: "" }),
-    ).toBe(false);
   });
 });
 

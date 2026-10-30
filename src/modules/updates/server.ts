@@ -136,17 +136,6 @@ export function marquage(update: {
   return { currentVersion, logiciel };
 }
 
-/** Une mise à jour reste à faire tant que le statut n'est pas « À jour », ou qu'une dernière
- * version est connue et diffère de la version installée : le statut est saisi à la main et
- * peut rester sur « À jour » après la publication d'une nouvelle version. */
-export function miseAJourAFaire(update: {
-  status: string | null;
-  currentVersion: string | null;
-  latestVersion: string | null;
-}): boolean {
-  return updateEffectiveStatus(update) !== "up_to_date";
-}
-
 /** Le statut enregistré depuis le formulaire : la case « Critique / sécurité » vaut `critical` ;
  * sinon il se déduit des versions, comme à l'affichage, pour que la base dise la même chose que
  * l'écran (« disponible » quand une dernière version différente est connue, « à jour » sinon). */
