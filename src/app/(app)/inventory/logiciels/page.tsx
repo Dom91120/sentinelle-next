@@ -132,7 +132,7 @@ export default async function SoftwareList({ searchParams }: { searchParams: Par
                   const techno = s.technologyId ? technoPar.get(s.technologyId) : null;
                   return (
                     <tr key={s.id}>
-                      <td>
+                      <td className="cell-logiciel">
                         <span className="d-flex align-items-center gap-1">
                           <a
                             href={`/inventory/logiciels/${s.id}`}

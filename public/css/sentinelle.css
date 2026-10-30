@@ -1266,7 +1266,9 @@ body.dash-editing .stat-toggle { display: inline-flex; }
    en petit et serre pour ne pas creuser la rangee. */
 .tableau-logiciels { table-layout: fixed; }
 .tableau-logiciels td { overflow: hidden; }
-.tableau-logiciels .cell-services { font-size: 0.75rem; line-height: 1.15; }
+.tableau-logiciels .cell-services { font-size: 0.75rem; line-height: 1; }
+/* Le nom du logiciel et son type en dessous : interligne 1,2. */
+.tableau-logiciels .cell-logiciel { line-height: 1.2; }
 .tableau-logiciels .badge-status { vertical-align: middle; }
 /* Liste des fournisseurs : la disposition de l'annuaire des editeurs de
    SoftInventory. Quatre colonnes fixes (26 / 27 / 27 / 20) ; les cellules
