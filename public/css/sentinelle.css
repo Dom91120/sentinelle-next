@@ -458,9 +458,9 @@ svg.lucide { flex-shrink: 0; vertical-align: -0.18em; fill: none; stroke: curren
     background: color-mix(in srgb, currentColor 14%, transparent) !important;
 }
 .sidebar-link .badge.bg-danger  { color: #b91c1c !important; }
-.sidebar-link .badge.bg-warning { color: #b45309 !important; }
+.sidebar-link .badge.bg-warning { color: var(--warning) !important; } /* l'ambre du compteur « Mise à jour disponible » */
 [data-theme="dark"] .sidebar-link .badge.bg-danger  { color: #f87171 !important; }
-[data-theme="dark"] .sidebar-link .badge.bg-warning { color: #fbbf24 !important; }
+[data-theme="dark"] .sidebar-link .badge.bg-warning { color: var(--warning) !important; }
 .sidebar-link .badge.bg-secondary { background: var(--inset) !important; color: var(--muted) !important; }
 
 /* ---- Pied : identite + boutons-icones ---- */
@@ -1407,7 +1407,8 @@ a.badge-status:hover { filter: brightness(0.96); }
 /* Couleur propre a chaque statut (texte = couleur, point herite via currentColor) */
 .status-filter-secondary { color: var(--text-light); }
 .status-filter-danger    { color: #b91c1c; }
-.status-filter-warning   { color: #b45309; }
+/* Orange : la couleur de base du badge « Mise à jour disponible », sans fond, comme ses voisines. */
+.status-filter-warning   { color: var(--warning); }
 .status-filter-info      { color: #1d4ed8; }
 .status-filter-success   { color: #047857; }
 
@@ -1428,13 +1429,13 @@ a.badge-status:hover { filter: brightness(0.96); }
 .status-filter.active { border-color: transparent; }
 .status-filter-secondary.active { background: var(--table-hover); color: var(--text); }
 .status-filter-danger.active    { background: #fee2e2; color: #991b1b; }
-.status-filter-warning.active   { background: #fef3c7; color: #92400e; }
+.status-filter-warning.active   { background: #fef3c7; color: #b45309; } /* un cran plus sombre que la base, comme les autres */
 .status-filter-info.active      { background: #dbeafe; color: #1e40af; }
 .status-filter-success.active   { background: #d1fae5; color: #065f46; }
 .status-filter.active .status-filter-count { background: rgba(0, 0, 0, 0.08); }
 
 [data-theme="dark"] .status-filter-danger    { color: #f87171; }
-[data-theme="dark"] .status-filter-warning   { color: #fbbf24; }
+[data-theme="dark"] .status-filter-warning   { color: var(--warning); }
 [data-theme="dark"] .status-filter-info      { color: #60a5fa; }
 [data-theme="dark"] .status-filter-success   { color: #34d399; }
 [data-theme="dark"] .status-filter .status-filter-count { background: rgba(255, 255, 255, 0.1); }
