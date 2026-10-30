@@ -4,8 +4,8 @@ import { Activite, Entete, Fait, FaitBloc, Faits, Historique } from "@/component
 import { BarreOnglets, Onglet, Volet, Volets } from "@/components/onglets";
 import { SnoozeCard } from "@/components/partials";
 import { dateCourte } from "@/lib/libelles";
-import { updateEffectiveStatus, updateStatusColor } from "@/lib/statuts";
-import { formContext, STATUS_LABELS, TYPE_LABELS } from "@/modules/updates/server";
+import { updateStatusColor } from "@/lib/statuts";
+import { badgeVersion, formContext, STATUS_LABELS, TYPE_LABELS } from "@/modules/updates/server";
 import { FormCorps, Synthese } from "@/modules/updates/vues";
 import { prisma } from "@/server/db";
 import { idDeRoute } from "@/server/guards";
@@ -42,16 +42,22 @@ export default async function UpdateDetail({ params }: { params: Promise<{ id: s
   ]);
   const couleur = updateStatusColor(update);
   const sousTitre = `${TYPE_LABELS[update.systemType ?? ""] ?? update.systemType ?? ""}${update.currentVersion ? ` · version ${update.currentVersion}` : ""}`;
+  // « Critique / sécurité » se signale par le point rouge devant le nom, comme dans la liste ;
+  // le badge après le nom ne dit que la version : à jour ou mise à jour disponible.
+  const badge = badgeVersion(update);
   return (
     <>
       <Entete
-        titre={update.name}
-        sousTitre={sousTitre}
-        badges={
-          <span className={`badge-status badge-${couleur}`}>
-            {STATUS_LABELS[updateEffectiveStatus(update)] ?? update.status}
-          </span>
+        titre={
+          <>
+            {update.status === "critical" ? (
+              <span className="point-critique" title={STATUS_LABELS.critical} aria-hidden="true" />
+            ) : null}
+            {update.name}
+          </>
         }
+        sousTitre={sousTitre}
+        badges={<span className={`badge-status badge-${badge.couleur}`}>{badge.libelle}</span>}
         voisins={voisins}
         base="/updates"
         bandeau={

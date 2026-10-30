@@ -10,6 +10,11 @@ import { ADMINISTRATION, DOMAINES, entreeActive } from "@/lib/navigation";
 import type { Flash } from "@/server/flash";
 import type { CurrentUser } from "@/server/guards";
 
+/** Infobulle de la pastille orange des mises à jour : « 1 mise à jour disponible », « 2 mises à jour disponibles ». */
+function disponibles(n: number): string {
+  return n === 1 ? "1 mise à jour disponible" : `${n} mises à jour disponibles`;
+}
+
 const FLASH_ICONS: Record<string, string> = {
   success: "check-circle-fill",
   danger: "exclamation-octagon-fill",
@@ -136,7 +141,18 @@ export function Shell({
                   >
                     <Icone bi={e.icon} />
                     <span>{e.label}</span>
-                    {e.count && counts[e.count] ? (
+                    {e.count === "updates" ? (
+                      // Mises à jour : seule la pastille orange des disponibles ; la criticité
+                      // se lit sur la liste et la fiche (point rouge), pas dans le menu.
+                      counts["updates:warning"] ? (
+                        <span
+                          className="badge bg-warning rounded-pill ms-auto"
+                          title={disponibles(counts["updates:warning"])}
+                        >
+                          {counts["updates:warning"]}
+                        </span>
+                      ) : null
+                    ) : e.count && counts[e.count] ? (
                       <span
                         className="badge bg-danger rounded-pill ms-auto"
                         title={compte(counts[e.count], "danger")}

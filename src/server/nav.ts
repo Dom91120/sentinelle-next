@@ -4,6 +4,7 @@
  * par minute (cache process). Les éléments reportés (snooze) sont exclus.
  */
 
+import { nouvelleVersionDisponible } from "@/lib/statuts";
 import { prisma } from "@/server/db";
 import { chargerTout } from "@/server/donnees";
 import type { CurrentUser } from "@/server/guards";
@@ -44,6 +45,14 @@ async function calculer(): Promise<Cache> {
     inventory: danger(tout.equipments, "equipment"),
     software: danger(tout.software, "software"),
     contracts: danger(tout.contracts, "contract"),
+    // Mises à jour : les disponibles (orange) ont leur propre pastille, à côté des critiques.
+    // Une fiche critique dont une nouvelle version est connue compte dans les deux.
+    "updates:warning": tout.updates.filter(
+      (u) =>
+        !snoozed.has(`update:${u.id}`) &&
+        (u.effectif === "update_available" ||
+          nouvelleVersionDisponible(u.currentVersion, u.latestVersion)),
+    ).length,
   };
   const [acc, cert, dom, bkp, tst, rev, upd, eq, ctr] = await Promise.all([
     prisma.account.count({ where: { isActive: false } }),

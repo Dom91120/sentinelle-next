@@ -1,7 +1,9 @@
 /** Mises à jour (port de app/updates.py). */
+
+import type { Statut } from "@/lib/constantes";
 import { champ, champOuNull, coche, parseDate } from "@/lib/forms-util";
 import { aujourdhui, dateCourte } from "@/lib/libelles";
-import { updateEffectiveStatus } from "@/lib/statuts";
+import { nouvelleVersionDisponible, updateEffectiveStatus } from "@/lib/statuts";
 import { auditRecord } from "@/server/audit";
 import { prisma } from "@/server/db";
 
@@ -146,6 +148,36 @@ export function statutEnregistre(
 ): string {
   if (critique) return "critical";
   return updateEffectiveStatus({ status: "up_to_date", currentVersion, latestVersion });
+}
+
+export type BadgeStatut = { cle: string; libelle: string; couleur: Statut };
+
+/** Le badge de version d'une fiche, liste et en-tête : « Mise à jour disponible » (orange) dès
+ * qu'une nouvelle version est connue, « À jour » (vert) sinon. La criticité est un état à part,
+ * signalé par le point rouge devant le nom, jamais par ce badge. */
+export function badgeVersion(update: {
+  status: string | null;
+  currentVersion: string | null;
+  latestVersion: string | null;
+}): BadgeStatut {
+  const disponible =
+    update.status === "update_available" ||
+    nouvelleVersionDisponible(update.currentVersion, update.latestVersion);
+  return disponible
+    ? { cle: "update_available", libelle: STATUS_LABELS.update_available, couleur: "warning" }
+    : { cle: "up_to_date", libelle: STATUS_LABELS.up_to_date, couleur: "success" };
+}
+
+/** Les filtres de la liste auxquels une fiche appartient : « Critique » si elle l'est, et le filtre de
+ * son badge de version (« Mise à jour disponible » ou « À jour »), les deux états étant indépendants. */
+export function filtresLigne(update: {
+  status: string | null;
+  currentVersion: string | null;
+  latestVersion: string | null;
+}): string {
+  const cles = update.status === "critical" ? ["danger"] : [];
+  cles.push(badgeVersion(update).couleur);
+  return cles.join(" ");
 }
 
 /** Données d'un enregistrement sans marquage : « Date MAJ » laissée vide conserve la date mémorisée. */

@@ -1,6 +1,13 @@
 /** « Marquer à jour » : la règle de recopie des versions (partie pure de la route). */
 import { describe, expect, it } from "vitest";
-import { commentaireMarquage, donneesSimples, marquage, statutEnregistre } from "./server";
+import {
+  badgeVersion,
+  commentaireMarquage,
+  donneesSimples,
+  filtresLigne,
+  marquage,
+  statutEnregistre,
+} from "./server";
 
 describe("marquage", () => {
   it("la version actuelle rejoint la dernière disponible", () => {
@@ -83,5 +90,52 @@ describe("commentaireMarquage", () => {
     expect(commentaireMarquage(" ", "3", null)).toBe("Mis à jour en version 3");
     expect(commentaireMarquage("3", "3", null)).toBe("Mis à jour en version 3");
     expect(commentaireMarquage("2", null, null)).toBe("Mis à jour de la version 2 en version ?");
+  });
+});
+
+describe("badgeVersion", () => {
+  it("« Mise à jour disponible » dès qu'une nouvelle version est connue, critique ou non", () => {
+    expect(badgeVersion({ status: "critical", currentVersion: "4", latestVersion: "5" })).toEqual({
+      cle: "update_available",
+      libelle: "Mise à jour disponible",
+      couleur: "warning",
+    });
+    expect(
+      badgeVersion({ status: "up_to_date", currentVersion: "8.5.3.4", latestVersion: "8.5.3.8" }),
+    ).toEqual({ cle: "update_available", libelle: "Mise à jour disponible", couleur: "warning" });
+    expect(
+      badgeVersion({ status: "update_available", currentVersion: null, latestVersion: null }),
+    ).toEqual({ cle: "update_available", libelle: "Mise à jour disponible", couleur: "warning" });
+  });
+
+  it("« À jour » sinon, même pour une fiche critique", () => {
+    expect(badgeVersion({ status: "up_to_date", currentVersion: "3", latestVersion: "3" })).toEqual(
+      { cle: "up_to_date", libelle: "À jour", couleur: "success" },
+    );
+    expect(badgeVersion({ status: "critical", currentVersion: "4", latestVersion: "4" })).toEqual({
+      cle: "up_to_date",
+      libelle: "À jour",
+      couleur: "success",
+    });
+  });
+});
+
+describe("filtresLigne", () => {
+  it("critique et disponible appartiennent à deux filtres", () => {
+    expect(filtresLigne({ status: "critical", currentVersion: "4", latestVersion: "5" })).toBe(
+      "danger warning",
+    );
+    expect(filtresLigne({ status: "critical", currentVersion: "4", latestVersion: "4" })).toBe(
+      "danger success",
+    );
+  });
+
+  it("sinon le seul filtre du badge de version", () => {
+    expect(
+      filtresLigne({ status: "up_to_date", currentVersion: "8.5.3.4", latestVersion: "8.5.3.8" }),
+    ).toBe("warning");
+    expect(filtresLigne({ status: "up_to_date", currentVersion: "3", latestVersion: "3" })).toBe(
+      "success",
+    );
   });
 });

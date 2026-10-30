@@ -443,14 +443,24 @@ svg.lucide { flex-shrink: 0; vertical-align: -0.18em; fill: none; stroke: curren
     color: var(--text);
 }
 
-/* Compteur d'alertes : pastille rouge pastel, pas un aplat. */
+/* Compteur d'alertes : même thème que le compteur des filtres de statut (texte dans la couleur
+   du statut, fond en lavis à 14 % de cette couleur). Les mises à jour disponibles ont leur
+   pastille orange, distincte de la rouge des critiques. */
 .sidebar-link .badge {
     font-size: 0.66rem;
     font-weight: 700;
     padding: 1px 7px;
-    background: var(--danger-dim) !important;
-    color: var(--danger-text) !important;
 }
+/* Plus précis que « .badge.bg-danger » (thème des badges Bootstrap, plus bas) pour l'emporter. */
+.sidebar-link .badge.bg-danger,
+.sidebar-link .badge.bg-warning {
+    background: var(--danger-dim) !important;
+    background: color-mix(in srgb, currentColor 14%, transparent) !important;
+}
+.sidebar-link .badge.bg-danger  { color: #b91c1c !important; }
+.sidebar-link .badge.bg-warning { color: #b45309 !important; }
+[data-theme="dark"] .sidebar-link .badge.bg-danger  { color: #f87171 !important; }
+[data-theme="dark"] .sidebar-link .badge.bg-warning { color: #fbbf24 !important; }
 .sidebar-link .badge.bg-secondary { background: var(--inset) !important; color: var(--muted) !important; }
 
 /* ---- Pied : identite + boutons-icones ---- */
@@ -1388,7 +1398,9 @@ a.badge-status:hover { filter: brightness(0.96); }
     font-weight: 700;
     padding: 0 5px;
     border-radius: var(--radius-pill);
+    /* Un lavis de la couleur du statut (gris neutre si color-mix est inconnu). */
     background: rgba(0, 0, 0, 0.06);
+    background: color-mix(in srgb, currentColor 14%, transparent);
 }
 .status-filter:hover { border-color: currentColor; }
 
@@ -1398,6 +1410,19 @@ a.badge-status:hover { filter: brightness(0.96); }
 .status-filter-warning   { color: #b45309; }
 .status-filter-info      { color: #1d4ed8; }
 .status-filter-success   { color: #047857; }
+
+/* Mises à jour : le point rouge du filtre « Critique », devant le nom des fiches critiques
+   (liste et en-tête de fiche). */
+.point-critique {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: #b91c1c;
+    vertical-align: middle;
+}
+[data-theme="dark"] .point-critique { background: #f87171; }
 
 /* Etat actif : fond teinte plein dans la couleur du statut */
 .status-filter.active { border-color: transparent; }

@@ -1,7 +1,7 @@
 import { Icone } from "@/components/icones";
 import { Barre, CsvToolbar, PaginationBar, Vide } from "@/components/liste";
 import { dateCourte } from "@/lib/libelles";
-import { STATUS_LABELS, TYPE_LABELS } from "@/modules/updates/server";
+import { badgeVersion, filtresLigne, STATUS_LABELS, TYPE_LABELS } from "@/modules/updates/server";
 import { chargerMisesAJour } from "@/server/donnees";
 import { contexteModule } from "@/server/module";
 import { paginate, resolvePerPage, textSearch } from "@/server/paging";
@@ -54,7 +54,13 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
 
       <div className="data-card">
         <div className="table-responsive">
-          <table className="table table-hover mb-0 js-filterable">
+          <table
+            className="table table-hover mb-0 js-filterable"
+            data-filter-labels={JSON.stringify({
+              warning: STATUS_LABELS.update_available,
+              success: STATUS_LABELS.up_to_date,
+            })}
+          >
             <thead>
               <tr>
                 <th>Application</th>
@@ -66,30 +72,46 @@ export default async function UpdatesList({ searchParams }: { searchParams: Para
             </thead>
             <tbody>
               {rows.length ? (
-                rows.map((u) => (
-                  <tr key={u.id} className={`row-${u.status}`}>
-                    <td>
-                      <a href={`/updates/${u.id}`} className="fw-medium text-decoration-none">
-                        {u.name}
-                      </a>
-                      <small className="d-block text-muted">
-                        {TYPE_LABELS[u.systemType ?? ""] ?? u.systemType}
-                      </small>
-                    </td>
-                    <td>
-                      <code>{u.currentVersion || "—"}</code>
-                    </td>
-                    <td>
-                      <code>{u.latestVersion || "—"}</code>
-                    </td>
-                    <td>{u.lastUpdate ? dateCourte(u.lastUpdate) : "—"}</td>
-                    <td>
-                      <span className={`badge-status badge-${u.status}`}>
-                        {STATUS_LABELS[u.effectif] ?? u.effectif}
-                      </span>
-                    </td>
-                  </tr>
-                ))
+                rows.map((u) => {
+                  // Les lignes portent la couleur dans `status` ; les règles lisent le statut enregistré.
+                  const fiche = {
+                    status: u.brut,
+                    currentVersion: u.currentVersion,
+                    latestVersion: u.latestVersion,
+                  };
+                  const badge = badgeVersion(fiche);
+                  return (
+                    <tr key={u.id} className={`row-${u.status}`} data-filtres={filtresLigne(fiche)}>
+                      <td>
+                        {u.brut === "critical" ? (
+                          <span
+                            className="point-critique"
+                            title="Critique / sécurité"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        <a href={`/updates/${u.id}`} className="fw-medium text-decoration-none">
+                          {u.name}
+                        </a>
+                        <small className="d-block text-muted">
+                          {TYPE_LABELS[u.systemType ?? ""] ?? u.systemType}
+                        </small>
+                      </td>
+                      <td>
+                        <code>{u.currentVersion || "—"}</code>
+                      </td>
+                      <td>
+                        <code>{u.latestVersion || "—"}</code>
+                      </td>
+                      <td>{u.lastUpdate ? dateCourte(u.lastUpdate) : "—"}</td>
+                      <td>
+                        <span className={`badge-status badge-${badge.couleur}`}>
+                          {badge.libelle}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <Vide
                   colonnes={6}

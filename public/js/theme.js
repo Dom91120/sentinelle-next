@@ -127,7 +127,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
 });
 
-// Filtres interactifs par statut sur les tableaux marques .js-filterable
+// Filtres interactifs par statut sur les tableaux marques .js-filterable.
+// Par defaut, une ligne appartient au filtre de sa couleur (classe row-<statut>). Un tableau
+// peut preciser :
+//  - data-filter-labels='{"warning":"Mise à jour disponible"}' : ses propres mots pour certains
+//    filtres (les autres gardent le vocabulaire commun) ;
+//  - sur ses lignes, data-filtres="danger warning" : les filtres auxquels la ligne appartient,
+//    quand un etat n'exclut pas l'autre (une mise a jour critique ET disponible).
 function initStatusFilters() {
     const FILTERS = [
         {key: 'all', label: 'Tous', cls: 'secondary'},
@@ -137,15 +143,21 @@ function initStatusFilters() {
         {key: 'info', label: 'À prévoir', cls: 'info'},
         {key: 'success', label: 'OK', cls: 'success'},
     ];
+    function cles(tr) {
+        if (tr.dataset.filtres !== undefined) return tr.dataset.filtres.split(/\s+/).filter(Boolean);
+        const m = tr.className.match(/\brow-(danger|warning|info|success)\b/);
+        return m ? [m[1]] : [];
+    }
     document.querySelectorAll('table.js-filterable').forEach(function(table) {
+        let labels = {};
+        try { labels = JSON.parse(table.dataset.filterLabels || '{}'); } catch (e) { /* libelles communs */ }
         const rows = Array.from(table.querySelectorAll('tbody tr')).filter(function(tr) {
-            return /\brow-(danger|warning|info|success)\b/.test(tr.className);
+            return cles(tr).length > 0;
         });
         if (rows.length < 2) return;
         const counts = {danger: 0, warning: 0, info: 0, success: 0};
         rows.forEach(function(tr) {
-            const m = tr.className.match(/row-(danger|warning|info|success)/);
-            if (m) counts[m[1]]++;
+            cles(tr).forEach(function(k) { if (k in counts) counts[k]++; });
         });
         const bar = document.createElement('div');
         bar.className = 'status-filter-bar d-flex gap-2 mb-3 flex-wrap';
@@ -155,7 +167,7 @@ function initStatusFilters() {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'status-filter status-filter-' + f.cls;
-            btn.innerHTML = '<span class="status-filter-label">' + f.label + '</span>' +
+            btn.innerHTML = '<span class="status-filter-label">' + (labels[f.key] || f.label) + '</span>' +
                 (f.key === 'all' ? '' : '<span class="status-filter-count">' + counts[f.key] + '</span>');
             btn.dataset.filter = f.key;
             if (f.key === 'all') allBtn = btn;
@@ -163,7 +175,7 @@ function initStatusFilters() {
                 bar.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
                 btn.classList.add('active');
                 rows.forEach(function(tr) {
-                    tr.style.display = (f.key === 'all' || tr.className.indexOf('row-' + f.key) !== -1) ? '' : 'none';
+                    tr.style.display = (f.key === 'all' || cles(tr).indexOf(f.key) !== -1) ? '' : 'none';
                 });
             });
             bar.appendChild(btn);
