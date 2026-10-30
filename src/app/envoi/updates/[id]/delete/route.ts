@@ -16,7 +16,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       data: {
         updateId: id,
         action: "deleted",
-        comment: `Mise a jour desactivee : ${update.name}`,
+        comment: `Mise à jour désactivée : ${update.name}`,
         performedBy: user.username,
       },
     });

@@ -17,6 +17,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return redirigerAvecMessage(`/updates/${id}/edit`, "Le nom est obligatoire.", "danger");
     await prisma.systemUpdate.update({ where: { id }, data: await depuisFormulaire(form, name) });
     invalidateNavCounts();
-    return redirigerAvecMessage(`/updates/${id}`, "Mise a jour modifiee", "success");
+    return redirigerAvecMessage(`/updates/${id}`, "Mise à jour modifiée", "success");
   });
 }

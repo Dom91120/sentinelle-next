@@ -19,12 +19,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
     const note =
       typeof form.get("comment") === "string" ? (form.get("comment") as string).trim() : "";
-    let comment = `Mis a jour en version ${currentVersion || "?"}`;
+    let comment = `Mis à jour en version ${currentVersion || "?"}`;
     if (note) comment += ` — ${note}`;
     await prisma.updateHistory.create({
       data: { updateId: id, action: "updated", comment, performedBy: user.username },
     });
     invalidateNavCounts();
-    return redirigerAvecMessage(`/updates/${id}`, "Marque comme a jour", "success");
+    return redirigerAvecMessage(`/updates/${id}`, "Marqué comme à jour", "success");
   });
 }

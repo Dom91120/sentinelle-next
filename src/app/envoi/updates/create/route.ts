@@ -15,11 +15,11 @@ export async function POST(req: Request) {
       data: {
         updateId: u.id,
         action: "creation",
-        comment: `Mise a jour creee : ${u.name}`,
+        comment: `Mise à jour créée : ${u.name}`,
         performedBy: user.username,
       },
     });
     invalidateNavCounts();
-    return redirigerAvecMessage("/updates", "Mise a jour ajoutee", "success");
+    return redirigerAvecMessage("/updates", "Mise à jour ajoutée", "success");
   });
 }
